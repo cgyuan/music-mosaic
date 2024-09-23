@@ -1,14 +1,32 @@
 <template>
     <div class="app-header">
         <div class="left-controls">
-            <Button severity="secondary" text rounded icon="pi pi-arrow-left"  size="small" @click="goBack" />
-            <Button severity="secondary" text rounded icon="pi pi-arrow-right"  size="small" @click="goForward" />
+            <Button 
+                severity="secondary" 
+                text 
+                rounded 
+                icon="pi pi-arrow-left"  
+                size="small" 
+                @click="goBack" 
+                :disabled="!canGoBack" 
+                :class="{ 'disabled-button': !canGoBack }"
+            />
+            <Button 
+                severity="secondary" 
+                text 
+                rounded 
+                icon="pi pi-arrow-right"  
+                size="small" 
+                @click="goForward" 
+                :disabled="!canGoForward" 
+                :class="{ 'disabled-button': !canGoForward }"
+            />
         </div>
         
         <div class="center-content">
             <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText v-model="searchQuery" placeholder="Search" @keyup.enter="performSearch" />
+                <InputText v-model="searchQuery" placeholder="Search" />
             </IconField>
         </div>
         
@@ -27,27 +45,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import SvgAsset from '../SvgAsset.vue';
 
 const router = useRouter();
+const route = useRoute();
 const searchQuery = ref('');
+const canGoBack = ref(false);
+const canGoForward = ref(false);
+
+const updateNavigationState = () => {
+    canGoBack.value = router.options.history.state.back !== null;
+    canGoForward.value = router.options.history.state.forward !== null;
+};
 
 const goBack = () => {
-    router.go(-1);
+    if (canGoBack.value) {
+        router.back();
+    }
 };
 
 const goForward = () => {
-    router.go(1);
+    if (canGoForward.value) {
+        router.forward();
+    }
 };
 
-const performSearch = () => {
-    // Implement search functionality
-    console.log('Searching for:', searchQuery.value);
-    // You might want to navigate to a search results page
-    // router.push({ name: 'search', query: { q: searchQuery.value } });
-};
+onMounted(() => {
+    updateNavigationState();
+    window.addEventListener('popstate', updateNavigationState);
+});
+
+watch(route, updateNavigationState);
+
 </script>
 
 <style scoped>
@@ -78,5 +109,9 @@ const performSearch = () => {
 :deep(.p-button.p-button-text) {
     color: #6c757d;
     padding: 0.25rem;
+}
+
+.disabled-button {
+    color: #d3d3d3 !important; /* Lighter color for disabled buttons */
 }
 </style>

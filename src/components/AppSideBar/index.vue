@@ -1,14 +1,15 @@
 <template>
     <div class="app-sidebar">
         <div class="sidebar-section">
-            <SidebarItem icon="trophy" label="排行榜" />
-            <SidebarItem icon="fire" label="热门歌单" :active="true" />
-            <SidebarItem icon="array-download-tray" label="下载管理" />
-            <SidebarItem icon="folder-open" label="本地音乐" />
-            <SidebarItem icon="code-bracket-square" label="插件管理" />
-            <SidebarItem icon="clock" label="最近播放" />
+            <SidebarItem 
+                v-for="item in navMenus" 
+                :key="item.path" 
+                :icon="item.icon" 
+                :label="item.label" 
+                :active="isActive(item.path)" 
+                @click="navigateTo(item.path)" 
+            />
         </div>
-
         <div class="sidebar-section">
             <div class="section-header">
                 <div class="section-label">
@@ -32,8 +33,54 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
+import { SvgAssetIconNames } from '../SvgAsset.vue';
+
+const route = useRoute();
+const router = useRouter();
+
+const navMenus = [
+    {
+        label: '排行榜',
+        icon: 'trophy',
+        path: '/ranking'
+    },
+    {
+        label: '热门歌单',
+        icon: 'fire',
+        path: '/poppular'
+    },
+    {
+        label: '下载管理',
+        icon: 'array-download-tray',
+        path: '/download'
+    },
+    {
+        label: '本地音乐',
+        icon: 'folder-open',
+        path: '/local'
+    },
+    {
+        label: '插件管理',
+        icon: 'code-bracket-square',
+        path: '/plugin'
+    },
+    {
+        label: '最近播放',
+        icon: 'clock',
+        path: '/recent'
+    },
+] as Array<{label: string, icon: SvgAssetIconNames, path: string}>;
+
+const isActive = (path: string) => {
+    return route.path === path;
+};
+
+const navigateTo = (path: string) => {
+    router.push(path);
+};
 </script>
 
 <style scoped>
