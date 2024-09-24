@@ -7,9 +7,16 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+fn plugin_log(message: String, window: tauri::Window) {
+    println!("Plugin log: {}", message);
+    // You can also emit an event to the frontend if needed
+    window.emit("plugin-log", message).unwrap();
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet, plugin_log])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

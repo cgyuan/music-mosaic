@@ -14,12 +14,9 @@ declare module 'vue' {
     InputIcon: typeof import('primevue/inputicon')['default']
     InputText: typeof import('primevue/inputtext')['default']
     MainContent: typeof import('./src/components/MainContent/index.vue')['default']
-    Menu: typeof import('primevue/menu')['default']
     NowPlaying: typeof import('./src/components/NowPlaying/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    Sidebar: typeof import('primevue/sidebar')['default']
-    SideBar: typeof import('./src/components/SideBar/index.vue')['default']
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']
     SvgAsset: typeof import('./src/components/SvgAsset.vue')['default']
   }
