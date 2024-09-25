@@ -18,17 +18,17 @@ const packages: Record<string, any> = {
 };
 
 // Custom axios-like interface using Tauri's fetch
-const createAxiosLikeMethod = (method: string) => {
+const createAxiosLikeMethod = (method: HttpVerb) => {
     return async (urlOrConfig: string | HttpOptions, config?: HttpOptions) => {
         let url: string;
         let options: HttpOptions;
 
         if (typeof urlOrConfig === 'string') {
             url = urlOrConfig;
-            options = config || { method: method as HttpVerb, url };
+            options = config || { method, url };
         } else {
             url = urlOrConfig.url!;
-            options = { ...urlOrConfig, method: method as HttpVerb };
+            options = { ...urlOrConfig, method };
         }
 
         options.responseType = ResponseType.JSON;
@@ -95,7 +95,7 @@ const axiosProxy = new Proxy(tauriAxios, {
             return axiosLikeFunction({ method: 'GET', url: args[0], ...args[1] });
         };
     },
-    apply: (target, thisArg, argumentsList) => {
+    apply: (target, _thisArg, argumentsList) => {
         console.log('Axios called as a function', argumentsList);
         return target(...argumentsList);
     }
