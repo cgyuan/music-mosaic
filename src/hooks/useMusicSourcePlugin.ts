@@ -18,8 +18,6 @@ const packages: Record<string, any> = {
     he
 };
 
-console.log('big-integer', bigInt);
-
 // Custom axios-like interface using Tauri's fetch
 const createAxiosLikeMethod = (method: HttpVerb) => {
     return async (urlOrConfig: string | HttpOptions, config?: HttpOptions) => {
@@ -34,7 +32,9 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             options = { ...urlOrConfig, method };
         }
 
-        options.responseType = ResponseType.JSON;
+        // Set response type to Text to handle JSONP
+        options.responseType = ResponseType.Text;
+
         // Handle data property for POST requests
         if (method === 'POST' && 'data' in options) {
             options.headers = {
@@ -58,12 +58,22 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             
             delete options.data;
         }
-
-        console.log('Request options:', options);
         const response = await fetch(url, options);
 
-        console.log('response', response);
-        return { data: response.data, status: response.status, headers: response.headers };
+        // Parse JSONP or JSON response
+        let data;
+        if (typeof response.data === 'string') {
+            try {
+                data = JSON.parse(response.data);
+            } catch (error) {
+                data = response.data;
+            }
+           
+        } else {
+            data = response.data;
+        }
+
+        return { data, status: response.status, headers: response.headers };
     };
 };
 
@@ -139,11 +149,15 @@ const _require = (packageName: string) => {
     }
     let pkg = packages[packageName];
 
-    console.log('pkg', `${packageName}`, pkg);
+    // console.log('pkg', `${packageName}`, pkg);
     
     // Special handling for big-integer
     if (packageName === 'big-integer') {
         return bigInt;
+    }
+
+    if (packageName === 'dayjs') {
+        return dayjs;
     }
     
     // Create a new object with the same properties as pkg
