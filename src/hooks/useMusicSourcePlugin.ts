@@ -7,6 +7,7 @@ import he from "he";
 import { nanoid } from "nanoid";
 import { fetch, ResponseType, HttpOptions, HttpVerb } from '@tauri-apps/api/http';
 import { validatePlugin } from "../utils/pluginValidator";
+// import { invoke } from '@tauri-apps/api/tauri';
 
 const packages: Record<string, any> = {
     cheerio,
@@ -16,6 +17,8 @@ const packages: Record<string, any> = {
     qs,
     he
 };
+
+console.log('big-integer', bigInt);
 
 // Custom axios-like interface using Tauri's fetch
 const createAxiosLikeMethod = (method: HttpVerb) => {
@@ -32,8 +35,34 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
         }
 
         options.responseType = ResponseType.JSON;
+        // Handle data property for POST requests
+        if (method === 'POST' && 'data' in options) {
+            options.headers = {
+                ...options.headers,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            
+            if (typeof options.data === 'string') {
+                // If data is already a string, wrap it in the expected format
+                options.body = { type: "Text", payload: options.data };
+            } else if (typeof options.data === 'object' && options.data !== null) {
+                // If data is an object, convert it to a URL-encoded string and wrap it
+                const formData = Object.entries(options.data as Record<string, unknown>)
+                    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+                    .join('&');
+                options.body = { type: "Text", payload: formData };
+            } else {
+                // Handle other types of data or throw an error
+                throw new Error('Unsupported data type for POST request');
+            }
+            
+            delete options.data;
+        }
 
+        console.log('Request options:', options);
         const response = await fetch(url, options);
+
+        console.log('response', response);
         return { data: response.data, status: response.status, headers: response.headers };
     };
 };
@@ -97,7 +126,10 @@ const axiosProxy = new Proxy(tauriAxios, {
     },
     apply: (target, _thisArg, argumentsList) => {
         console.log('Axios called as a function', argumentsList);
-        return target(...argumentsList);
+        if (typeof argumentsList[0] === 'string') {
+            return target.get(argumentsList[0], argumentsList[1]);
+        }
+        return target(argumentsList[0]);
     }
 });
 
@@ -106,6 +138,13 @@ const _require = (packageName: string) => {
         return axiosProxy;
     }
     let pkg = packages[packageName];
+
+    console.log('pkg', `${packageName}`, pkg);
+    
+    // Special handling for big-integer
+    if (packageName === 'big-integer') {
+        return bigInt;
+    }
     
     // Create a new object with the same properties as pkg
     let wrappedPkg = Object.create(null);
