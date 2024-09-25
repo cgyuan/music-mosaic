@@ -3,12 +3,13 @@ import App from "./App.vue";
 import "./assets/style.css"
 import router from "./router";
 import { createPinia } from 'pinia';
-import { createPersistedState } from 'pinia-plugin-persistedstate';
+import { createPersistedStatePlugin } from 'pinia-plugin-persistedstate-2';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 // import PrimeVueComponents from './plugins/primevue';
 import "primeicons/primeicons.css";
 import { definePreset } from "@primevue/themes";
+import { indexedDBStorage } from "./utils/indexedDBStorage";
 
 const app = createApp(App);
 
@@ -16,7 +17,14 @@ app.use(router);
 // app.use(PrimeVueComponents); // Use the plugin
 
 const pinia = createPinia();
-pinia.use(createPersistedState());
+const installPersistedStatePlugin = createPersistedStatePlugin();
+pinia.use((context) => installPersistedStatePlugin(context));
+
+pinia.use(
+    createPersistedStatePlugin({
+      storage: indexedDBStorage,
+    })
+);
 
 app.use(pinia);
 

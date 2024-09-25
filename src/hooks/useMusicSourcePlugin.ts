@@ -4,7 +4,9 @@ import bigInt from "big-integer";
 import qs from "qs";
 import * as cheerio from "cheerio";
 import he from "he";
+import { nanoid } from "nanoid";
 import { fetch, ResponseType, HttpOptions, HttpVerb } from '@tauri-apps/api/http';
+import { validatePlugin } from "../utils/pluginValidator";
 
 const packages: Record<string, any> = {
     cheerio,
@@ -118,8 +120,8 @@ const _require = (packageName: string) => {
 };
 
 export const useMusicSourcePlugin = () => {
-    const loadPlugin = (code: string): IPlugin.IPluginInstance => {
-        console.log('Attempting to load plugin...');
+    
+    const parsePlugin = (code: string): IPlugin.IPluginInstance => {
         const _module: any = { exports: {} };
         try {
             let _instance = Function(`
@@ -139,6 +141,10 @@ export const useMusicSourcePlugin = () => {
             } else {
                 _instance = _module.exports as IPlugin.IPluginInstance;
             }
+            if (!validatePlugin(_instance)) {
+                throw new Error('Invalid plugin');
+            }
+            _instance.id = nanoid();
             return _instance;
         } catch (error) {
             console.error('Error in loadPlugin:', error);
@@ -147,6 +153,6 @@ export const useMusicSourcePlugin = () => {
     }
 
     return {
-        loadPlugin
+        parsePlugin
     }
 }

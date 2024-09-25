@@ -11,18 +11,34 @@
         </div>
 
         <DataTable :value="plugins" stripedRows scrollable scrollHeight="flex" class="plugin-table">
-            <Column field="index" header="#" style="width: 5%;" />
-            <Column field="source" header="来源" style="width: 25%;" />
+            <Column header="#" style="width: 5%;">
+                <template #body="slotProps">
+                    {{ slotProps.index + 1 }}
+                </template>
+            </Column>
+            <Column field="platform" header="来源" style="width: 25%;" />
             <Column field="version" header="版本号" style="width: 15%;" />
-            <Column field="author" header="作者" style="width: 20%;" />
+            <Column header="作者" style="width: 20%;">
+                <template #body="slotProps">
+                    {{ slotProps.data.author || '未知作者' }}
+                </template>
+            </Column>
             <Column header="操作" style="width: 35%;">
                 <template #body="slotProps">
-                    <Button label="卸载" class="p-button-text p-button-danger" />
+                    <Button label="卸载" class="p-button-text p-button-danger" @click="showConfirmDialog(slotProps.data)" />
                     <Button label="更新" class="p-button-text p-button-success" />
-                    <Button v-if="slotProps.data.hasPlaylist" label="导入歌单" class="p-button-text p-button-info" />
+                    <Button v-if="slotProps.data.supportedSearchType?.includes('sheet')" label="导入歌单" class="p-button-text p-button-info" />
                 </template>
             </Column>
         </DataTable>
+
+        <Dialog header="确认卸载" v-model:visible="confirmDialogVisible" :modal="true" :closable="false">
+            <p>确定要卸载插件 {{ pluginToRemove!!.platform }} 吗？</p>
+            <template #footer>
+                <Button label="取消" class="p-button-outlined" @click="confirmDialogVisible = false" />
+                <Button label="确认" class="p-button-danger" @click="confirmRemovePlugin" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
@@ -31,13 +47,20 @@ import { ref } from 'vue';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import Dialog from 'primevue/dialog';
 import { selectAndReadFile, FileSelectResult } from '../../../utils/fileUtils';
 import { useMusicSourcePlugin } from '../../../hooks/useMusicSourcePlugin';
 import { invoke } from '@tauri-apps/api/tauri';
+import { usePluginStore } from '../../../store/pluginStore';
+import { storeToRefs } from 'pinia';
 
-const { loadPlugin } = useMusicSourcePlugin()
+const pluginStore = usePluginStore();
+const { plugins } = storeToRefs(pluginStore);
 
-const plugins = ref([]);
+const { parsePlugin } = useMusicSourcePlugin()
+
+const confirmDialogVisible = ref(false);
+const pluginToRemove = ref<IPlugin.IPluginInstance | null>(null);
 
 const selectPluginFile = async () => {
     try {
@@ -53,19 +76,31 @@ const selectPluginFile = async () => {
 };
 
 const processFileContent = async (content: string, fileName: string) => {
-
     if (fileName.endsWith('.js')) {
         try {
-            const plugin = loadPlugin(content);
+            const plugin = parsePlugin(content);
 
-            if (plugin && typeof plugin.getTopLists === 'function') {
-                const res = await plugin.getTopLists();
-                console.log('getTopLists result:', res);
+            if (plugin) {
+                console.log(plugin);
+                pluginStore.addPlugin(plugin);
             }
         } catch (error) {
             console.error('Error loading or executing plugin:', error);
             await invoke('plugin_log', { message: `Error loading or executing plugin: ${error}` });
         }
+    }
+};
+
+const showConfirmDialog = (plugin: IPlugin.IPluginInstance) => {
+    pluginToRemove.value = plugin;
+    confirmDialogVisible.value = true;
+};
+
+const confirmRemovePlugin = () => {
+    if (pluginToRemove.value) {
+        pluginStore.removePlugin(pluginToRemove.value.id!!);
+        confirmDialogVisible.value = false;
+        pluginToRemove.value = null;
     }
 };
 </script>
@@ -80,6 +115,8 @@ const processFileContent = async (content: string, fileName: string) => {
 
 h1 {
     margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .action-buttons {

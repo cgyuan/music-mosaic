@@ -133,6 +133,7 @@ declare namespace IPlugin {
   }
 
   export interface IPluginInstance extends IPluginDefine {
+    id: string?;
     /** 内部属性 */
     /** 插件路径 */
     _path: string;
