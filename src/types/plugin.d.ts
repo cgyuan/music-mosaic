@@ -75,7 +75,7 @@ declare namespace IPlugin {
     /** 默认搜索类型 */
     defaultSearchType?: IMedia.SupportMediaType;
     /** 有效搜索类型 */
-    supportedSearchType?: ICommon.SupportMediaType[];
+    supportedSearchType?: IMedia.SupportMediaType[];
     /** 插件缓存控制 */
     cacheControl?: "cache" | "no-cache" | "no-store";
     /** 插件作者 */
@@ -127,7 +127,7 @@ declare namespace IPlugin {
     getRecommendSheetTags?: () => Promise<IGetRecommendSheetTagsResult>;
     /** 歌单列表 */
     getRecommendSheetsByTag?: (
-      tag: ICommon.IUnique,
+      tag: IMedia.IUnique,
       page?: number
     ) => Promise<ICommon.PaginationResponse<IMusic.IMusicSheetItem>>;
   }

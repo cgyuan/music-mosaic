@@ -9,15 +9,18 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppHeader: typeof import('./src/components/AppHeader/index.vue')['default']
     AppSideBar: typeof import('./src/components/AppSideBar/index.vue')['default']
+    BottomLoadingState: typeof import('./src/components/BottomLoadingState.vue')['default']
     Button: typeof import('primevue/button')['default']
     IconField: typeof import('primevue/iconfield')['default']
     InputIcon: typeof import('primevue/inputicon')['default']
     InputText: typeof import('primevue/inputtext')['default']
+    Loading: typeof import('./src/components/Loading.vue')['default']
     MainContent: typeof import('./src/components/MainContent/index.vue')['default']
     NowPlaying: typeof import('./src/components/NowPlaying/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']
     SvgAsset: typeof import('./src/components/SvgAsset.vue')['default']
+    SwitchCase: typeof import('./src/components/SwitchCase.vue')['default']
   }
 }

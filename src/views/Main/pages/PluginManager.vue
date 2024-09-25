@@ -75,14 +75,14 @@ const selectPluginFile = async () => {
     }
 };
 
-const processFileContent = async (content: string, fileName: string) => {
+const processFileContent = async (code: string, fileName: string) => {
     if (fileName.endsWith('.js')) {
         try {
-            const plugin = parsePlugin(content);
+            const plugin = parsePlugin(code);
 
             if (plugin) {
                 console.log(plugin);
-                pluginStore.addPlugin(plugin);
+                pluginStore.addPlugin(plugin, code);
             }
         } catch (error) {
             console.error('Error loading or executing plugin:', error);
