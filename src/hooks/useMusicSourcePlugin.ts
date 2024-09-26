@@ -34,6 +34,11 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
 
         // Set response type to Text to handle JSONP
         options.responseType = ResponseType.Text;
+        
+        // Handle query params
+        if ('params' in options && options.params) {
+            url += '?' + qs.stringify(options.params);
+        }
 
         // Handle data property for POST requests
         if (method === 'POST' && 'data' in options) {
@@ -46,6 +51,7 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
                 // If data is already a string, wrap it in the expected format
                 options.body = { type: "Text", payload: options.data };
             } else if (typeof options.data === 'object' && options.data !== null) {
+                console.log('options.data', options.data);
                 // If data is an object, convert it to a URL-encoded string and wrap it
                 const formData = Object.entries(options.data as Record<string, unknown>)
                     .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
@@ -59,8 +65,10 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             delete options.data;
         }
 
+        console.log('options', options);
 
-        if (url.startsWith('https://api.bilibili.com')) {
+
+        if (url.startsWith('https://api.bilibili.com') || url.startsWith('http://kbangserver.kuwo.cn')) {
             const response = await invoke('http_request', {
                 method: options.method,
                 url,
