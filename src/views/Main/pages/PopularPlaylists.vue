@@ -69,17 +69,19 @@ const page = ref(1);
 
 const bottomLoadingState = ref(RequestStateCode.PENDING_REST_PAGE);
 
-const activePlugin = computed(() => plugins.value[activePluginIndex.value]);
+const supportPlugins = computed(() => plugins.value.filter(plugin => plugin.getRecommendSheetTags && plugin.getRecommendSheetsByTag));
+
+const activePlugin = computed(() => supportPlugins.value[activePluginIndex.value]);
 
 // Create a computed property for the TabMenu items
 const tabMenuItems = computed(() => {
-    return plugins.value.map(plugin => ({
+    return supportPlugins.value.map(plugin => ({
         label: plugin.platform,
         icon: 'pi pi-fw pi-music'
     }));
 });
 
-watch(plugins, async (newVal, oldVal) => {
+watch(supportPlugins, async (newVal, oldVal) => {
     if (newVal.length > 0 && oldVal) {
         activePluginIndex.value = 0;
         if (activePlugin.value) {
@@ -216,6 +218,7 @@ const loadMore = async () => {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
 }
 
 .playlist-image {

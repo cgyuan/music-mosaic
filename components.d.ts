@@ -22,5 +22,6 @@ declare module 'vue' {
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']
     SvgAsset: typeof import('./src/components/SvgAsset.vue')['default']
     SwitchCase: typeof import('./src/components/SwitchCase.vue')['default']
+    TabMenu: typeof import('primevue/tabmenu')['default']
   }
 }
