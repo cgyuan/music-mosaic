@@ -3,14 +3,15 @@
         <div class="plugin-tabs">
             <TabMenu :model="tabMenuItems" :activeIndex="activePluginIndex" @tab-change="onTabChange" />
         </div>
-        
+
         <div class="ranking-lists" ref="rankingListsRef">
             <div v-for="(group, groupIndex) in rankingLists" :key="groupIndex" class="ranking-group">
                 <h2 class="group-title">{{ group.title }}</h2>
                 <DataView :value="group.data" :layout="'grid'" :rows="10">
                     <template #grid="slotProps">
                         <div class="ranking-grid">
-                            <div v-for="(item, index) in slotProps.items" :key="index" class="ranking-item">
+                            <div v-for="(item, index) in slotProps.items" :key="index" class="ranking-item"
+                                @click="goToMusicListDetail(item)">
                                 <div class="ranking-image">
                                     <div class="image-container">
                                         <img :src="item.coverImg || albumCover" :alt="item.title" />
@@ -18,7 +19,8 @@
                                 </div>
                                 <div class="ranking-info">
                                     <div class="ranking-title">{{ item.title || 'Untitled' }}</div>
-                                    <div class="ranking-description" v-if="item.description">{{ item.description }}</div>
+                                    <div class="ranking-description" v-if="item.description">{{ item.description }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -40,6 +42,7 @@ import { usePluginStore } from '../../../store/pluginStore';
 import { storeToRefs } from 'pinia';
 import Loading from '../../../components/Loading.vue';
 import albumCover from '../../../assets/imgs/album-cover.jpg';
+import router from '../../../router';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
@@ -64,11 +67,17 @@ const tabMenuItems = computed(() => {
 watch(supportPlugins, (newPlugins) => {
     if (newPlugins.length > 0) {
         activePluginIndex.value = 0;
-        loadRanking();
+        if (activePlugin.value) {
+            pluginStore.setCurrentPluginId(activePlugin.value.id!!);
+            loadRanking();
+        }
     }
 });
 
 onMounted(() => {
+    if (activePlugin.value) {
+        pluginStore.setCurrentPluginId(activePlugin.value.id!!);
+    }
     if (activePlugin.value) {
         loadRanking();
     }
@@ -76,6 +85,7 @@ onMounted(() => {
 
 const onTabChange = (event: { index: number }) => {
     activePluginIndex.value = event.index;
+    pluginStore.setCurrentPluginId(activePlugin.value.id!!);
     loadRanking();
 };
 
@@ -92,6 +102,13 @@ const loadRanking = async () => {
             isLoading.value = false;
         }
     }
+};
+
+const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
+    router.push({
+        name: 'music-list-detail',
+        params: { item: JSON.stringify(item) }
+    });
 };
 
 </script>

@@ -53,6 +53,7 @@ declare namespace IPlugin {
     isEnd?: boolean;
     topListItem?: IMusic.IMusicSheetItem;
     musicList?: IMusic.IMusicItem[];
+    [key: string]: any;
   }
 
   interface IGetRecommendSheetTagsResult {

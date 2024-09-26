@@ -86,6 +86,7 @@ const navigateTo = (path: string) => {
 <style scoped>
 .app-sidebar {
     width: 200px;
+    min-width: 200px;
     background-color: #f8f9fa;
     height: 100%;
     padding: 1rem 0;

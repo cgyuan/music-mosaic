@@ -14,7 +14,7 @@
             <DataView :value="recommendSheets" :layout="'grid'" :rows="10">
                 <template #grid="slotProps">
                     <div class="playlist-grid">
-                        <div v-for="(item, index) in slotProps.items" :key="index" class="playlist-item">
+                        <div v-for="(item, index) in slotProps.items" :key="index" class="playlist-item" @click="goToMusicListDetail(item)">
                             <div class="playlist-image">
                                 <div class="image-container">
                                     <img :src="item.artwork" :alt="item.title" />
@@ -32,10 +32,7 @@
                     </div>
                 </template>
                 <template #empty>
-                    <div class="empty-state">
-                        <Loading v-if="isLoading" />
-                        <div class="empty-text" v-else>什么都没有呀~~~</div>
-                    </div>
+                    <LoadingOrEmpty :loading="isLoading" />
                 </template>
             </DataView>
             <div v-if="recommendSheets.length > 0">
@@ -54,6 +51,7 @@ import { usePluginStore } from '../../../store/pluginStore';
 import { storeToRefs } from 'pinia';
 import BottomLoadingState from '../../../components/BottomLoadingState.vue';
 import { RequestStateCode } from '../../../common/constant';
+import router from '../../../router';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
@@ -85,6 +83,7 @@ watch(supportPlugins, async (newVal, oldVal) => {
     if (newVal.length > 0 && oldVal) {
         activePluginIndex.value = 0;
         if (activePlugin.value) {
+            pluginStore.setCurrentPluginId(activePlugin.value.id!!);
             await loadRecommendTags();
             await loadRecommendSheets();
         }
@@ -100,6 +99,7 @@ onMounted(async () => {
 
 const onTabChange = async (event: { index: number }) => {
     activePluginIndex.value = event.index;
+    pluginStore.setCurrentPluginId(activePlugin.value.id!!);
     await loadRecommendTags();
     await loadRecommendSheets();
 };
@@ -167,6 +167,14 @@ const loadMore = async () => {
 
     page.value++;
     await loadRecommendSheets(page.value);
+};
+
+const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
+    console.log('item', item);
+    router.push({
+        name: 'music-list-detail',
+        params: { item: JSON.stringify(item) }
+    });
 };
 </script>
 
@@ -284,12 +292,4 @@ const loadMore = async () => {
     color: #fff;
 }
 
-.empty-state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 2rem;
-    color: #999;
-}
 </style>

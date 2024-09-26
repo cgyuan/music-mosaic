@@ -36,6 +36,11 @@ const routes: Array<RouteRecordRaw> = [
         path: '/recent',
         name: 'recent-played',
         component: () => import('@/views/Main/pages/RecentlyPlayed.vue')
+      },
+      {
+        path: '/music-list-detail',
+        name: 'music-list-detail',
+        component: () => import('@/views/Main/pages/MusicListDetail.vue')
       }
     ]
   }
