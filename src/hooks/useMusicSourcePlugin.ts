@@ -7,7 +7,7 @@ import he from "he";
 import { nanoid } from "nanoid";
 import { fetch, ResponseType, HttpOptions, HttpVerb } from '@tauri-apps/api/http';
 import { validatePlugin } from "../utils/pluginValidator";
-// import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/tauri';
 
 const packages: Record<string, any> = {
     cheerio,
@@ -26,7 +26,7 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
 
         if (typeof urlOrConfig === 'string') {
             url = urlOrConfig;
-            options = config || { method, url };
+            options = { ...config, method, url };
         } else {
             url = urlOrConfig.url!;
             options = { ...urlOrConfig, method };
@@ -58,6 +58,18 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             
             delete options.data;
         }
+
+
+        if (url.startsWith('https://api.bilibili.com')) {
+            const response = await invoke('http_request', {
+                method: options.method,
+                url,
+                headers: options.headers,
+                body: options.body
+            });
+            return { data: JSON.parse(response as string), status: 200, headers: {} };
+        }
+
         const response = await fetch(url, options);
 
         // Parse JSONP or JSON response
