@@ -15,7 +15,7 @@
             <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined" />
             <Button label="收藏" icon="pi pi-heart" class="p-button-rounded p-button-outlined" />
         </div>
-        <DataTable v-if="!isLoading" :value="musicList" stripedRows class="music-table">
+        <DataTable v-if="!isLoading" :value="musicList" stripedRows class="music-table" @rowDblclick="onRowDoubleClick">
             <Column style="width: 8rem; flex: 0 0 8rem;">
                 <template #body="slotProps">
                     <div class="item-actions">
@@ -52,12 +52,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '../../../store/pluginStore';
+import { usePlayerStore } from '../../../store/playerStore'; // Add this import
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Loading from '../../../components/Loading.vue';
 
 const pluginStore = usePluginStore();
+const playerStore = usePlayerStore(); // Add this line
 const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
 const isLoading = ref(false);
@@ -115,6 +117,17 @@ const formatDuration = (duration?: number) => {
     const seconds = Math.floor(duration % 60);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
+
+const onRowDoubleClick = async (event: { data: IMusic.IMusicItem }) => {
+    console.log('Double-clicked row data:', event.data);
+    
+    // Add the current music list to the playlist
+    playerStore.setPlaylist(musicList.value);
+    
+    // Set the current track and play
+    await playerStore.setCurrentTrackAndPlay(event.data);
+};
+
 </script>
 
 <style scoped>

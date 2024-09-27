@@ -1,23 +1,23 @@
 <template>
     <div class="now-playing">
-        <Slider v-model="progress" class="progress-slider" />
+        <Slider v-model="progress" class="progress-slider" @change="onProgressChange" />
         <div class="content">
             <div class="left-section">
-                <img class="album-cover" src="https://picsum.photos/id/237/300/300" alt="Album Cover">
+                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg" :alt="currentTrack?.title">
                 <div class="song-details">
-                    <div class="song-title">Dream It Possible</div>
+                    <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
                     <div class="artist-and-time">
-                        <span class="artist">Delacey</span>
-                        <span class="playback-time">01:30/03:24</span>
+                        <span class="artist">{{ currentTrack?.artist || 'Unknown artist' }}</span>
+                        <span class="playback-time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
                     </div>
                 </div>
-                <div class="song-source">QQ音乐</div>
+                <div class="song-source">{{ currentTrack?.platform || 'Unknown source' }}</div>
             </div>
             <div class="center-section">
                 <div class="playback-controls">
-                    <Button icon="pi pi-step-backward" text rounded />
-                    <Button icon="pi pi-play" text rounded class="play-button" />
-                    <Button icon="pi pi-step-forward" text rounded />
+                    <Button icon="pi pi-step-backward" text rounded @click="previousTrack" />
+                    <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button" @click="togglePlay" />
+                    <Button icon="pi pi-step-forward" text rounded @click="nextTrack" />
                 </div>
             </div>
             <div class="right-section">
@@ -31,11 +31,48 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { usePlayerStore } from '../../store/playerStore';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
 
-const progress = ref(44);
+const playerStore = usePlayerStore();
+
+const progress = computed({
+    get: () => playerStore.progress,
+    set: (value) => playerStore.seek(value)
+});
+
+const currentTrack = computed(() => playerStore.currentTrack);
+const isPlaying = computed(() => playerStore.isPlaying);
+const currentTime = computed(() => playerStore.currentTime);
+const duration = computed(() => playerStore.duration);
+
+const togglePlay = () => {
+    if (isPlaying.value) {
+        playerStore.pause();
+    } else {
+        playerStore.play();
+    }
+};
+
+const previousTrack = () => {
+    playerStore.previousTrack();
+};
+
+const nextTrack = () => {
+    playerStore.nextTrack();
+};
+
+const onProgressChange = (value: number) => {
+    playerStore.seek(value);
+};
+
+const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
 </script>
 
 <style scoped>
