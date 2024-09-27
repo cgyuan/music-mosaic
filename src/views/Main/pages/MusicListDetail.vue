@@ -95,7 +95,10 @@ const getMusicListDetail = async (page: number) => {
             console.log(musicSheetItem)
             const res = await currentPlugin.value.getTopListDetail(musicSheetItem, page);
             if (res.musicList) {
-                musicList.value = res.musicList;
+                musicList.value = res.musicList.map(item => {
+                    item.platform = currentPlugin.value?.platform || '';
+                    return item;
+                });
             }
             console.log(res);
         } catch (error) {
@@ -122,6 +125,9 @@ const onRowDoubleClick = async (event: { data: IMusic.IMusicItem }) => {
     console.log('Double-clicked row data:', event.data);
     
     // Add the current music list to the playlist
+    musicList.value.map(item => {
+        item.platform = currentPlugin.value?.platform || '';
+    });
     playerStore.setPlaylist(musicList.value);
     
     // Set the current track and play

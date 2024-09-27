@@ -19,6 +19,7 @@ declare module 'vue' {
     LoadingOrEmpty: typeof import('./src/components/LoadingOrEmpty.vue')['default']
     MainContent: typeof import('./src/components/MainContent/index.vue')['default']
     NowPlaying: typeof import('./src/components/NowPlaying/index.vue')['default']
+    PlaylistDrawer: typeof import('./src/components/PlaylistDrawer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']

@@ -8,10 +8,17 @@
       </MainContent>
     </div>
     <NowPlaying />
+    <PlaylistDrawer ref="playlistDrawer" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { provide, ref } from 'vue';
+
+const playlistDrawer = ref(null);
+
+// Provide the playlistDrawer to be accessible by child components
+provide('playlistDrawer', playlistDrawer);
 </script>
 
 <style scoped>

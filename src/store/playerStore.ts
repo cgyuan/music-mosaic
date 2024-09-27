@@ -27,6 +27,11 @@ export const usePlayerStore = defineStore('player', () => {
     async function setCurrentTrackAndPlay(track: IMusic.IMusicItem) {
         console.log('setCurrentTrackAndPlay', track);
         setCurrentTrack(track);
+        if (track.url) {
+            setAudioSrc(track.url);
+            play();
+            return;
+        }
         await fetchAndPlayTrack(track);
     }
 
@@ -97,6 +102,14 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
+    function clearPlaylist() {
+        playlist.value = [];
+    }
+
+    function removeFromPlaylist(index: number) {
+        playlist.value.splice(index, 1);
+    }
+
     return {
         currentTrack,
         playlist,
@@ -112,5 +125,7 @@ export const usePlayerStore = defineStore('player', () => {
         seek,
         nextTrack,
         previousTrack,
+        clearPlaylist,
+        removeFromPlaylist,
     };
 });

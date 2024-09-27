@@ -24,18 +24,18 @@
                 <Button icon="pi pi-volume-up" text rounded />
                 <Button icon="pi pi-file-edit" text rounded />
                 <Button icon="pi pi-sync" text rounded />
-                <Button icon="pi pi-list" text rounded />
+                <Button icon="pi pi-list" text rounded @click="showPlaylist" />
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { inject, Ref, computed } from 'vue';
 import { usePlayerStore } from '../../store/playerStore';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
-
+import PlaylistDrawer from '../PlaylistDrawer.vue';
 const playerStore = usePlayerStore();
 
 const progress = computed({
@@ -73,6 +73,14 @@ const formatTime = (time: number) => {
     const seconds = Math.floor(time % 60);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
+
+const playlistDrawer = inject('playlistDrawer') as Ref<InstanceType<typeof PlaylistDrawer>>;
+
+const showPlaylist = () => {
+    if (playlistDrawer.value) {
+        playlistDrawer.value.visible = true;
+    }
+};
 </script>
 
 <style scoped>
@@ -81,6 +89,7 @@ const formatTime = (time: number) => {
     flex-direction: column;
     background-color: #f8f9fa;
     border-top: 1px solid #e9ecef;
+    z-index: 999;
 }
 
 .progress-slider {
