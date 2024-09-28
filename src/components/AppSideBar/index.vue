@@ -16,9 +16,15 @@
                     <i class="pi pi-angle-down"></i>
                     <span>我的歌单</span>
                 </div>
-                <Button icon="pi pi-plus" text rounded severity="secondary" size="small" />
+                <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" />
             </div>
-            <SidebarItem icon="heart-outline" label="我喜欢" />
+            <SidebarItem :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
+                :label="item.title" 
+                v-for="item in playlistSummaries" 
+                :key="item.id" 
+                @click="handlePlaylistClick(item)" 
+                :active="isActive(`/playlist-detail/${item.id}`)"
+            />
         </div>
 
         <div class="sidebar-section">
@@ -30,16 +36,29 @@
             </div>
         </div>
     </div>
+    <CreatePlaylistModal 
+        :visible="isCreatePlaylistModalVisible" 
+        @update:visible="isCreatePlaylistModalVisible = $event"
+        @create="createPlaylist" 
+    />
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
+import CreatePlaylistModal from './CreatePlaylistModal.vue';
+import { PlaylistSummary, usePlaylistStore } from '../../store/playlistStore';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
+
+const { addPlaylist } = usePlaylistStore();
+const { playlistSummaries, currentPlaylist } = storeToRefs(usePlaylistStore());
+const isCreatePlaylistModalVisible = ref(false);
 
 const navMenus = [
     {
@@ -78,8 +97,22 @@ const isActive = (path: string) => {
     return route.path === path;
 };
 
+const handlePlaylistClick = (item: PlaylistSummary) => {
+    currentPlaylist.value = item;
+    navigateTo(`/playlist-detail/${item.id}`);
+};
+
 const navigateTo = (path: string) => {
     router.push(path);
+};
+
+const showCreatePlaylistModal = () => {
+    isCreatePlaylistModalVisible.value = true;
+};
+
+const createPlaylist = (playlistName: string) => {
+    addPlaylist(playlistName);
+    isCreatePlaylistModalVisible.value = false;
 };
 </script>
 

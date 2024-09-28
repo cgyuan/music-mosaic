@@ -4,7 +4,7 @@
     <div class="main-container">
       <AppSideBar />
       <MainContent>
-        <router-view></router-view>
+        <router-view :key="$route.fullPath"></router-view>
       </MainContent>
     </div>
     <NowPlaying />

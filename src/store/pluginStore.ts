@@ -72,7 +72,7 @@ export const usePluginStore = defineStore('plugin', () => {
         includePaths: ['storedPlugins', 'currentPluginId'],
         beforeHydrate(oldState) {
             const { parsePlugin } = useMusicSourcePlugin()
-            console.log('beforeHydrate', oldState.storedPlugins);
+            // console.log('beforeHydrate', oldState.storedPlugins);
             const hydratedPlugins = oldState.storedPlugins.map(p => {
                 const plugin = parsePlugin(p.code)
                 plugin.id = p.id
