@@ -73,7 +73,7 @@ import Column from 'primevue/column';
 import Loading from './Loading.vue';
 import ContextMenu from 'primevue/contextmenu';
 import Dialog from 'primevue/dialog';
-import { usePlaylistStore } from '../store/playlistStore';
+import { useMusicSheetStore } from '../store/musicSheetStore';
 import { storeToRefs } from 'pinia';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 
@@ -85,8 +85,8 @@ const props = defineProps<{
 }>();
 
 const playerStore = usePlayerStore();
-const playlistStore = usePlaylistStore();
-const { playlistSummaries } = storeToRefs(playlistStore);
+const musicSheetStore = useMusicSheetStore();
+const { playlistSummaries } = storeToRefs(musicSheetStore);
 
 const cm = ref();
 const selectedTrack = ref<IMusic.IMusicItem | null>(null);
@@ -131,7 +131,7 @@ const createNewPlaylist = () => {
 
 const addToPlaylist = (playlistId: string) => {
   if (selectedTrack.value) {
-    playlistStore.addTrackToPlaylist(playlistId, selectedTrack.value);
+    musicSheetStore.addTrackToMusicSheet(playlistId, selectedTrack.value);
     showPlaylistDialog.value = false;
   }
 };

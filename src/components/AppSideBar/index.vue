@@ -50,14 +50,14 @@ import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
 import CreatePlaylistModal from './CreatePlaylistModal.vue';
-import { PlaylistSummary, usePlaylistStore } from '@/store/playlistStore';
+import { MusicSheetSummary, useMusicSheetStore } from '@/store/musicSheetStore';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const router = useRouter();
 
-const { addPlaylist } = usePlaylistStore();
-const { playlistSummaries, currentPlaylist } = storeToRefs(usePlaylistStore());
+const { addMusicSheet } = useMusicSheetStore();
+const { playlistSummaries, currentPlaylist } = storeToRefs(useMusicSheetStore());
 const isCreatePlaylistModalVisible = ref(false);
 
 const navMenus = [
@@ -97,7 +97,7 @@ const isActive = (path: string) => {
     return route.path === path;
 };
 
-const handlePlaylistClick = (item: PlaylistSummary) => {
+const handlePlaylistClick = (item: MusicSheetSummary) => {
     currentPlaylist.value = item;
     navigateTo(`/playlist-detail/${item.id}`);
 };
@@ -111,7 +111,7 @@ const showCreatePlaylistModal = () => {
 };
 
 const createPlaylist = (playlistName: string) => {
-    addPlaylist(playlistName);
+    addMusicSheet(playlistName);
     isCreatePlaylistModalVisible.value = false;
 };
 </script>

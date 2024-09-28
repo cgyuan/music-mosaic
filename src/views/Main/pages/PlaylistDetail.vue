@@ -7,11 +7,11 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import CommonMusicSheet from '@/components/CommonMusicSheet.vue';
-import { usePlaylistStore } from '@/store/playlistStore';
+import { useMusicSheetStore } from '@/store/musicSheetStore';
 import { storeToRefs } from 'pinia';
 
-const playlistStore = usePlaylistStore();
-const { currentPlaylist } = storeToRefs(playlistStore);
+const musicSheetStore = useMusicSheetStore();
+const { currentPlaylist } = storeToRefs(musicSheetStore);
 const pluginStore = usePluginStore();
 const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
@@ -31,10 +31,10 @@ onMounted(() => {
 
 
 const getMusicListDetail = async () => {
-    currentPlaylist.value = playlistStore.getPlaylistSummaryById(playlistId);
+    currentPlaylist.value = musicSheetStore.getMusicSheetSummaryById(playlistId);
     musicSheetItem.value = currentPlaylist.value as IMusic.IMusicSheetItem;
     isLoading.value = true;
-    musicSheetItem.value.musicList = (await playlistStore.fetchPlaylist(playlistId))?.tracks;
+    musicSheetItem.value.musicList = (await musicSheetStore.fetchMusicSheet(playlistId))?.tracks;
     isLoading.value = false;
 };
 
