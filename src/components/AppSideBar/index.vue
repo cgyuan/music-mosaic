@@ -50,7 +50,7 @@ import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
 import CreatePlaylistModal from './CreatePlaylistModal.vue';
-import { PlaylistSummary, usePlaylistStore } from '../../store/playlistStore';
+import { PlaylistSummary, usePlaylistStore } from '@/store/playlistStore';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();

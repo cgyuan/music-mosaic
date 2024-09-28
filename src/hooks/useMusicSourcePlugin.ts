@@ -6,7 +6,7 @@ import * as cheerio from "cheerio";
 import he from "he";
 import { nanoid } from "nanoid";
 import { fetch, ResponseType, HttpOptions, HttpVerb } from '@tauri-apps/api/http';
-import { validatePlugin } from "../utils/pluginValidator";
+import { validatePlugin } from "@/utils/pluginValidator";
 import { invoke } from '@tauri-apps/api/tauri';
 
 const packages: Record<string, any> = {

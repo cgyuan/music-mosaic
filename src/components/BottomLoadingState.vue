@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { RequestStateCode } from '../common/constant'
+import { RequestStateCode } from '@/common/constant'
 defineProps<{
     state: RequestStateCode,
     onLoadMore: () => void

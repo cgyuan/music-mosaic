@@ -1,13 +1,13 @@
 <template>
-    <CommonMusicListDetail :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" />
+    <CommonMusicSheet :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { usePluginStore } from '../../../store/pluginStore';
-import CommonMusicListDetail from '../../../components/CommonMusicListDetail.vue';
-import { usePlaylistStore } from '../../../store/playlistStore';
+import { usePluginStore } from '@/store/pluginStore.ts';
+import CommonMusicSheet from '@/components/CommonMusicSheet.vue';
+import { usePlaylistStore } from '@/store/playlistStore';
 import { storeToRefs } from 'pinia';
 
 const playlistStore = usePlaylistStore();

@@ -75,7 +75,7 @@ import ContextMenu from 'primevue/contextmenu';
 import Dialog from 'primevue/dialog';
 import { usePlaylistStore } from '../store/playlistStore';
 import { storeToRefs } from 'pinia';
-import albumCover from '../assets/imgs/album-cover.jpg';
+import albumCover from '@/assets/imgs/album-cover.jpg';
 
 
 const props = defineProps<{

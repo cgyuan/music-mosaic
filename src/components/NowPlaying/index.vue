@@ -32,10 +32,10 @@
 
 <script setup lang="ts">
 import { inject, Ref, computed } from 'vue';
-import { usePlayerStore } from '../../store/playerStore';
+import { usePlayerStore } from '@/store/playerStore';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
-import PlaylistDrawer from '../PlaylistDrawer.vue';
+import PlaylistDrawer from '@/components/PlaylistDrawer.vue';
 const playerStore = usePlayerStore();
 
 const progress = computed({

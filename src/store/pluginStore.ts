@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { useMusicSourcePlugin } from '../hooks/useMusicSourcePlugin';
+import { useMusicSourcePlugin } from '@/hooks/useMusicSourcePlugin';
 
 interface StoredPlugin {
     id: string;

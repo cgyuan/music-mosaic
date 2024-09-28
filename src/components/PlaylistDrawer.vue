@@ -50,7 +50,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
-import { usePlayerStore } from '../store/playerStore';
+import { usePlayerStore } from '@/store/playerStore';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';

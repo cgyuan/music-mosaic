@@ -1,20 +1,18 @@
 <template>
-    <CommonMusicListDetail :musicSheetItem="musicSheetItem" :musicList="musicList" :platform="currentPlugin?.platform" :isLoading="isLoading" />
+    <CommonMusicSheet :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { usePluginStore } from '../../../store/pluginStore';
-import CommonMusicListDetail from '../../../components/CommonMusicListDetail.vue';
+import { usePluginStore } from '@/store/pluginStore.ts';
+import CommonMusicSheet from '@/components/CommonMusicSheet.vue';
 const pluginStore = usePluginStore();
 const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
 const isLoading = ref(false);
 
 const route = useRoute();
-
-const musicList = ref<IMusic.IMusicItem[]>([]);
 
 let itemString = route.params.item as string;
 if (itemString) {
@@ -44,7 +42,7 @@ const getMusicListDetail = async (page: number) => {
             
             const res = await currentPlugin.value.getTopListDetail(musicSheetItem.value, page);
             if (res.musicList) {
-                musicList.value = res.musicList.map(item => {
+                res.musicList= res.musicList.map(item => {
                     item.platform = currentPlugin.value?.platform || '';
                     return item;
                 });
