@@ -15,7 +15,16 @@ export const usePluginStore = defineStore('plugin', () => {
     const storedPlugins = ref<StoredPlugin[]>([]);
     const plugins = ref<IPlugin.IPluginInstance[]>([]);
     const currentPluginId = ref<string | null>(null);
+    const { parsePlugin } = useMusicSourcePlugin()
 
+    function loadPlugins() {
+        plugins.value = storedPlugins.value.map(p => {
+            const plugin = parsePlugin(p.code)
+            plugin.id = p.id
+            return plugin
+        })
+    }
+    
     function addPlugin(plugin: IPlugin.IPluginInstance, code: string) {
         plugins.value.push(plugin);
         storedPlugins.value.push({
@@ -66,19 +75,10 @@ export const usePluginStore = defineStore('plugin', () => {
         getPlugin,
         setCurrentPluginId,
         getCurrentPlugin,
+        loadPlugins,
     };
 }, {
     persistedState: {
         includePaths: ['storedPlugins', 'currentPluginId'],
-        beforeHydrate(oldState) {
-            const { parsePlugin } = useMusicSourcePlugin()
-            // console.log('beforeHydrate', oldState.storedPlugins);
-            const hydratedPlugins = oldState.storedPlugins.map(p => {
-                const plugin = parsePlugin(p.code)
-                plugin.id = p.id
-                return plugin
-            })
-            oldState.plugins = hydratedPlugins;
-        }
     }
 });

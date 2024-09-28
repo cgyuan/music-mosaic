@@ -47,11 +47,11 @@ import { ref, onMounted, computed, watch } from 'vue';
 import TabMenu from 'primevue/tabmenu';
 import Chip from 'primevue/chip';
 import DataView from 'primevue/dataview';
-import { usePluginStore } from '../../../store/pluginStore';
+import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
-import BottomLoadingState from '../../../components/BottomLoadingState.vue';
-import { RequestStateCode } from '../../../common/constant';
-import router from '../../../router';
+import BottomLoadingState from '@/components/BottomLoadingState.vue';
+import { MusicSheetType, RequestStateCode } from '@/common/constant';
+import router from '@/router';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
@@ -173,7 +173,10 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     console.log('item', item);
     router.push({
         name: 'music-list-detail',
-        params: { item: JSON.stringify(item) }
+        params: { item: JSON.stringify(item) },
+        query: {
+            type: MusicSheetType.Cloud
+        }
     });
 };
 </script>

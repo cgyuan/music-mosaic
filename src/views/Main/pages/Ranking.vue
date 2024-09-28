@@ -38,11 +38,12 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import TabMenu from 'primevue/tabmenu';
 import DataView from 'primevue/dataview';
-import { usePluginStore } from '@/store/pluginStore';
+import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
 import Loading from '@/components/Loading.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import router from '@/router';
+import { MusicSheetType } from '@/common/constant';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
@@ -107,7 +108,10 @@ const loadRanking = async () => {
 const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     router.push({
         name: 'music-list-detail',
-        params: { item: JSON.stringify(item) }
+        params: { item: JSON.stringify(item) },
+        query: {
+            type: MusicSheetType.Ranking
+        }
     });
 };
 

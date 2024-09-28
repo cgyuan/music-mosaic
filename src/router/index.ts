@@ -40,12 +40,12 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/music-list-detail',
         name: 'music-list-detail',
-        component: () => import('@/views/Main/pages/MusicSheetDetail.vue')
+        component: () => import('@/views/Main/pages/CloudMusicSheet.vue')
       },
       {
         path: '/playlist-detail/:id',
         name: 'playlist-detail',
-        component: () => import('@/views/Main/pages/PlaylistDetail.vue')
+        component: () => import('@/views/Main/pages/LocalMusicSheet.vue')
       }
     ]
   }

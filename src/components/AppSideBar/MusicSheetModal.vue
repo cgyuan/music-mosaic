@@ -3,25 +3,25 @@
         :visible="visible" 
         @update:visible="updateVisible" 
         modal 
-        header="创建新歌单" 
+        :header="isEditing ? '重命名歌单' : '创建新歌单'" 
         :style="{ width: '400px' }"
     >
         <div class="p-fluid">
             <div class="p-field">
                 <InputText 
                     id="playlist-name" 
-                    v-model="playlistName" 
-                    placeholder="歌单名称"
+                    v-model="musicSheetName" 
+                    :placeholder="isEditing ? '新歌单名称' : '歌单名称'"
                     autofocus 
                 />
             </div>
         </div>
         <div class="button-container">
             <Button 
-                label="创建" 
+                :label="isEditing ? '重命名' : '创建'" 
                 icon="pi pi-check" 
-                @click="createPlaylist" 
-                :disabled="!playlistName.trim()"
+                @click="submitMusicSheet" 
+                :disabled="!musicSheetName.trim()"
             />
         </div>
     </Dialog>
@@ -34,35 +34,39 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 
 const props = defineProps<{
-    visible: boolean
+    visible: boolean,
+    isEditing: boolean,
+    initialName?: string
 }>();
 
 const emit = defineEmits<{
     (e: 'update:visible', value: boolean): void
-    (e: 'create', playlistName: string): void
+    (e: 'submit', musicSheetName: string): void
 }>();
 
-const playlistName = ref('');
+const musicSheetName = ref('');
 
 const updateVisible = (value: boolean) => {
     emit('update:visible', value);
 };
 
-const createPlaylist = () => {
-    if (playlistName.value.trim()) {
-        emit('create', playlistName.value.trim());
+const submitMusicSheet = () => {
+    if (musicSheetName.value.trim()) {
+        emit('submit', musicSheetName.value.trim());
         closeModal();
     }
 };
 
 const closeModal = () => {
     updateVisible(false);
-    playlistName.value = '';
+    musicSheetName.value = '';
 };
 
 watch(() => props.visible, (newValue) => {
-    if (!newValue) {
-        playlistName.value = '';
+    if (newValue && props.isEditing && props.initialName) {
+        musicSheetName.value = props.initialName;
+    } else if (!newValue) {
+        musicSheetName.value = '';
     }
 });
 </script>

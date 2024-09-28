@@ -110,3 +110,13 @@ export enum TrackPlayerSyncType {
   CurrentLyricChanged = "CurrentLyricChanged",
   ProgressChanged = "ProgressChanged",
 }
+
+export enum MusicSheetType {
+  Playlist = "playlist",
+  Favorite = "favorite",
+  Download = "download",
+  Local = "local",
+  Cloud = "cloud",
+  Ranking = "ranking",
+  Recent = "recent",
+}

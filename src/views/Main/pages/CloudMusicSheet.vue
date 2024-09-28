@@ -1,5 +1,5 @@
 <template>
-    <CommonMusicSheet :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" />
+    <CommonMusicSheet :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" :musicSheetType="musicSheetType" />
 </template>
 
 <script setup lang="ts">
@@ -7,6 +7,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import CommonMusicSheet from '@/components/CommonMusicSheet.vue';
+import { MusicSheetType } from '@/common/constant';
+
 const pluginStore = usePluginStore();
 const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
@@ -15,6 +17,7 @@ const isLoading = ref(false);
 const route = useRoute();
 
 let itemString = route.params.item as string;
+const musicSheetType = route.query.type as MusicSheetType;
 if (itemString) {
     localStorage.setItem('music-list-item', itemString);
 } else {

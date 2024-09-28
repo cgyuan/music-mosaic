@@ -10,7 +10,7 @@
             <Button label="更新订阅" class="p-button-outlined" />
         </div>
 
-        <DataTable :value="plugins" stripedRows scrollable scrollHeight="flex" class="plugin-table">
+        <DataTable :value="storedPlugins" stripedRows scrollable scrollHeight="flex" class="plugin-table">
             <Column header="#" style="width: 5%;">
                 <template #body="slotProps">
                     {{ slotProps.index + 1 }}
@@ -55,7 +55,11 @@ import { usePluginStore } from '../../../store/pluginStore';
 import { storeToRefs } from 'pinia';
 
 const pluginStore = usePluginStore();
-const { plugins } = storeToRefs(pluginStore);
+const { storedPlugins } = storeToRefs(pluginStore);
+
+pluginStore.$persistedState.isReady().then(() => {
+    console.log('pluginStore is ready');
+});
 
 const { parsePlugin } = useMusicSourcePlugin()
 

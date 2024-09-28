@@ -11,13 +11,13 @@ export interface MusicSheetSummary {
   createAt?: number;
 }
 
-export interface Playlist extends MusicSheetSummary {
+export interface musicSheet extends MusicSheetSummary {
     tracks: IMusic.IMusicItem[];
 }
 
 export const useMusicSheetStore = defineStore('musicSheet', () => {
   const musicSheetsSummaries = ref<MusicSheetSummary[]>([]);
-  const currentPlaylist = ref<MusicSheetSummary | null>(null);
+  const currentMusicSheet = ref<MusicSheetSummary | null>(null);
 
   // Initialize localforage
   const musicSheetStorage = localforage.createInstance({
@@ -30,13 +30,14 @@ export const useMusicSheetStore = defineStore('musicSheet', () => {
     const title = "我喜欢";
     const favoriteSheet = musicSheetsSummaries.value.find((item) => item.id === id);
     if (!favoriteSheet) {
+      console.log('initialize', musicSheetsSummaries.value);
       musicSheetsSummaries.value.push({
         id,
         title,
         createAt: Date.now(),
       });
-      const newPlaylist: Playlist = { id, title, tracks: [] };
-      await musicSheetStorage.setItem(id, newPlaylist);
+      const newmusicSheet: musicSheet = { id, title, tracks: [] };
+      await musicSheetStorage.setItem(id, newmusicSheet);
     }
   };
 
@@ -47,11 +48,11 @@ export const useMusicSheetStore = defineStore('musicSheet', () => {
   const addMusicSheet = async (title: string) => {
     const newId = nanoid();
     const createAt = Date.now();
-    const newPlaylist: Playlist = { id: newId, title, tracks: [] };
+    const newmusicSheet: musicSheet = { id: newId, title, tracks: [] };
     musicSheetsSummaries.value.push({ id: newId, title, createAt });
     
-    // Save the new playlist in storage
-    await musicSheetStorage.setItem(newId, newPlaylist);
+    // Save the new musicSheet in storage
+    await musicSheetStorage.setItem(newId, newmusicSheet);
     
     return newId;
   };
@@ -61,7 +62,7 @@ export const useMusicSheetStore = defineStore('musicSheet', () => {
     if (index !== -1) {
       musicSheetsSummaries.value.splice(index, 1);
       
-      // Remove the playlist in storage
+      // Remove the musicSheet in storage
       await musicSheetStorage.removeItem(id);
     }
   };
@@ -72,56 +73,68 @@ export const useMusicSheetStore = defineStore('musicSheet', () => {
 
   const fetchMusicSheet = async (id: string) => {
     
-    const playlist = await musicSheetStorage.getItem<Playlist>(id);
-    return playlist;
+    const musicSheet = await musicSheetStorage.getItem<musicSheet>(id);
+    return musicSheet;
   };
 
-  const addTrackToMusicSheet = async (playlistId: string, track: IMusic.IMusicItem) => {
-    let playlist = await musicSheetStorage.getItem<Playlist>(playlistId);
-    const playlistSummary = musicSheetsSummaries.value.find(p => p.id === playlistId);
-    if (!playlistSummary) return;
-    if (!playlist) {
-        playlist = { id: playlistId, title: playlistSummary.title, tracks: [], createAt: playlistSummary.createAt };
+  const addTrackToMusicSheet = async (musicSheetId: string, track: IMusic.IMusicItem) => {
+    let musicSheet = await musicSheetStorage.getItem<musicSheet>(musicSheetId);
+    const musicSheetSummary = musicSheetsSummaries.value.find(p => p.id === musicSheetId);
+    if (!musicSheetSummary) return;
+    if (!musicSheet) {
+        musicSheet = { id: musicSheetId, title: musicSheetSummary.title, tracks: [], createAt: musicSheetSummary.createAt };
     }
-    playlistSummary.artwork = track.artwork;
-    if (playlist) {
+    musicSheetSummary.artwork = track.artwork;
+    if (musicSheet) {
       const plainTrack = JSON.parse(JSON.stringify(track));
-      playlist.tracks.push(plainTrack);
-      await musicSheetStorage.setItem(playlistId, playlist);
+      musicSheet.tracks.push(plainTrack);
+      await musicSheetStorage.setItem(musicSheetId, musicSheet);
     }
   };
 
-  const removeTrackFromMusicSheet = async (playlistId: string, trackIndex: number) => {
-    const playlist = await musicSheetStorage.getItem<Playlist>(playlistId);
-    if (playlist) {
-      playlist.tracks.splice(trackIndex, 1);
-      await musicSheetStorage.setItem(playlistId, playlist);
+  const removeTrackFromMusicSheet = async (musicSheetId: string, trackIndex: number) => {
+    const musicSheet = await musicSheetStorage.getItem<musicSheet>(musicSheetId);
+    if (musicSheet) {
+      musicSheet.tracks.splice(trackIndex, 1);
+      await musicSheetStorage.setItem(musicSheetId, musicSheet);
     }
   };
 
-  const addTracksToMusicSheet = async (playlistId: string, newTracks: IMusic.IMusicItem[]) => {
-    const playlist = await musicSheetStorage.getItem<Playlist>(playlistId);
-    if (playlist) {
-      playlist.tracks.push(...newTracks);
-      await musicSheetStorage.setItem(playlistId, playlist);
+  const addTracksToMusicSheet = async (musicSheetId: string, newTracks: IMusic.IMusicItem[]) => {
+    const musicSheet = await musicSheetStorage.getItem<musicSheet>(musicSheetId);
+    if (musicSheet) {
+      const plainTracks = newTracks.map(p => JSON.parse(JSON.stringify(p)));
+      musicSheet.tracks.push(...plainTracks);
+      await musicSheetStorage.setItem(musicSheetId, musicSheet);
+    }
+  };
+
+  const renameMusicSheet = async (id: string, title: string) => {
+    const musicSheet = await musicSheetStorage.getItem<musicSheet>(id);
+    const musicSheetSummary = musicSheetsSummaries.value.find(p => p.id === id);
+    if (!musicSheetSummary) return;
+    if (musicSheet) {
+      musicSheetSummary.title = title;
+      musicSheet.title = title;
+      await musicSheetStorage.setItem(id, musicSheet);
     }
   };
 
   return {
-    playlistSummaries: musicSheetsSummaries,
-    currentPlaylist,
-    playlistStorage: musicSheetStorage,
+    musicSheetsSummaries,
+    currentMusicSheet,
     getMusicSheetSummaryById,
     addMusicSheet,
     removeMusicSheet,
     fetchMusicSheet,
     addTrackToMusicSheet,
     addTracksToMusicSheet,
-    removeTrackFromMusicSheet
+    removeTrackFromMusicSheet,
+    renameMusicSheet
   };
 }, {
     persistedState: {
         persist: true,
-        includePaths: ['playlistSummaries']
+        includePaths: ['musicSheetsSummaries']
     }
 });

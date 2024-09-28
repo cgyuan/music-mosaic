@@ -7,17 +7,19 @@
                 <h1>{{ musicSheetItem.title }}</h1>
                 <p v-if="musicSheetItem.artist">作者: {{ musicSheetItem.artist }}</p>
                 <p v-if="musicSheetItem.playCount">播放数: {{ formatPlayCount(musicSheetItem.playCount) }}</p>
-                <p v-if="musicSheetItem.worksNum || musicSheetItem?.musicList">歌曲数: {{ musicSheetItem.worksNum || musicSheetItem?.musicList?.length }}</p>
+                <p v-if="musicSheetItem.worksNum || musicSheetItem?.musicList">歌曲数: {{ musicSheetItem.worksNum ||
+                    musicSheetItem?.musicList?.length }}</p>
                 <p v-if="musicSheetItem.description">简介: {{ musicSheetItem.description }}</p>
             </div>
         </div>
         <div class="actions">
-            <Button label="播放" icon="pi pi-play" class="p-button-rounded" />
-            <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined" />
-            <Button label="收藏" icon="pi pi-heart" class="p-button-rounded p-button-outlined" />
+            <Button label="播放" icon="pi pi-play" class="p-button-rounded" @click="playAll" />
+            <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined" @click="handleAddAll()" />
+            <Button label="收藏" icon="pi pi-heart" class="p-button-rounded p-button-outlined"
+                v-if="musicSheetType === MusicSheetType.Cloud" />
         </div>
-        <DataTable v-if="!isLoading" :value="musicSheetItem.musicList" stripedRows class="music-table" 
-                   @rowDblclick="onRowDoubleClick" @rowContextmenu="onRowRightClick">
+        <DataTable v-if="!isLoading" :value="musicSheetItem.musicList" stripedRows class="music-table"
+            @rowDblclick="onRowDoubleClick" @rowContextmenu="onRowRightClick">
             <Column style="width: 8rem; flex: 0 0 8rem;">
                 <template #body="slotProps">
                     <div class="item-actions">
@@ -48,18 +50,19 @@
             <Loading />
         </div>
         <ContextMenu ref="cm" :model="contextMenuItems" />
-        
-        <Dialog v-model:visible="showPlaylistDialog" header="添加到歌单" :style="{ width: '30vw' }">
-          <div class="playlist-selection">
-            <div class="new-playlist" @click="createNewPlaylist">
-              <i class="pi pi-plus"></i>
-              <span>新建歌单</span>
+
+        <Dialog v-model:visible="showPlaylistDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
+            <div class="playlist-selection">
+                <div class="new-playlist" @click="createNewPlaylist">
+                    <i class="pi pi-plus"></i>
+                    <span>新建歌单</span>
+                </div>
+                <div v-for="playlist in musicSheetsSummaries" :key="playlist.id" class="playlist-item"
+                    @click="addToMusicSheet(playlist.id)">
+                    <img :src="playlist.artwork || albumCover" :alt="playlist.title">
+                    <span>{{ playlist.title }}</span>
+                </div>
             </div>
-            <div v-for="playlist in playlistSummaries" :key="playlist.id" class="playlist-item" @click="addToPlaylist(playlist.id)">
-              <img :src="playlist.artwork || albumCover" :alt="playlist.title">
-              <span>{{ playlist.title }}</span>
-            </div>
-          </div>
         </Dialog>
     </div>
 </template>
@@ -76,17 +79,20 @@ import Dialog from 'primevue/dialog';
 import { useMusicSheetStore } from '../store/musicSheetStore';
 import { storeToRefs } from 'pinia';
 import albumCover from '@/assets/imgs/album-cover.jpg';
-
+import { MusicSheetType } from '@/common/constant';
 
 const props = defineProps<{
     platform?: string;
     musicSheetItem: IMusic.IMusicSheetItem;
     isLoading: boolean;
+    musicSheetType: MusicSheetType;
 }>();
 
 const playerStore = usePlayerStore();
 const musicSheetStore = useMusicSheetStore();
-const { playlistSummaries } = storeToRefs(musicSheetStore);
+const { musicSheetsSummaries } = storeToRefs(musicSheetStore);
+
+const addAll = ref(false);
 
 const cm = ref();
 const selectedTrack = ref<IMusic.IMusicItem | null>(null);
@@ -125,19 +131,21 @@ const contextMenuItems = ref([
 ]);
 
 const createNewPlaylist = () => {
-  // Implement new playlist creation logic
-  console.log('Create new playlist');
+    // Implement new playlist creation logic
+    console.log('Create new playlist');
 };
 
-const addToPlaylist = (playlistId: string) => {
-  if (selectedTrack.value) {
-    musicSheetStore.addTrackToMusicSheet(playlistId, selectedTrack.value);
+const addToMusicSheet = (playlistId: string) => {
+    if (addAll.value) {
+        musicSheetStore.addTracksToMusicSheet(playlistId, props.musicSheetItem.musicList || []);
+    } else if (selectedTrack.value) {
+        musicSheetStore.addTrackToMusicSheet(playlistId, selectedTrack.value);
+    }
     showPlaylistDialog.value = false;
-  }
 };
 
 const onRowRightClick = (event: {
-    originalEvent(originalEvent: any): unknown; data: IMusic.IMusicItem 
+    originalEvent(originalEvent: any): unknown; data: IMusic.IMusicItem
 }) => {
     selectedTrack.value = event.data;
     cm.value.show(event.originalEvent);
@@ -157,14 +165,29 @@ const formatDuration = (duration?: number) => {
 
 const onRowDoubleClick = async (event: { data: IMusic.IMusicItem }) => {
     console.log('Double-clicked row data:', event.data);
-    
+
     // Add the current music list to the playlist
     playerStore.setPlaylist(props.musicSheetItem.musicList || []);
-    
+
     // Set the current track and play
     await playerStore.setCurrentTrackAndPlay(event.data);
 };
 
+const playAll = async () => {
+    if (props.musicSheetItem.musicList && props.musicSheetItem.musicList.length > 0) {
+        playerStore.setPlaylist(props.musicSheetItem.musicList || []);
+        await playerStore.setCurrentTrackAndPlay(props.musicSheetItem.musicList[0]);
+    }
+};
+
+const handleAddAll = () => {
+    showPlaylistDialog.value = true;
+    addAll.value = true;
+};
+
+const handleDialogHide = () => {
+    addAll.value = false;
+};
 </script>
 
 <style scoped>
@@ -258,33 +281,35 @@ const onRowDoubleClick = async (event: { data: IMusic.IMusicItem }) => {
 }
 
 .playlist-selection {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.new-playlist, .playlist-item {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  cursor: pointer;
-  border-radius: 4px;
+.new-playlist,
+.playlist-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-.new-playlist:hover, .playlist-item:hover {
-  background-color: #f0f0f0;
+.new-playlist:hover,
+.playlist-item:hover {
+    background-color: #f0f0f0;
 }
 
 .new-playlist i {
-  font-size: 24px;
-  margin-right: 10px;
+    font-size: 24px;
+    margin-right: 10px;
 }
 
 .playlist-item img {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-right: 10px;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 10px;
 }
 </style>

@@ -17,8 +17,8 @@ app.use(router);
 // app.use(PrimeVueComponents); // Use the plugin
 
 const pinia = createPinia();
-const installPersistedStatePlugin = createPersistedStatePlugin();
-pinia.use((context) => installPersistedStatePlugin(context));
+// const installPersistedStatePlugin = createPersistedStatePlugin();
+// pinia.use((context) => installPersistedStatePlugin(context));
 
 pinia.use(
     createPersistedStatePlugin({

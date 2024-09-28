@@ -18,12 +18,14 @@
                 </div>
                 <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" />
             </div>
-            <SidebarItem :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
-                :label="item.title" 
-                v-for="item in playlistSummaries" 
+            <SidebarItem 
+                v-for="item in musicSheetsSummaries" 
                 :key="item.id" 
+                :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
+                :label="item.title" 
                 @click="handlePlaylistClick(item)" 
-                :active="isActive(`/playlist-detail/${item.id}`)"
+                :active="isActive(`/playlist-detail/${item.id}`)" 
+                @contextmenu="(event) => showContextMenu(event, item)" 
             />
         </div>
 
@@ -36,11 +38,14 @@
             </div>
         </div>
     </div>
-    <CreatePlaylistModal 
-        :visible="isCreatePlaylistModalVisible" 
-        @update:visible="isCreatePlaylistModalVisible = $event"
-        @create="createPlaylist" 
+    <MusicSheetModal 
+        :visible="isMusicSheetModalVisible" 
+        :is-editing="isEditingMusicSheet"
+        :initial-name="selectedMusicSheet?.title"
+        @update:visible="isMusicSheetModalVisible = $event"
+        @submit="handleMusicSheetSubmit" 
     />
+    <ContextMenu :model="contextMenuItems" ref="contextMenu" />
 </template>
 
 <script setup lang="ts">
@@ -49,16 +54,24 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
-import CreatePlaylistModal from './CreatePlaylistModal.vue';
 import { MusicSheetSummary, useMusicSheetStore } from '@/store/musicSheetStore';
 import { storeToRefs } from 'pinia';
+import MusicSheetModal from './MusicSheetModal.vue';
+import ContextMenu from 'primevue/contextmenu';
+
+
+const musicSheetStore = useMusicSheetStore();
 
 const route = useRoute();
 const router = useRouter();
 
-const { addMusicSheet } = useMusicSheetStore();
-const { playlistSummaries, currentPlaylist } = storeToRefs(useMusicSheetStore());
-const isCreatePlaylistModalVisible = ref(false);
+const { addMusicSheet, renameMusicSheet } = useMusicSheetStore();
+const { musicSheetsSummaries, currentMusicSheet } = storeToRefs(useMusicSheetStore());
+
+const isEditingMusicSheet = ref(false);
+const isMusicSheetModalVisible = ref(false);
+
+let selectedMusicSheet = null as MusicSheetSummary | null;
 
 const navMenus = [
     {
@@ -98,7 +111,7 @@ const isActive = (path: string) => {
 };
 
 const handlePlaylistClick = (item: MusicSheetSummary) => {
-    currentPlaylist.value = item;
+    currentMusicSheet.value = item;
     navigateTo(`/playlist-detail/${item.id}`);
 };
 
@@ -107,12 +120,53 @@ const navigateTo = (path: string) => {
 };
 
 const showCreatePlaylistModal = () => {
-    isCreatePlaylistModalVisible.value = true;
+    isEditingMusicSheet.value = false;
+    selectedMusicSheet = null;
+    isMusicSheetModalVisible.value = true;
 };
 
-const createPlaylist = (playlistName: string) => {
-    addMusicSheet(playlistName);
-    isCreatePlaylistModalVisible.value = false;
+const handleMusicSheetSubmit = (title: string) => {
+    if (isEditingMusicSheet.value && selectedMusicSheet) {
+        renameMusicSheet(selectedMusicSheet.id, title);
+    } else {
+        addMusicSheet(title);
+    }
+    isMusicSheetModalVisible.value = false;
+};
+
+const contextMenu = ref();
+const contextMenuItems = ref([
+    {
+        label: '重命名歌单',
+        icon: 'pi pi-pencil',
+        command: () => {
+            if (selectedMusicSheet) {
+                isEditingMusicSheet.value = true;
+                isMusicSheetModalVisible.value = true;
+            }
+        }
+    },
+    {
+        label: '删除歌单',
+        icon: 'pi pi-trash',
+        command: () => {
+            if (selectedMusicSheet) {
+                if (route.path === `/playlist-detail/${selectedMusicSheet.id}`) {
+                    navigateTo('/playlist-detail/favorite');
+                }
+                musicSheetStore.removeMusicSheet(selectedMusicSheet.id);
+                selectedMusicSheet = null;
+            }
+        }
+    }
+]);
+
+const showContextMenu = (event: MouseEvent, item: MusicSheetSummary) => {
+    if (item.id !== 'favorite') {
+        event.preventDefault();
+        selectedMusicSheet = item;
+        contextMenu.value.show(event);
+    }
 };
 </script>
 
