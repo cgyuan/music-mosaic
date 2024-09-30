@@ -19,7 +19,7 @@
                 <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" />
             </div>
             <SidebarItem 
-                v-for="item in musicSheetsSummaries" 
+                v-for="item in musicSheets" 
                 :key="item.id" 
                 :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
                 :label="item.title" 
@@ -54,24 +54,19 @@ import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
-import { MusicSheetSummary, useMusicSheetStore } from '@/store/musicSheetStore';
-import { storeToRefs } from 'pinia';
 import MusicSheetModal from './MusicSheetModal.vue';
 import ContextMenu from 'primevue/contextmenu';
+import MusicSheet from '@/music-sheet';
 
-
-const musicSheetStore = useMusicSheetStore();
+const musicSheets = MusicSheet.frontend.useAllSheets();
 
 const route = useRoute();
 const router = useRouter();
 
-const { addMusicSheet, renameMusicSheet } = useMusicSheetStore();
-const { musicSheetsSummaries, currentMusicSheet } = storeToRefs(useMusicSheetStore());
-
 const isEditingMusicSheet = ref(false);
 const isMusicSheetModalVisible = ref(false);
 
-let selectedMusicSheet = null as MusicSheetSummary | null;
+let selectedMusicSheet = null as IMusic.IDBMusicSheetItem | null;
 
 const navMenus = [
     {
@@ -110,8 +105,7 @@ const isActive = (path: string) => {
     return route.path === path;
 };
 
-const handlePlaylistClick = (item: MusicSheetSummary) => {
-    currentMusicSheet.value = item;
+const handlePlaylistClick = (item: IMusic.IDBMusicSheetItem) => {
     navigateTo(`/playlist-detail/${item.id}`);
 };
 
@@ -125,11 +119,19 @@ const showCreatePlaylistModal = () => {
     isMusicSheetModalVisible.value = true;
 };
 
-const handleMusicSheetSubmit = (title: string) => {
+const handleMusicSheetSubmit = async (title: string) => {
     if (isEditingMusicSheet.value && selectedMusicSheet) {
-        renameMusicSheet(selectedMusicSheet.id, title);
+        MusicSheet.frontend.updateSheet(selectedMusicSheet.id, {
+            title: title
+        });
     } else {
-        addMusicSheet(title);
+        try {
+            const newSheet = await MusicSheet.frontend.addSheet(title);
+            console.log(newSheet);
+        } catch (error) {
+            console.error(error);
+        }
+        
     }
     isMusicSheetModalVisible.value = false;
 };
@@ -154,14 +156,14 @@ const contextMenuItems = ref([
                 if (route.path === `/playlist-detail/${selectedMusicSheet.id}`) {
                     navigateTo('/playlist-detail/favorite');
                 }
-                musicSheetStore.removeMusicSheet(selectedMusicSheet.id);
+                MusicSheet.frontend.removeSheet(selectedMusicSheet.id);
                 selectedMusicSheet = null;
             }
         }
     }
 ]);
 
-const showContextMenu = (event: MouseEvent, item: MusicSheetSummary) => {
+const showContextMenu = (event: MouseEvent, item: IMusic.IDBMusicSheetItem) => {
     if (item.id !== 'favorite') {
         event.preventDefault();
         selectedMusicSheet = item;

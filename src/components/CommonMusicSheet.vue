@@ -57,10 +57,10 @@
                     <i class="pi pi-plus"></i>
                     <span>新建歌单</span>
                 </div>
-                <div v-for="playlist in musicSheetsSummaries" :key="playlist.id" class="playlist-item"
-                    @click="addToMusicSheet(playlist.id)">
-                    <img :src="playlist.artwork || albumCover" :alt="playlist.title">
-                    <span>{{ playlist.title }}</span>
+                <div v-for="item in musicSheets" :key="item.id" class="playlist-item"
+                    @click="addToMusicSheet(item.id)">
+                    <img :src="item.artwork || albumCover" :alt="item.title">
+                    <span>{{ item.title }}</span>
                 </div>
             </div>
         </Dialog>
@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { usePlayerStore } from '../store/playerStore';
 import Button from 'primevue/button';
 import DataTable from 'primevue/datatable';
@@ -76,10 +76,9 @@ import Column from 'primevue/column';
 import Loading from './Loading.vue';
 import ContextMenu from 'primevue/contextmenu';
 import Dialog from 'primevue/dialog';
-import { useMusicSheetStore } from '../store/musicSheetStore';
-import { storeToRefs } from 'pinia';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { MusicSheetType } from '@/common/constant';
+import MusicSheet from '@/music-sheet';
 
 const props = defineProps<{
     platform?: string;
@@ -89,8 +88,7 @@ const props = defineProps<{
 }>();
 
 const playerStore = usePlayerStore();
-const musicSheetStore = useMusicSheetStore();
-const { musicSheetsSummaries } = storeToRefs(musicSheetStore);
+const musicSheets = MusicSheet.frontend.useAllSheets();
 
 const addAll = ref(false);
 
@@ -135,11 +133,11 @@ const createNewPlaylist = () => {
     console.log('Create new playlist');
 };
 
-const addToMusicSheet = (playlistId: string) => {
+const addToMusicSheet = (sheetId: string) => {
     if (addAll.value) {
-        musicSheetStore.addTracksToMusicSheet(playlistId, props.musicSheetItem.musicList || []);
+        MusicSheet.frontend.addMusicToSheet(JSON.parse(JSON.stringify(props.musicSheetItem.musicList || [])), sheetId);
     } else if (selectedTrack.value) {
-        musicSheetStore.addTrackToMusicSheet(playlistId, selectedTrack.value);
+        MusicSheet.frontend.addMusicToSheet(JSON.parse(JSON.stringify(selectedTrack.value)), sheetId);
     }
     showPlaylistDialog.value = false;
 };
@@ -181,13 +179,20 @@ const playAll = async () => {
 };
 
 const handleAddAll = () => {
-    showPlaylistDialog.value = true;
+    console.log("handleAddAll", props.musicSheetItem.musicList);
     addAll.value = true;
+    showPlaylistDialog.value = true;
 };
 
 const handleDialogHide = () => {
     addAll.value = false;
 };
+
+watch(showPlaylistDialog, (newValue) => {
+    if (!newValue) {
+        handleDialogHide();
+    }
+});
 </script>
 
 <style scoped>
