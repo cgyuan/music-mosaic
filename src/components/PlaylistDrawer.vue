@@ -11,9 +11,7 @@
       <DataTable :value="playlist" class="playlist-table" @row-click="onRowClick" :showHeaders="false" ref="dataTable">
         <Column style="width: 100px;">
           <template #body="slotProps">
-            <Button icon="pi pi-heart" text @click.stop="toggleFavorite(slotProps.data)" 
-                    :class="{ 'p-button-danger': isFavorite(slotProps.data) }" 
-                    tooltip="收藏" />
+            <MusicFavorite :musicItem="slotProps.data" />
             <Button icon="pi pi-download" text @click.stop="downloadTrack(slotProps.data)" 
                     tooltip="下载" />
           </template>
@@ -54,6 +52,7 @@ import { usePlayerStore } from '@/store/playerStore';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
+import MusicFavorite from './MusicFavorite.vue';
 
 const playerStore = usePlayerStore();
 const visible = ref(false);

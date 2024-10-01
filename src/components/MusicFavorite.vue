@@ -8,7 +8,7 @@ import MusicSheet from '@/music-sheet';
 
 interface IMusicFavoriteProps {
   musicItem: IMusic.IMusicItem;
-  size: number;
+  size?: number;
 }
 
 const props = defineProps<IMusicFavoriteProps>();
