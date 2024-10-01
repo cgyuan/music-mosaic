@@ -1,7 +1,7 @@
 <template>
-    <div class="empty-state">
+    <div class="loading-or-empty">
         <Loading v-if="loading" />
-        <div class="empty-text" v-else>什么都没有呀~~~</div>
+        <Empty v-else />
     </div>
 </template>
 
@@ -12,12 +12,11 @@ defineProps<{
 </script>
 
 <style scoped>
-.empty-state {
+.loading-or-empty {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
     padding: 2rem;
-    color: #999;
 }
 </style>
