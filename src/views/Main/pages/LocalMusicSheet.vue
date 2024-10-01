@@ -3,7 +3,7 @@
         :musicSheetItem="sheetItem!" 
         :platform="currentPlugin?.platform" 
         :isLoading="false" 
-        :status="pendingState"
+        :state="pendingState"
         :musicSheetType="MusicSheetType.Local" 
     />
 </template>

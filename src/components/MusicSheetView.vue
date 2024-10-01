@@ -1,5 +1,5 @@
 <template>
-    <CustomDataTable :loading="status === RequestStateCode.PENDING_FIRST_PAGE" :value="musicSheetItem.musicList || []"
+    <CustomDataTable :loading="state === RequestStateCode.PENDING_FIRST_PAGE" :value="musicSheetItem.musicList || []"
         :columns="columns" keyField="id" :stripedRows="true" class="music-list-detail" :bufferSize="10"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
@@ -81,8 +81,7 @@ import CustomDataTable from '@/components/CustomDataTable.vue';
 const props = defineProps<{
     platform?: string;
     musicSheetItem: IMusic.IMusicSheetItem;
-    isLoading: boolean;
-    status: RequestStateCode;
+    state: RequestStateCode;
     musicSheetType: MusicSheetType;
 }>();
 

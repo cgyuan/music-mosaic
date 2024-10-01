@@ -1,18 +1,18 @@
 <template>
-    <CommonMusicSheet :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :isLoading="isLoading" :musicSheetType="musicSheetType" />
+    <MusicSheetView :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :state="state" :musicSheetType="musicSheetType" />
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
-import CommonMusicSheet from '@/components/CommonMusicSheet.vue';
-import { MusicSheetType } from '@/common/constant';
+import MusicSheetView from '@/components/MusicSheetView.vue';
+import { MusicSheetType, RequestStateCode } from '@/common/constant';
 
 const pluginStore = usePluginStore();
 const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
-const isLoading = ref(false);
+const state = ref(RequestStateCode.PENDING_FIRST_PAGE);
 
 const route = useRoute();
 
@@ -41,7 +41,7 @@ watch(() => currentPlugin.value, () => {
 const getMusicListDetail = async (page: number) => {
     if (currentPlugin.value && currentPlugin.value.getTopListDetail) {
         try {
-            isLoading.value = true;
+            state.value = RequestStateCode.PENDING_FIRST_PAGE;
             
             const res = await currentPlugin.value.getTopListDetail(musicSheetItem.value, page);
             if (res.musicList) {
@@ -55,7 +55,7 @@ const getMusicListDetail = async (page: number) => {
         } catch (error) {
             console.error('Error fetching music list detail:', error);
         } finally {
-            isLoading.value = false;
+            state.value = RequestStateCode.FINISHED;
         }
     }
 };
