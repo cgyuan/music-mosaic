@@ -11,14 +11,14 @@
             />
         </div>
         <div class="sidebar-section">
-            <div class="section-header">
+            <div class="section-header" @click="toggleMusicSheetSection">
                 <div class="section-label">
-                    <i class="pi pi-angle-down"></i>
+                    <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
                 <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" />
             </div>
-            <SidebarItem 
+            <SidebarItem v-if="isMusicSheetOpen"
                 v-for="item in musicSheets" 
                 :key="item.id" 
                 :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
@@ -169,6 +169,11 @@ const showContextMenu = (event: MouseEvent, item: IMusic.IDBMusicSheetItem) => {
         selectedMusicSheet = item;
         contextMenu.value.show(event);
     }
+};
+
+const isMusicSheetOpen = ref(true);
+const toggleMusicSheetSection = () => {
+    isMusicSheetOpen.value = !isMusicSheetOpen.value;
 };
 </script>
 

@@ -8,12 +8,16 @@
           <Button icon="pi pi-trash" label="清空" @click="clearPlaylist" />
         </div>
       </div>
-      <DataTable :value="playlist" class="playlist-table" @row-click="onRowClick" :showHeaders="false" ref="dataTable">
+      <DataTable :value="playlist" class="playlist-table" @row-click="onRowClick" :showHeaders="false"
+         :virtualScrollerOptions="{ itemSize: 20 }"
+         scrollHeight="flex"
+         ref="dataTable">
         <Column style="width: 100px;">
           <template #body="slotProps">
-            <MusicFavorite :musicItem="slotProps.data" />
-            <Button icon="pi pi-download" text @click.stop="downloadTrack(slotProps.data)" 
-                    tooltip="下载" />
+            <div class="item-actions">
+              <MusicFavorite :musicItem="slotProps.data" :size="16" />
+              <MusicDownloaded :musicItem="slotProps.data" :size="16" />
+            </div>
           </template>
         </Column>
         <Column field="title" style="max-width: 200px;">
@@ -74,21 +78,6 @@ const onRowClick = (event: { data: IMusic.IMusicItem }) => {
 
 const close = () => {
   visible.value = false;
-};
-
-const toggleFavorite = (track: IMusic.IMusicItem) => {
-  // Implement the logic to toggle favorite status
-  console.log('Toggle favorite:', track);
-};
-
-const isFavorite = (track: IMusic.IMusicItem) => {
-  // Implement the logic to check if a track is favorited
-  return false; // Placeholder
-};
-
-const downloadTrack = (track: IMusic.IMusicItem) => {
-  // Implement the logic to download the track
-  console.log('Download track:', track);
 };
 
 const isCurrentTrack = (track: IMusic.IMusicItem) => {
@@ -197,6 +186,13 @@ defineExpose({ visible });
 
 .playing-track {
   color: #2196F3;
+}
+
+.item-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
 }
 
 .source-tag {

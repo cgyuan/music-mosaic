@@ -31,7 +31,7 @@
                                 :key="item[keyField] || (startIndex + localIndex)" class="data-row"
                                 :class="{ 'striped': (startIndex + localIndex) % 2 === 1 }"
                                 @dblclick="onRowDblClick(item, $event)" @contextmenu="onRowContextMenu(item, $event)"
-                                :ref="el => { if (el) setRowRef(startIndex + localIndex, el as HTMLElement) }">
+                                :style="{ height: `${ROW_HEIGHT}px` }">
                                 <td v-for="column in columns" :key="column.field" :style="getColumnStyle(column)">
                                     <slot :name="`cell:${column.field}`" :item="item" :value="item[column.field]"
                                         :index="startIndex + localIndex">
@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import throttle from 'lodash.throttle';
 
 interface Column {
@@ -69,71 +69,22 @@ const props = defineProps<{
 const emit = defineEmits(['row-dblclick', 'row-contextmenu']);
 
 const containerRef = ref<HTMLElement | null>(null);
-const rowHeights = ref<number[]>([]);
-const rowRefs = ref<Record<number, HTMLElement>>({});
 const bufferSize = props.bufferSize || 5;
 const startIndex = ref(0);
 const endIndex = ref(0);
 const scrollTop = ref(0);
 
-const estimatedRowHeight = 61; // Default estimated row height
+const ROW_HEIGHT = 40; // Fixed row height
 
-const totalHeight = computed(() => {
-    const measuredHeight = rowHeights.value.reduce((sum, height) => sum + (height || estimatedRowHeight), 0);
-    const remainingItems = props.value.length - rowHeights.value.length;
-    return measuredHeight + remainingItems * estimatedRowHeight;
-});
+const totalHeight = computed(() => props.value.length * ROW_HEIGHT);
 
 const visibleItems = computed(() => {
     return props.value.slice(startIndex.value, endIndex.value);
 });
 
-const startOffset = computed(() => {
-    return rowHeights.value.slice(0, startIndex.value).reduce((sum, height) => sum + (height || estimatedRowHeight), 0);
-});
+const startOffset = computed(() => startIndex.value * ROW_HEIGHT);
 
 const throttledUpdateVisibleRange = throttle(updateVisibleRange, 8);
-
-function setRowRef(index: number, el: HTMLElement) {
-    rowRefs.value[index] = el;
-    nextTick(() => {
-        const height = el.offsetHeight;
-        if (rowHeights.value[index] !== height) {
-            rowHeights.value[index] = height;
-            updateTotalHeight();
-        }
-    });
-}
-
-function updateTotalHeight() {
-    if (containerRef.value) {
-        const newTotalHeight = totalHeight.value;
-        containerRef.value.style.setProperty('--total-height', `${newTotalHeight}px`);
-    }
-}
-
-function findStartIndex(scrollTop: number): number {
-    if (scrollTop <= 0) {
-        return 0;
-    }
-    let low = 0;
-    let high = props.value.length - 1;
-
-    while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
-        const offset = rowHeights.value.slice(0, mid).reduce((sum, height) => sum + (height || estimatedRowHeight), 0);
-
-        if (offset < scrollTop) {
-            low = mid + 1;
-        } else if (offset > scrollTop) {
-            high = mid - 1;
-        } else {
-            return mid;
-        }
-    }
-
-    return Math.max(0, low - 1);
-}
 
 function onScroll() {
     if (containerRef.value) {
@@ -148,43 +99,18 @@ function updateVisibleRange() {
     const containerHeight = containerRef.value.clientHeight;
     const scrollTop = containerRef.value.scrollTop;
 
-    let start = findStartIndex(scrollTop);
-    let end = start;
-    let sum = 0;
+    const start = Math.floor(scrollTop / ROW_HEIGHT);
+    const visibleCount = Math.ceil(containerHeight / ROW_HEIGHT);
+    const end = Math.min(props.value.length, start + visibleCount + bufferSize);
 
-    const preRenderBuffer = Math.ceil(containerHeight / estimatedRowHeight) * 2;
-
-    for (let i = start; i < props.value.length; i++) {
-        sum += rowHeights.value[i] || estimatedRowHeight;
-        if (sum > containerHeight + preRenderBuffer * estimatedRowHeight) {
-            end = i + 1;
-            break;
-        }
-    }
-
-    if (end === start) end = Math.min(props.value.length, start + preRenderBuffer);
-
-    start = Math.max(0, start - preRenderBuffer);
-    end = Math.min(props.value.length, end + preRenderBuffer);
-
-    if (scrollTop + containerHeight >= totalHeight.value - 20) {
-        end = props.value.length;
-        start = Math.max(0, end - preRenderBuffer * 2);
-    }
-
-    startIndex.value = start;
+    startIndex.value = Math.max(0, start - bufferSize);
     endIndex.value = end;
-
-    updateTotalHeight();
 }
 
 // Watch for changes in value (data)
-watch(() => props.value.length, () => {
-    updateVisibleRange();
-});
+watch(() => props.value.length, updateVisibleRange);
 
-// Update visible range when data or container size changes
-// watch(() => props.value, updateVisibleRange);
+// Update visible range when container size changes
 watch(() => containerRef.value?.clientHeight, updateVisibleRange);
 
 onMounted(() => {
@@ -228,7 +154,6 @@ function getColumnStyle(column: Column) {
 }
 
 .virtual-list {
-    height: var(--total-height);
     position: relative;
 }
 
@@ -244,6 +169,7 @@ table {
     table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
+    font-size: 14px;
 }
 
 thead {

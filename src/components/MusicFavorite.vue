@@ -1,28 +1,29 @@
 <template>
-    <Button :icon="isFav ? 'pi pi-heart-fill' : 'pi pi-heart'" class="p-button-rounded p-button-text p-button-sm"
-        :style="{ color: isFav ? 'red' : 'black' }" @click="handleFavorite" />
+    <div role="button" :style="{ color: isFav ? 'red' : 'black', width: size + 'px', height: size + 'px' }"
+        @click="toggleFavorite" @dblclick.stop>
+        <SvgAsset :iconName="isFav ? 'heart' : 'heart-outline'" :size="size" />
+    </div>
 </template>
 
 <script setup lang="ts">
+import SvgAsset from '@/components/SvgAsset';
 import MusicSheet from '@/music-sheet';
 
 interface IMusicFavoriteProps {
-  musicItem: IMusic.IMusicItem;
-  size?: number;
+    musicItem: IMusic.IMusicItem;
+    size: number;
 }
 
 const props = defineProps<IMusicFavoriteProps>();
 
 const isFav = MusicSheet.frontend.useMusicIsFavorite(props.musicItem);
 
-const handleFavorite = (ev: MouseEvent) => {
-    ev.stopPropagation();
+const toggleFavorite = (e: MouseEvent) => {
+    e.stopPropagation();
     if (isFav.value) {
         MusicSheet.frontend.removeMusicFromFavorite(props.musicItem);
     } else {
-        console.log('add to favorite', props.musicItem);
         MusicSheet.frontend.addMusicToFavorite(props.musicItem);
     }
-}
-
+};
 </script>

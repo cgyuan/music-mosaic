@@ -2,7 +2,6 @@
     <MusicSheetView 
         :musicSheetItem="sheetItem!" 
         :platform="currentPlugin?.platform" 
-        :isLoading="false" 
         :state="pendingState"
         :musicSheetType="MusicSheetType.Local" 
     />
@@ -12,7 +11,7 @@
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
-import MusicSheetView from '@/components/MusicSheetView.vue';
+import MusicSheetView from '@/components/MusicSheetView/index.vue';
 import { MusicSheetType } from '@/common/constant';
 import MusicSheet from '@/music-sheet';
 

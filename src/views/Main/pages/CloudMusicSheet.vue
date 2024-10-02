@@ -6,7 +6,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
-import MusicSheetView from '@/components/MusicSheetView.vue';
+import MusicSheetView from '@/components/MusicSheetView/index.vue';
 import { MusicSheetType, RequestStateCode } from '@/common/constant';
 
 const pluginStore = usePluginStore();

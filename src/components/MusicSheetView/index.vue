@@ -3,30 +3,12 @@
         :columns="columns" keyField="id" :stripedRows="true" class="music-list-detail" :bufferSize="10"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
-            <div class="header">
-                <img :src="musicSheetItem.coverImg || musicSheetItem.artwork || albumCover" :alt="musicSheetItem.title"
-                    class="cover-image">
-                <div class="info">
-                    <h1>{{ musicSheetItem.title }}</h1>
-                    <p v-if="musicSheetItem.artist">作者: {{ musicSheetItem.artist }}</p>
-                    <p v-if="musicSheetItem.playCount">播放数: {{ formatPlayCount(musicSheetItem.playCount) }}</p>
-                    <p v-if="musicSheetItem.worksNum || musicSheetItem?.musicList">歌曲数: {{ musicSheetItem.worksNum ||
-                        musicSheetItem?.musicList?.length }}</p>
-                    <p v-if="musicSheetItem.description">简介: {{ musicSheetItem.description }}</p>
-                </div>
-            </div>
-            <div class="actions">
-                <Button label="播放" icon="pi pi-play" class="p-button-rounded" @click="playAll" />
-                <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined"
-                    @click="handleAddAll()" />
-                <Button label="收藏" icon="pi pi-heart" class="p-button-rounded p-button-outlined"
-                    v-if="musicSheetType === MusicSheetType.Cloud" />
-            </div>
+            <Header :musicSheetItem="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" />       
         </template>
         <template #cell:actions="{ item }">
             <div class="item-actions">
-                <MusicFavorite :musicItem="item" :size="16" />
-                <Button icon="pi pi-download" class="p-button-rounded p-button-text p-button-sm" />
+                <MusicFavorite :musicItem="item" :size="20"/>
+                <MusicDownloaded :musicItem="item" :size="20"/>
             </div>
         </template>
         <template #cell:index="{ index }">
@@ -67,17 +49,16 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { usePlayerStore } from '../store/playerStore';
-import Button from 'primevue/button';
-import Loading from './Loading.vue';
-import Empty from './Empty.vue';
+import { usePlayerStore } from '../../store/playerStore';
+import Loading from '@/components/Loading.vue';
+import Empty from '@/components/Empty.vue';
 import ContextMenu from 'primevue/contextmenu';
 import Dialog from 'primevue/dialog';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { MusicSheetType, RequestStateCode } from '@/common/constant';
 import MusicSheet from '@/music-sheet';
 import CustomDataTable from '@/components/CustomDataTable.vue';
-
+import Header from './Header.vue';
 const props = defineProps<{
     platform?: string;
     musicSheetItem: IMusic.IMusicSheetItem;
@@ -127,7 +108,7 @@ const contextMenuItems = ref([
 ]);
 
 const columns = [
-    { field: 'actions', header: '', width: '8rem' },
+    { field: 'actions', header: '', width: '6rem' },
     { field: 'index', header: '#', width: '3rem' },
     { field: 'title', header: '标题' },
     { field: 'artist', header: '作者' },
@@ -155,10 +136,6 @@ const onRowRightClick = (event: { item: IMusic.IMusicItem, event: MouseEvent }) 
     cm.value.show(event.event);
 };
 
-const formatPlayCount = (count?: number) => {
-    if (!count) return '0';
-    return count >= 10000 ? `${(count / 10000).toFixed(1)}万` : count.toString();
-};
 
 const formatDuration = (duration?: number) => {
     if (!duration) return '--:--';
@@ -209,47 +186,6 @@ watch(showPlaylistDialog, (newValue) => {
     box-sizing: border-box;
 }
 
-.header {
-    display: flex;
-    margin-bottom: 20px;
-}
-
-.cover-image {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-right: 20px;
-}
-
-.info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.info h1 {
-    margin-bottom: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: 18px;
-}
-
-.info p {
-    margin: 5px 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.actions {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-
 :deep(.custom-datatable) {
     font-size: 14px;
 }
@@ -278,11 +214,7 @@ watch(showPlaylistDialog, (newValue) => {
 .item-actions {
     display: flex;
     align-items: center;
-    gap: 5px;
-}
-
-.item-actions .p-button-sm {
-    padding: 0.25rem;
+    gap: 1.5rem;
 }
 
 .source-tag {
