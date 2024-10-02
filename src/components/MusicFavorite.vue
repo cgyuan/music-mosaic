@@ -23,7 +23,7 @@ const toggleFavorite = (e: MouseEvent) => {
     if (isFav.value) {
         MusicSheet.frontend.removeMusicFromFavorite(props.musicItem);
     } else {
-        MusicSheet.frontend.addMusicToFavorite(props.musicItem);
+        MusicSheet.frontend.addMusicToFavorite(JSON.parse(JSON.stringify(props.musicItem)));
     }
 };
 </script>

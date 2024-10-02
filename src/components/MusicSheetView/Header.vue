@@ -1,15 +1,15 @@
 <template>
     <div class="music-sheet-header">
         <div class="header-info">
-            <img :src="musicSheetItem.coverImg || musicSheetItem.artwork || albumCover" :alt="musicSheetItem.title"
+            <img :src="musicSheet.coverImg || musicSheet.artwork || albumCover" :alt="musicSheet.title"
                 class="cover-image">
             <div class="info">
-                <h1>{{ musicSheetItem.title }}</h1>
-                <div v-if="musicSheetItem.artist">作者: {{ musicSheetItem.artist }}</div>
-                <div v-if="musicSheetItem.playCount">播放数: {{ formatPlayCount(musicSheetItem.playCount) }}</div>
-                <div>歌曲数: {{ musicSheetItem.worksNum || musicSheetItem?.musicList?.length || 0 }}</div>
-                <div v-if="musicSheetItem.createAt">创建时间: {{ dayjs(musicSheetItem?.createAt).format("YYYY-MM-DD") }}</div>
-                <div v-if="musicSheetItem.description">简介: {{ musicSheetItem.description }}</div>
+                <h1>{{ musicSheet.title }}</h1>
+                <div v-if="musicSheet.artist">作者: {{ musicSheet.artist }}</div>
+                <div v-if="musicSheet.playCount">播放数: {{ formatPlayCount(musicSheet.playCount) }}</div>
+                <div>歌曲数: {{ musicSheet.worksNum || musicSheet?.musicList?.length || 0 }}</div>
+                <div v-if="musicSheet.createAt">创建时间: {{ dayjs(musicSheet?.createAt).format("YYYY-MM-DD") }}</div>
+                <div v-if="musicSheet.description">简介: {{ musicSheet.description }}</div>
             </div>
         </div>
         <div class="actions">
@@ -26,7 +26,7 @@ import albumCover from '@/assets/imgs/album-cover.jpg';
 import dayjs from 'dayjs';
 
 defineProps<{
-    musicSheetItem: IMusic.IMusicSheetItem;
+    musicSheet: IMusic.IMusicSheetItem;
     musicSheetType: MusicSheetType;
 }>();
 

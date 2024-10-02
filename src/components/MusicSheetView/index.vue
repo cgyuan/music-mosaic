@@ -3,7 +3,7 @@
         :columns="columns" keyField="id" :stripedRows="true" class="music-list-detail" :bufferSize="10"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
-            <Header :musicSheetItem="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" />       
+            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" />       
         </template>
         <template #cell:actions="{ item }">
             <div class="item-actions">
