@@ -9,8 +9,6 @@
         </div>
       </div>
       <DataTable :value="playlist" class="playlist-table" @row-click="onRowClick" :showHeaders="false"
-         :virtualScrollerOptions="{ itemSize: 20 }"
-         scrollHeight="flex"
          ref="dataTable">
         <Column style="width: 100px;">
           <template #body="slotProps">

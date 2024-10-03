@@ -3,12 +3,13 @@
         :columns="columns" keyField="id" :stripedRows="true" class="music-sheet-detail" :bufferSize="10"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
-            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" :platform="platform" />       
+            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll"
+                @addAll="handleAddAll" :platform="platform" />
         </template>
         <template #cell:actions="{ item }">
             <div class="item-actions">
-                <MusicFavorite :musicItem="item" :size="20"/>
-                <MusicDownloaded :musicItem="item" :size="20"/>
+                <MusicFavorite :musicItem="item" :size="20" />
+                <MusicDownloaded :musicItem="item" :size="20" />
             </div>
         </template>
         <template #cell:index="{ index }">
@@ -20,7 +21,7 @@
             {{ formatDuration(item.duration) }}
         </template>
         <template #cell:platform="{ item }">
-            <span class="source-tag">{{ item.platform ||platform }}</span>
+            <span class="source-tag">{{ item.platform || platform }}</span>
         </template>
 
         <template #loading>
@@ -48,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import { usePlayerStore } from '../../store/playerStore';
 import Loading from '@/components/Loading.vue';
 import Empty from '@/components/Empty.vue';
@@ -148,10 +149,11 @@ const onRowDoubleClick = async (event: { item: IMusic.IMusicItem }) => {
     console.log('Double-clicked row data:', event.item);
 
     // Add the current music list to the playlist
+    playerStore.setPlaylist([]);
+    await nextTick();
     playerStore.setPlaylist(props.musicSheetItem.musicList || []);
+    playerStore.setCurrentTrackAndPlay(event.item);
 
-    // Set the current track and play
-    await playerStore.setCurrentTrackAndPlay(event.item);
 };
 
 const playAll = async () => {

@@ -16,8 +16,7 @@
                     <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
-                <!-- <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" /> -->
-                <SvgAsset iconName="plus" size="16" @click.stop="showCreatePlaylistModal" />
+                <SvgAsset iconName="plus" :size="16" @click.stop="showCreatePlaylistModal" />
             </div>
             <SidebarItem v-if="isMusicSheetOpen"
                 v-for="item in musicSheets" 
