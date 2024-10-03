@@ -3,7 +3,7 @@ import * as backend from "../backend";
 import defaultSheet from "../common/default-sheet";
 import { RequestStateCode, localPluginName } from "@/common/constant";
 import { toMediaBase } from "@/common/media-util";
-import { onBeforeUnmount, ref, watch, watchEffect } from "vue";
+import { onBeforeUnmount, ref, watch, computed, shallowRef, toRaw } from "vue";
 
 const musicSheetsStore = new Store<IMusic.IDBMusicSheetItem[]>([]);
 const starredSheetsStore = new Store<IMedia.IMediaBase[]>([]);
@@ -201,19 +201,20 @@ export function isFavoriteMusic(musicItem: IMusic.IMusicItem) {
 }
 
 /** hook 某首歌曲是否被标记成喜欢 */
-export function useMusicIsFavorite(musicItem:  IMusic.IMusicItem) {
-  const isFav = ref<boolean>(backend.isFavoriteMusic(musicItem));
+export function useMusicIsFavorite(musicItem: IMusic.IMusicItem) {
+  const musicItemRef = shallowRef(musicItem);
 
-  const cb = () => {
-    isFav.value = backend.isFavoriteMusic(musicItem);
+  const isFav = computed(() => {
+    return backend.isFavoriteMusic(toRaw(musicItemRef.value));
+  });
+
+  const refreshFav = () => {
+    musicItemRef.value = { ...musicItemRef.value };
   };
 
-  watchEffect(() => {
-    cb();
-    refreshFavCbs.add(cb);
-    onBeforeUnmount(() => {
-      refreshFavCbs.delete(cb);
-    });
+  refreshFavCbs.add(refreshFav);
+  onBeforeUnmount(() => {
+    refreshFavCbs.delete(refreshFav);
   });
 
   return isFav;
