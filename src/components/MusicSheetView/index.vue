@@ -192,27 +192,6 @@ watch(showPlaylistDialog, (newValue) => {
     font-size: 14px;
 }
 
-:deep(.p-datatable-wrapper) {
-    overflow-x: hidden !important;
-}
-
-:deep(.p-datatable-table) {
-    /*  ensure the table fits the container width */
-    width: 100%;
-    table-layout: fixed;
-}
-
-:deep(.p-datatable-thead > tr > th),
-:deep(.p-datatable-tbody > tr > td) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-:deep(.p-datatable .p-datatable-tbody > tr > td) {
-    padding: 0.5rem;
-}
-
 .item-actions {
     display: flex;
     align-items: center;

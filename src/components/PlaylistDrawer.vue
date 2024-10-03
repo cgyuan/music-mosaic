@@ -3,64 +3,71 @@
     <div v-if="visible" class="playlist-drawer-overlay" @click="close"></div>
     <div class="playlist-drawer" :class="{ 'playlist-drawer-visible': visible }" @transitionend="onTransitionEnd">
       <div class="playlist-drawer-header">
-        <h2>播放列表 ({{ playlist.length }}首)</h2>
+        <h5>播放列表 ({{ playlist.length }}首)</h5>
         <div>
-          <Button icon="pi pi-trash" label="清空" @click="clearPlaylist" />
+          <Button size="small" icon="pi pi-trash" label="清空" @click="clearPlaylist" />
         </div>
       </div>
-      <DataTable :value="playlist" class="playlist-table" @row-click="onRowClick" :showHeaders="false"
-         ref="dataTable">
-        <Column style="width: 100px;">
-          <template #body="slotProps">
-            <div class="item-actions">
-              <MusicFavorite :musicItem="slotProps.data" :size="16" />
-              <MusicDownloaded :musicItem="slotProps.data" :size="16" />
-            </div>
-          </template>
-        </Column>
-        <Column field="title" style="max-width: 200px;">
-          <template #body="slotProps">
-            <span :class="{ 'playing-track': isCurrentTrack(slotProps.data) }">
-              {{ slotProps.data.title }}
-            </span>
-          </template>
-        </Column>
-        <Column field="artist" style="max-width: 150px;">
-            <template #body="slotProps">
-                <span :class="{ 'playing-track': isCurrentTrack(slotProps.data) }">
-                {{ slotProps.data.artist }}
-                </span>
-            </template>
-        </Column>
-        <Column field="platform" style="max-width: 100px;">
-            <template #body="slotProps">
-                <span class="source-tag">{{ slotProps.data.platform }}</span>
-            </template>
-        </Column>
-        <Column style="width: 50px;">
-          <template #body="slotProps">
-            <Button icon="pi pi-times" text @click.stop="removeFromPlaylist(slotProps.index)" 
-                    tooltip="从列表中删除" />
-          </template>
-        </Column>
-      </DataTable>
+      <CustomDataTable
+        ref="dataTable"
+        :value="playlist"
+        :columns="columns"
+        keyField="id"
+        :stripedRows="true"
+        class="playlist-table"
+        :bufferSize="10"
+        :showHeader="false"
+        @row-dblclick="onRowDoubleClick"
+      >
+        <template #cell:actions="{ item }">
+          <div class="item-actions">
+            <MusicFavorite :musicItem="item" :size="16" />
+            <MusicDownloaded :musicItem="item" :size="16" />
+          </div>
+        </template>
+        <template #cell:title="{ item }">
+          <span :class="{ 'playing-track': isCurrentTrack(item) }">
+            {{ item.title }}
+          </span>
+        </template>
+        <template #cell:artist="{ item }">
+          <span :class="{ 'playing-track': isCurrentTrack(item) }">
+            {{ item.artist }}
+          </span>
+        </template>
+        <template #cell:platform="{ item }">
+          <span class="source-tag">{{ item.platform }}</span>
+        </template>
+        <template #cell:remove="{ item, index }">
+          <SvgAsset class="remove-icon" iconName="x-mark" :size="16" @click.stop="removeFromPlaylist(index)" />
+        </template>
+      </CustomDataTable>
     </div>
   </Teleport>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { usePlayerStore } from '@/store/playerStore';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
 import Button from 'primevue/button';
 import MusicFavorite from './MusicFavorite.vue';
+import MusicDownloaded from './MusicDownloaded.vue';
+import CustomDataTable from './CustomDataTable.vue';
+import SvgAsset from '@/components/SvgAsset.vue';
 
+const dataTable = ref<InstanceType<typeof CustomDataTable> | null>(null);
 const playerStore = usePlayerStore();
 const visible = ref(false);
 const playlist = computed(() => playerStore.playlist);
-const dataTable = ref<InstanceType<typeof DataTable> | null>(null);
 const isTransitionComplete = ref(false);
+
+const columns = [
+  { field: 'actions', header: '', width: '100px' },
+  { field: 'title', header: '标题', width: '200px' },
+  { field: 'artist', header: '艺术家' },
+  { field: 'platform', header: '来源', width: '120px' },
+  { field: 'remove', header: '', width: '60px' }
+];
 
 const clearPlaylist = () => {
   playerStore.clearPlaylist();
@@ -70,8 +77,8 @@ const removeFromPlaylist = (index: number) => {
   playerStore.removeFromPlaylist(index);
 };
 
-const onRowClick = (event: { data: IMusic.IMusicItem }) => {
-  playerStore.setCurrentTrackAndPlay(event.data);
+const onRowDoubleClick = (event: { item: IMusic.IMusicItem }) => {
+  playerStore.setCurrentTrackAndPlay(event.item);
 };
 
 const close = () => {
@@ -85,15 +92,8 @@ const isCurrentTrack = (track: IMusic.IMusicItem) => {
 const scrollToCurrentTrack = () => {
   if (playerStore.currentTrack && isTransitionComplete.value) {
     const index = playlist.value.findIndex(track => track.id === playerStore.currentTrack?.id);
-    if (index !== -1) {
-      nextTick(() => {
-        const tableBody = document.querySelector('.playlist-table .p-datatable-tbody');
-        const targetRow = tableBody?.children[index] as HTMLElement;
-        if (targetRow) {
-          targetRow.scrollIntoView({ behavior: 'auto', block: 'center' });
-        }
-      });
-    }
+    console.log('index', index);
+    dataTable.value?.scrollToIndex(index, { smooth: true, position: 'center' });
   }
 };
 
@@ -152,34 +152,15 @@ defineExpose({ visible });
   border-bottom: 1px solid #e9ecef;
 }
 
-.playlist-drawer-header h2 {
+.playlist-drawer-header h5 {
   margin: 0;
+  font-size: 16px;
 }
 
 .playlist-table {
-  flex-grow: 1;
-  overflow-y: auto;
-  scroll-behavior: smooth;
+  box-sizing: border-box;
+  /* margin: 0 1rem; */
   font-size: 14px;
-}
-
-.playlist-table :deep(.p-button) {
-  padding: 0.5rem;
-}
-
-.playlist-table :deep(.p-button-icon) {
-  font-size: 1rem;
-}
-
-.playlist-table :deep(.p-datatable-tbody > tr > td) {
-  padding: 0.5rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.playlist-table :deep(.p-datatable-thead) {
-  display: none;
 }
 
 .playing-track {
@@ -187,16 +168,20 @@ defineExpose({ visible });
 }
 
 .item-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
 }
 
 .source-tag {
-    background-color: #f0f0f0;
-    border-radius: 12px;
-    padding: 2px 8px;
-    font-size: 12px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.remove-icon {
+  cursor: pointer;
 }
 </style>
