@@ -15,8 +15,9 @@
         <div class="actions">
             <Button label="播放" icon="pi pi-play" class="p-button-rounded" @click="playAll" />
             <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined" @click="handleAddAll()" />
-            <Button label="收藏" icon="pi pi-heart" class="p-button-rounded p-button-outlined"
-                v-if="musicSheetType === MusicSheetType.Cloud" />
+            <Button label="收藏" :icon="isStarred ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                class="p-button-rounded p-button-outlined" v-if="musicSheetType === MusicSheetType.Cloud"
+                @click="handleStarMusicSheet" />
         </div>
     </div>
 </template>
@@ -24,11 +25,23 @@
 import { MusicSheetType } from '@/common/constant';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import dayjs from 'dayjs';
+import MusicSheet from '@/music-sheet';
+import { isSameMedia } from '@/common/media-util';
+import { computed } from 'vue';
 
-defineProps<{
+const starredMusicSheets = MusicSheet.frontend.useAllStarredSheets();
+
+const props = defineProps<{
     musicSheet: IMusic.IMusicSheetItem;
     musicSheetType: MusicSheetType;
+    platform?: string;
 }>();
+
+let isStarred = computed(() => {
+    return starredMusicSheets.value.find((item) =>
+        isSameMedia(props.musicSheet, item)
+    );
+});
 
 const emit = defineEmits(['playAll', 'addAll']);
 
@@ -43,6 +56,17 @@ const playAll = () => {
 
 const handleAddAll = () => {
     emit('addAll');
+};
+
+const handleStarMusicSheet = () => {
+    if (isStarred.value) {
+        MusicSheet.frontend.unstarMusicSheet(props.musicSheet);
+    } else {
+        const musicSheet = JSON.parse(JSON.stringify(props.musicSheet));
+        musicSheet.platform = props.platform;
+        delete musicSheet.musicList;
+        MusicSheet.frontend.starMusicSheet(musicSheet);
+    }
 };
 </script>
 

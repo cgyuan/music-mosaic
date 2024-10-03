@@ -1,5 +1,5 @@
 <template>
-    <div class="music-list-detail">
+    <div class="music-sheet-detail">
         <div class="header">
             <img :src="musicSheetItem.coverImg || musicSheetItem.artwork || albumCover" :alt="musicSheetItem.title"
                 class="cover-image">
@@ -196,7 +196,7 @@ watch(showPlaylistDialog, (newValue) => {
 </script>
 
 <style scoped>
-.music-list-detail {
+.music-sheet-detail {
     height: 100%;
     padding: 20px;
     overflow-y: auto;

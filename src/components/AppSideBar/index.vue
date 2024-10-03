@@ -16,26 +16,36 @@
                     <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
-                <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" />
+                <!-- <Button icon="pi pi-plus" text rounded severity="secondary" size="small" @click="showCreatePlaylistModal" /> -->
+                <SvgAsset iconName="plus" size="16" @click.stop="showCreatePlaylistModal" />
             </div>
             <SidebarItem v-if="isMusicSheetOpen"
                 v-for="item in musicSheets" 
                 :key="item.id" 
                 :icon="item.id === 'favorite' ? 'heart-outline' : 'musical-note'" 
                 :label="item.title" 
-                @click="handlePlaylistClick(item)" 
-                :active="isActive(`/playlist-detail/${item.id}`)" 
+                @click="handleMyMusicSheetClick(item)" 
+                :active="isActive(`/my-music-sheet-detail/${item.id}`)" 
                 @contextmenu="(event) => showContextMenu(event, item)" 
             />
         </div>
 
         <div class="sidebar-section">
-            <div class="section-header">
+            <div class="section-header" @click="toggleStaredMusicSheetSection">
                 <div class="section-label">
-                    <i class="pi pi-angle-right"></i>
+                    <i :class="isStaredMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的收藏</span>
                 </div>
             </div>
+            <SidebarItem 
+                v-if="isStaredMusicSheetOpen"
+                v-for="item in starredSheets" 
+                :key="item.id" icon="musical-note" 
+                :label="item.title"
+                :active="isActive(`/stared-music-sheet/${item.id}`)"
+                @contextmenu="(event) => showStaredContextMenu(event, item as IMusic.IDBMusicSheetItem)"
+                @click="handleStaredMusicSheetClick(item as IMusic.IDBMusicSheetItem)"
+            />
         </div>
     </div>
     <MusicSheetModal 
@@ -46,10 +56,11 @@
         @submit="handleMusicSheetSubmit" 
     />
     <ContextMenu :model="contextMenuItems" ref="contextMenu" />
+    <ContextMenu :model="staredContextMenuItems" ref="staredContextMenu" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
@@ -57,8 +68,10 @@ import { SvgAssetIconNames } from '../SvgAsset.vue';
 import MusicSheetModal from './MusicSheetModal.vue';
 import ContextMenu from 'primevue/contextmenu';
 import MusicSheet from '@/music-sheet';
+import { MusicSheetType } from '@/common/constant';
 
 const musicSheets = MusicSheet.frontend.useAllSheets();
+const starredSheets = MusicSheet.frontend.useAllStarredSheets();
 
 const route = useRoute();
 const router = useRouter();
@@ -67,6 +80,12 @@ const isEditingMusicSheet = ref(false);
 const isMusicSheetModalVisible = ref(false);
 
 let selectedMusicSheet = null as IMusic.IDBMusicSheetItem | null;
+
+watch(starredSheets, (newVal) => {
+    console.log(newVal);
+}, {
+    deep: true
+});
 
 const navMenus = [
     {
@@ -102,11 +121,26 @@ const navMenus = [
 ] as Array<{label: string, icon: SvgAssetIconNames, path: string}>;
 
 const isActive = (path: string) => {
-    return route.path === path;
+    return route.path.startsWith(path);
 };
 
-const handlePlaylistClick = (item: IMusic.IDBMusicSheetItem) => {
-    navigateTo(`/playlist-detail/${item.id}`);
+const handleMyMusicSheetClick = (item: IMusic.IDBMusicSheetItem) => {
+    navigateTo(`/my-music-sheet-detail/${item.id}`);
+};
+
+const handleStaredMusicSheetClick = (item: IMusic.IDBMusicSheetItem) => {
+    const data = JSON.stringify(item)
+    history.pushState({ item: data }, '')
+    router.push({
+        name: 'stared-music-sheet',
+        params: { 
+            id: item.id,
+            itemData: data
+        },
+        query: {
+            type: MusicSheetType.Cloud,
+        },
+    });
 };
 
 const navigateTo = (path: string) => {
@@ -153,10 +187,24 @@ const contextMenuItems = ref([
         icon: 'pi pi-trash',
         command: () => {
             if (selectedMusicSheet) {
-                if (route.path === `/playlist-detail/${selectedMusicSheet.id}`) {
-                    navigateTo('/playlist-detail/favorite');
+                if (route.path === `/my-music-sheet-detail/${selectedMusicSheet.id}`) {
+                    navigateTo('/my-music-sheet-detail/favorite');
                 }
                 MusicSheet.frontend.removeSheet(selectedMusicSheet.id);
+                selectedMusicSheet = null;
+            }
+        }
+    }
+]);
+
+const staredContextMenu = ref();
+const staredContextMenuItems = ref([
+    {
+        label: '取消收藏',
+        icon: 'pi pi-trash',
+        command: () => {
+            if (selectedMusicSheet) {
+                MusicSheet.frontend.unstarMusicSheet(selectedMusicSheet);
                 selectedMusicSheet = null;
             }
         }
@@ -171,9 +219,20 @@ const showContextMenu = (event: MouseEvent, item: IMusic.IDBMusicSheetItem) => {
     }
 };
 
+const showStaredContextMenu = (event: MouseEvent, item: IMusic.IDBMusicSheetItem) => {
+    event.preventDefault();
+    selectedMusicSheet = item;
+    staredContextMenu.value.show(event);
+};
+
 const isMusicSheetOpen = ref(true);
 const toggleMusicSheetSection = () => {
     isMusicSheetOpen.value = !isMusicSheetOpen.value;
+};
+
+const isStaredMusicSheetOpen = ref(true);
+const toggleStaredMusicSheetSection = () => {
+    isStaredMusicSheetOpen.value = !isStaredMusicSheetOpen.value;
 };
 </script>
 

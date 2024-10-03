@@ -1,6 +1,6 @@
 <template>
   <div class="sidebar-item" :class="{ active: active }">
-    <SvgAsset class="icon" :icon-name="icon"/>
+    <SvgAsset class="icon" :icon-name="icon" :size="18" />
     <span class="label">{{ label }}</span>
   </div>
 </template>
@@ -37,6 +37,10 @@ defineProps<{
 }
 
 .sidebar-item .label {
-    font-size: 14px;
+  flex: 1;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

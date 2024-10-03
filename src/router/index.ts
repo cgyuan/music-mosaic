@@ -38,14 +38,27 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Main/pages/RecentlyPlayed.vue')
       },
       {
-        path: '/music-list-detail',
-        name: 'music-list-detail',
-        component: () => import('@/views/Main/pages/CloudMusicSheet.vue')
+        path: '/music-sheet-detail/:id/:itemData',
+        name: 'music-sheet-detail',
+        component: () => import('@/views/Main/pages/CloudMusicSheet.vue'),
+        props: (route) => ({
+          id: route.params.id,
+          itemData: route.params.itemData
+        })
       },
       {
-        path: '/playlist-detail/:id',
-        name: 'playlist-detail',
+        path: '/my-music-sheet-detail/:id',
+        name: 'my-music-sheet-detail',
         component: () => import('@/views/Main/pages/LocalMusicSheet.vue')
+      },
+      {
+        path: '/stared-music-sheet/:id/:itemData',
+        name: 'stared-music-sheet',
+        component: () => import('@/views/Main/pages/CloudMusicSheet.vue'),
+        props: (route) => ({
+          id: route.params.id,
+          itemData: route.params.itemData
+        })
       }
     ]
   }

@@ -16,6 +16,12 @@ export const usePlayerStore = defineStore('player', () => {
         return (currentTime.value / duration.value) * 100;
     });
 
+    function init() {
+        if (currentTrack.value) {
+            setAudioSrc(currentTrack.value);
+        }
+    }
+
     function setCurrentTrack(track: IMusic.IMusicItem) {
         currentTrack.value = track;
     }
@@ -25,35 +31,37 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function setCurrentTrackAndPlay(track: IMusic.IMusicItem) {
-        console.log('setCurrentTrackAndPlay', track);
         setCurrentTrack(track);
-        if (track.url) {
-            setAudioSrc(track.url);
-            play();
-            return;
-        }
-        await fetchAndPlayTrack(track);
+        await setAudioSrc(track);
+        play();
     }
 
-    async function fetchAndPlayTrack(track: IMusic.IMusicItem) {
-        const currentPlugin = pluginStore.getCurrentPlugin();
-        if (currentPlugin && currentPlugin.getMediaSource) {
+
+    async function getMediaSource(track: IMusic.IMusicItem) {
+        if (track.url) {
+            return track.url;
+        }
+        const plugin = pluginStore.getPluginByPlatform(track.platform);
+        if (plugin && plugin.getMediaSource) {
             try {
-                const mediaSource = await currentPlugin.getMediaSource(track, 'standard');
+                const mediaSource = await plugin.getMediaSource(track, 'standard');
                 console.log('mediaSource', mediaSource);
                 if (mediaSource && mediaSource.url) {
-                    setAudioSrc(mediaSource.url);
-                    play();
+                    return mediaSource.url;
                 } else {
                     console.error('No valid media source found');
+                    return null;
                 }
             } catch (error) {
                 console.error('Error fetching media source:', error);
+                return null;
             }
         }
+        return null;
     }
 
-    function setAudioSrc(src: string) {
+    async function setAudioSrc(track: IMusic.IMusicItem) {
+        const src = await getMediaSource(track);
         if (!audioElement.value) {
             audioElement.value = new Audio();
             audioElement.value.addEventListener('timeupdate', () => {
@@ -66,7 +74,9 @@ export const usePlayerStore = defineStore('player', () => {
                 nextTrack();
             });
         }
-        audioElement.value.src = src;
+        if (src) {
+            audioElement.value.src = src;
+        }
     }
 
     function play() {
@@ -111,6 +121,7 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     return {
+        init,
         currentTrack,
         playlist,
         isPlaying,

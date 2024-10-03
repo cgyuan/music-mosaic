@@ -1,10 +1,16 @@
 <script setup lang="ts">
 import MusicSheet from './music-sheet';
-import { usePluginStore } from './store/pluginStore';
+import { usePlayerStore } from '@/store/playerStore';
+import { usePluginStore } from '@/store/pluginStore';
 
 const pluginStore = usePluginStore();
 pluginStore.$persistedState.isReady().then(() => {
     pluginStore.loadPlugins();
+});
+
+const playerStore = usePlayerStore();
+playerStore.$persistedState.isReady().then(() => {
+    playerStore.init();
 });
 
 MusicSheet.frontend.setupMusicSheets();

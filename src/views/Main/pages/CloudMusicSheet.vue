@@ -1,52 +1,45 @@
 <template>
-    <MusicSheetView :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :state="state" :musicSheetType="musicSheetType" />
+    <MusicSheetView :musicSheetItem="musicSheetItem" :platform="currentPlugin?.platform" :state="state"
+        :musicSheetType="musicSheetType" />
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import MusicSheetView from '@/components/MusicSheetView/index.vue';
 import { MusicSheetType, RequestStateCode } from '@/common/constant';
 
+const props = defineProps<{
+    id?: string;
+    itemData?: string;
+}>();
+
 const pluginStore = usePluginStore();
-const currentPlugin = computed(() => pluginStore.getCurrentPlugin());
 
 const state = ref(RequestStateCode.PENDING_FIRST_PAGE);
 
 const route = useRoute();
 
-let itemString = route.params.item as string;
 const musicSheetType = route.query.type as MusicSheetType;
-if (itemString) {
-    localStorage.setItem('music-list-item', itemString);
-} else {
-    itemString = localStorage.getItem('music-list-item') || '';
-}
-const musicSheetItem = ref(JSON.parse(itemString) as IMusic.IMusicSheetItem);
 
+const musicSheetItem = ref(JSON.parse(props.itemData as string) as IMusic.IMusicSheetItem);
+
+const currentPlugin = pluginStore.getPluginByPlatform(musicSheetItem.value.platform);
 
 onMounted(() => {
-    if (itemString) {
-        getMusicListDetail(1);
-    }
-});
-
-watch(() => currentPlugin.value, () => {
-    if (musicSheetItem) {
-        getMusicListDetail(1);
-    }
+    getMusicListDetail(1);
 });
 
 const getMusicListDetail = async (page: number) => {
-    if (currentPlugin.value && currentPlugin.value.getTopListDetail) {
+    if (currentPlugin && currentPlugin.getTopListDetail) {
         try {
             state.value = RequestStateCode.PENDING_FIRST_PAGE;
-            
-            const res = await currentPlugin.value.getTopListDetail(musicSheetItem.value, page);
+
+            const res = await currentPlugin.getTopListDetail(musicSheetItem.value, page);
             if (res.musicList) {
-                res.musicList= res.musicList.map(item => {
-                    item.platform = currentPlugin.value?.platform || '';
+                res.musicList = res.musicList.map(item => {
+                    item.platform = currentPlugin?.platform || '';
                     return item;
                 });
             }

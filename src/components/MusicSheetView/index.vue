@@ -1,9 +1,9 @@
 <template>
     <CustomDataTable :loading="state === RequestStateCode.PENDING_FIRST_PAGE" :value="musicSheetItem.musicList || []"
-        :columns="columns" keyField="id" :stripedRows="true" class="music-list-detail" :bufferSize="10"
+        :columns="columns" keyField="id" :stripedRows="true" class="music-sheet-detail" :bufferSize="10"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
-            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" />       
+            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll" @addAll="handleAddAll" :platform="platform" />       
         </template>
         <template #cell:actions="{ item }">
             <div class="item-actions">
@@ -20,7 +20,7 @@
             {{ formatDuration(item.duration) }}
         </template>
         <template #cell:platform="{ item }">
-            <span class="source-tag">{{ platform || item.platform }}</span>
+            <span class="source-tag">{{ item.platform ||platform }}</span>
         </template>
 
         <template #loading>
@@ -179,7 +179,7 @@ watch(showPlaylistDialog, (newValue) => {
 </script>
 
 <style scoped>
-.music-list-detail {
+.music-sheet-detail {
     height: 100%;
     padding: 20px;
     overflow-y: auto;

@@ -65,6 +65,10 @@ export const usePluginStore = defineStore('plugin', () => {
         return plugins.value.find(p => p.id === currentPluginId.value);
     }
 
+    function getPluginByPlatform(platform: string) {
+        return plugins.value.find(p => p.platform === platform);
+    }
+
     return {
         storedPlugins,
         plugins,
@@ -76,6 +80,7 @@ export const usePluginStore = defineStore('plugin', () => {
         setCurrentPluginId,
         getCurrentPlugin,
         loadPlugins,
+        getPluginByPlatform,
     };
 }, {
     persistedState: {

@@ -171,9 +171,13 @@ const loadMore = async () => {
 
 const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     console.log('item', item);
+    item.platform = activePlugin.value.platform;
     router.push({
-        name: 'music-list-detail',
-        params: { item: JSON.stringify(item) },
+        name: 'music-sheet-detail',
+        params: { 
+            id: item.id,
+            itemData: JSON.stringify(item) 
+        },
         query: {
             type: MusicSheetType.Cloud
         }
@@ -218,7 +222,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
 
 .playlist-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
     gap: 1rem;
 }
 

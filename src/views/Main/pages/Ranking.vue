@@ -106,9 +106,13 @@ const loadRanking = async () => {
 };
 
 const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
+    item.platform = activePlugin.value.platform;
     router.push({
-        name: 'music-list-detail',
-        params: { item: JSON.stringify(item) },
+        name: 'music-sheet-detail',
+        params: {
+            id: item.id,
+            itemData: JSON.stringify(item) 
+        },
         query: {
             type: MusicSheetType.Ranking
         }
@@ -144,7 +148,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
 
 .ranking-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
     gap: 1rem;
 }
 
