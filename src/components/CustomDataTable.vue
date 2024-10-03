@@ -1,11 +1,11 @@
 <template>
     <div class="custom-datatable" ref="containerRef" @scroll="onScroll">
         <div class="content">
-            <div class="header">
+            <div class="header" v-if="showHeader">
                 <slot name="header" />
             </div>
             <table :class="{ 'striped': stripedRows }">
-                <thead>
+                <thead v-if="showHeader">
                     <tr>
                         <th v-for="column in columns" :key="column.field" :style="getColumnStyle(column)">
                             {{ column.header }}
@@ -57,6 +57,11 @@ interface Column {
     width?: string | number;
 }
 
+interface ScrollOptions {
+    smooth?: boolean;
+    position?: 'start' | 'center' | 'end';
+}
+
 const props = defineProps<{
     value: any[];
     columns: Column[];
@@ -64,6 +69,7 @@ const props = defineProps<{
     bufferSize?: number;
     stripedRows?: boolean;
     loading?: boolean;
+    showHeader?: boolean;
 }>();
 
 const emit = defineEmits(['row-dblclick', 'row-contextmenu']);
@@ -180,6 +186,7 @@ function updateVisibleRange() {
 
 // Watch for changes in value (data)
 watch(() => props.value.length, () => {
+    rowHeights.value = [];
     updateVisibleRange();
 });
 
@@ -208,6 +215,49 @@ function onRowContextMenu(item: any, event: MouseEvent) {
 function getColumnStyle(column: Column) {
     return column.width ? { width: typeof column.width === 'number' ? `${column.width}px` : column.width } : {};
 }
+
+const showHeader = computed(() => props.showHeader !== undefined ? props.showHeader : true);
+
+function scrollToIndex(index: number, options: ScrollOptions = {}) {
+    if (index < 0 || index >= props.value.length) {
+        console.warn('Invalid index');
+        return;
+    }
+
+    const { smooth = false, position = 'start' } = options;
+
+    const offset = rowHeights.value
+        .slice(0, index)
+        .reduce((sum, height) => sum + (height || estimatedRowHeight), 0);
+
+    if (containerRef.value) {
+        let targetScrollTop = offset;
+
+        if (position === 'center') {
+            const containerHeight = containerRef.value.clientHeight;
+            const rowHeight = rowHeights.value[index] || estimatedRowHeight;
+            targetScrollTop = offset - (containerHeight / 2) + (rowHeight / 2);
+        } else if (position === 'end') {
+            const containerHeight = containerRef.value.clientHeight;
+            const rowHeight = rowHeights.value[index] || estimatedRowHeight;
+            targetScrollTop = offset - containerHeight + rowHeight;
+        }
+
+        targetScrollTop = Math.max(0, Math.min(targetScrollTop, totalHeight.value - containerRef.value.clientHeight));
+
+        if (smooth) {
+            containerRef.value.scrollTo({
+                top: targetScrollTop,
+                behavior: 'smooth'
+            });
+        } else {
+            containerRef.value.scrollTop = targetScrollTop;
+        }
+    }
+}
+
+// Expose the method to parent components
+defineExpose({ scrollToIndex });
 </script>
 
 <style scoped>
@@ -251,6 +301,7 @@ thead {
     top: 0;
     background-color: #f4f4f4;
     z-index: 1;
+    display: contents;  /* This allows the header to scroll with the content */
 }
 
 th,
