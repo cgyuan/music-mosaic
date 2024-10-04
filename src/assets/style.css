@@ -26,3 +26,7 @@ body {
     margin: 0;
     overflow: hidden;
 }
+
+.p-chip-label {
+    font-size: 14px;
+}

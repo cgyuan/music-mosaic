@@ -1,15 +1,39 @@
 <template>
-    <div class="popular-playlists">
+    <div class="popular-music-sheet">
         <div class="plugin-tabs">
             <TabMenu :model="tabMenuItems" :activeIndex="activePluginIndex" @tab-change="onTabChange" />
         </div>
         <div class="recommend-tags">
             <div class="tag-container">
+                <Chip class="first-tag" :class="{ 
+                    'selected': isFromPopover,
+                    'show-popover': popover?.visible
+                 }" :label="defaultTagText" @click="toggle">
+                </Chip>
                 <Chip v-for="tag in recommendTags" :key="tag.id" :label="tag.title" @click="selectTag(tag)"
-                    :class="{ 'selected': selectedTag?.id === tag.id }" />
+                    :class="{ 'selected': selectedTag?.id === tag.id && !isFromPopover }" />
             </div>
         </div>
-
+        <Popover ref="popover">
+            <div class="tag-popover-content">
+                <div class="tag-popover-scroll">
+                    <Chip label="默认" class="default-tag" @click="selectTag({
+                        title: '默认',
+                        id: '',
+                        platform: activePlugin.platform
+                    }, true)" :class="{ 'selected': selectedTag?.id === '' }"/>
+                    <template v-for="(category, index) in allTags" :key="index">
+                        <h3>{{ category.title }}</h3>
+                        <div class="tag-grid">
+                            <Chip v-for="tag in category.data" :key="tag.id" 
+                                :label="tag.title" 
+                                @click="selectTag(tag, true)"
+                                :class="{ 'selected': selectedTag?.id === tag.id }" />
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </Popover>
         <div class="recommend-sheets" ref="recommendSheetsRef" @scroll="handleScroll">
             <DataView :value="recommendSheets" :layout="'grid'" :rows="10">
                 <template #grid="slotProps">
@@ -52,18 +76,25 @@ import { storeToRefs } from 'pinia';
 import BottomLoadingState from '@/components/BottomLoadingState.vue';
 import { MusicSheetType, RequestStateCode } from '@/common/constant';
 import router from '@/router';
+import Popover from 'primevue/popover';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
 
 const activePluginIndex = ref(0);
 const recommendTags = ref<IMusic.IMusicSheetItem[]>([]);
-const selectedTag = ref<IMusic.IMusicSheetItem | null>(null);
+const allTags = ref<IMusic.IMusicSheetGroupItem[]>([]);
+const selectedTag = ref<IMusic.IMusicSheetItem | null>();
 const recommendSheets = ref<IMusic.IMusicSheetItem[]>([]);
 const recommendSheetsRef = ref<HTMLElement | null>(null);
 const isLoading = ref(false);
 const hasMore = ref(true);
 const page = ref(1);
+
+const defaultTagText = ref('默认');
+const isFromPopover = ref(true);
+
+const popover = ref<InstanceType<typeof Popover> | null>(null);
 
 const bottomLoadingState = ref(RequestStateCode.PENDING_REST_PAGE);
 
@@ -90,6 +121,10 @@ watch(supportPlugins, async (newVal, oldVal) => {
     }
 });
 
+const toggle = (event: MouseEvent) => {
+    popover.value?.toggle(event);
+}
+
 onMounted(async () => {
     if (activePlugin.value) {
         await loadRecommendTags();
@@ -98,6 +133,13 @@ onMounted(async () => {
 });
 
 const onTabChange = async (event: { index: number }) => {
+    isFromPopover.value = true;
+    defaultTagText.value = '默认';
+    selectedTag.value = {
+        title: '默认',
+        id: '',
+        platform: activePlugin.value.platform
+    };
     activePluginIndex.value = event.index;
     pluginStore.setCurrentPluginId(activePlugin.value.id!!);
     await loadRecommendTags();
@@ -109,10 +151,12 @@ const loadRecommendTags = async () => {
         try {
             const result = await activePlugin.value.getRecommendSheetTags();
             recommendTags.value = result.pinned || [];
-            if (recommendTags.value.length > 0) {
-                selectedTag.value = recommendTags.value[0];
-            }
-            console.log('recommendTags', recommendTags.value);
+            allTags.value = result.data || [];
+            selectedTag.value = {
+                title: '默认',
+                id: '',
+                platform: activePlugin.value.platform
+            };
         } catch (error) {
             console.error(error);
         }
@@ -140,7 +184,12 @@ const loadRecommendSheets = async (page: number = 1) => {
     }
 };
 
-const selectTag = async (tag: IMusic.IMusicSheetItem) => {
+const selectTag = async (tag: IMusic.IMusicSheetItem, fromPopover: boolean = false) => {
+    if (fromPopover) {
+        defaultTagText.value = tag.title;
+        popover.value?.hide();
+    }
+    isFromPopover.value = fromPopover;
     selectedTag.value = tag;
     page.value = 1;
     await loadRecommendSheets();
@@ -186,7 +235,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
 </script>
 
 <style scoped>
-.popular-playlists {
+.popular-music-sheet {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -202,6 +251,22 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     margin-bottom: 1rem;
     overflow: visible;
     /* Ensure no horizontal scrollbar appears */
+}
+
+.first-tag::after {
+    content: "";
+    display: block;
+    width: 0;
+    height: 0;
+    margin-left: 0.2rem;
+    border: 4px solid transparent;
+    border-left-color: currentColor;
+    transform-origin: left center;
+    transition: transform linear 100ms;
+}
+
+.first-tag.show-popover::after {
+    transform: rotate(90deg);
 }
 
 .tag-container {
@@ -299,4 +364,64 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     color: #fff;
 }
 
+.tag-popover-content {
+    width: 400px;
+    max-height: 400px;
+    padding-right: 6px;
+}
+
+.tag-popover-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 1rem;
+    padding-right: calc(1rem - 6px);
+    margin-right: -6px;
+}
+
+.tag-popover-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tag-popover-scroll::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 3px;
+}
+
+.tag-popover-scroll::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+.tag-popover-content h3 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+.tag-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.default-tag {
+    background-color: #f0f0f0;
+    color: #333;
+}
+</style>
+
+<style>
+.p-popover:before,
+.p-popover:after {
+    display: none !important;
+}
+.p-popover {
+    margin-top: 10px !important;
+    padding: 0 !important;
+}
+
+.p-popover-content {
+    padding: 0 !important;
+}
 </style>

@@ -10,6 +10,7 @@ import Aura from '@primevue/themes/aura';
 import "primeicons/primeicons.css";
 import { definePreset } from "@primevue/themes";
 import { indexedDBStorage } from "./utils/indexedDBStorage";
+import Chip from "primevue/chip";
 
 const app = createApp(App);
 
@@ -44,7 +45,14 @@ const MyPreset = definePreset(Aura, {
             950: '{indigo.950}'
         },
         formField: {
-            borderRadius: '9999px'
+            borderRadius: '9999px',
+            paddingX: '0.5rem',
+            paddingY: '0.5rem',
+        },
+    },
+    components: {
+        chip: {
+            paddingY: '0.2rem',
         }
     }
 });
