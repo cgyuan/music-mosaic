@@ -45,4 +45,7 @@ declare module 'vue' {
     SwitchCase: typeof import('./src/components/SwitchCase.vue')['default']
     TabMenu: typeof import('primevue/tabmenu')['default']
   }
+  export interface ComponentCustomProperties {
+    Tooltip: typeof import('primevue/tooltip')['default']
+  }
 }

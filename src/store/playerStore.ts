@@ -16,9 +16,28 @@ export const usePlayerStore = defineStore('player', () => {
         return (currentTime.value / duration.value) * 100;
     });
 
+    const volumeValue = ref(1); // Default volume is 1 (100%)
+
+    const volume = computed({
+        get: () => volumeValue.value,
+        set: (value) => {
+            volumeValue.value = value;
+            if (audioElement.value) {
+                audioElement.value.volume = value;
+            }
+        }
+    });
+
+    function setVolume(value: number) {
+        volume.value = value;
+    }
+
     function init() {
         if (currentTrack.value) {
             setAudioSrc(currentTrack.value);
+        }
+        if (audioElement.value) {
+            audioElement.value.volume = volumeValue.value;
         }
     }
 
@@ -79,6 +98,15 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
+    function setPlayNext(track: IMusic.IMusicItem) {
+        const currentIndex = playlist.value.findIndex(track => track.id === currentTrack.value?.id);
+        if (currentIndex < playlist.value.length - 1) {
+            playlist.value.splice(currentIndex + 1, 0, track);
+        } else {
+            playlist.value.push(track);
+        }
+    }
+
     function play() {
         audioElement.value?.play();
         isPlaying.value = true;
@@ -127,10 +155,13 @@ export const usePlayerStore = defineStore('player', () => {
         isPlaying,
         currentTime,
         duration,
+        volume,
         progress,
         setCurrentTrack,
         setPlaylist,
         setCurrentTrackAndPlay,
+        setPlayNext,
+        setVolume,
         play,
         pause,
         seek,

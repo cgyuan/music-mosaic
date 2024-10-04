@@ -1,6 +1,6 @@
 <template>
     <div class="now-playing">
-        <Slider v-model="progress" class="progress-slider" @change="onProgressChange" />
+        <Slider v-model="progress" class="progress-slider"/>
         <div class="content">
             <div class="left-section">
                 <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg" :alt="currentTrack?.title">
@@ -21,7 +21,13 @@
                 </div>
             </div>
             <div class="right-section">
-                <Button icon="pi pi-volume-up" text rounded />
+                <div class="volume-control" @mouseenter="showVolumePopover" @mouseleave="hideVolumePopover">
+                    <Button icon="pi pi-volume-up" text rounded  />
+                    <div v-if="isVolumePopoverVisible" class="volume-popover">
+                        <Slider v-model="volume" orientation="vertical" :min="0" :max="1" :step="0.01" />
+                        <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
+                    </div>
+                </div>
                 <Button icon="pi pi-file-edit" text rounded />
                 <Button icon="pi pi-sync" text rounded />
                 <Button icon="pi pi-list" text rounded @click="showPlaylist" />
@@ -31,17 +37,20 @@
 </template>
 
 <script setup lang="ts">
-import { inject, Ref, computed } from 'vue';
+import { inject, Ref, computed, ref } from 'vue';
 import { usePlayerStore } from '@/store/playerStore';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
 import PlaylistDrawer from '@/components/PlaylistDrawer.vue';
-const playerStore = usePlayerStore();
+import { storeToRefs } from 'pinia';
 
+const playerStore = usePlayerStore();
+const { volume } = storeToRefs(playerStore);
 const progress = computed({
     get: () => playerStore.progress,
     set: (value) => playerStore.seek(value)
 });
+
 
 const currentTrack = computed(() => playerStore.currentTrack);
 const isPlaying = computed(() => playerStore.isPlaying);
@@ -64,10 +73,6 @@ const nextTrack = () => {
     playerStore.nextTrack();
 };
 
-const onProgressChange = (value: number) => {
-    playerStore.seek(value);
-};
-
 const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
@@ -81,6 +86,17 @@ const showPlaylist = () => {
         playlistDrawer.value.visible = true;
     }
 };
+
+const isVolumePopoverVisible = ref(false);
+
+const showVolumePopover = () => {
+    isVolumePopoverVisible.value = true;
+};
+
+const hideVolumePopover = () => {
+    isVolumePopoverVisible.value = false;
+};
+
 </script>
 
 <style scoped>
@@ -187,8 +203,8 @@ const showPlaylist = () => {
     transition: height 0.15s ease;
 }
 
-:deep(.p-slider:hover),
-:deep(.p-slider.dragging) {
+:deep(.progress-slider.p-slider:hover),
+:deep(.progress-slider.p-slider.dragging) {
     height: 4px;
 }
 
@@ -196,11 +212,12 @@ const showPlaylist = () => {
     background: #ff5722;
 }
 
-:deep(.p-slider-handle) {
+.progress-slider :deep(.p-slider-handle) {
     display: none;
 }
 
-:deep(.p-slider:hover .p-slider-handle) {
+:deep(.progress-slider.p-slider:hover .p-slider-handle),
+:deep(.progress-slider.p-slider.dragging .p-slider-handle) {
     display: block;
     cursor: default;
     opacity: 1;
@@ -224,12 +241,43 @@ const showPlaylist = () => {
 :deep(.p-slider.p-component) {
     padding: 0;
 }
+
+.volume-control {
+    position: relative;
+}
+
+.volume-popover {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 50px;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 0.5rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.volume-popover label {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+:deep(.p-slider-vertical) {
+    height: 100px;
+    margin-top: 0.5rem;
+}
 </style>
 
 <script lang="ts">
 export default {
     mounted() {
-        const slider = this.$el.querySelector('.p-slider');
+        const slider = this.$el.querySelector('.progress-slider');
         if (slider) {
             slider.addEventListener('mousedown', () => slider.classList.add('dragging'));
             document.addEventListener('mouseup', () => slider.classList.remove('dragging'));

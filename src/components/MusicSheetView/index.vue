@@ -1,6 +1,7 @@
 <template>
     <CustomDataTable :loading="state === RequestStateCode.PENDING_FIRST_PAGE" :value="musicSheetItem.musicList || []"
         :columns="columns" keyField="id" :stripedRows="true" class="music-sheet-detail" :bufferSize="10"
+        :show-header="true"
         @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
         <template #header>
             <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="playAll"
@@ -83,7 +84,7 @@ const contextMenuItems = ref([
         icon: 'pi pi-play',
         command: () => {
             if (selectedTrack.value) {
-                // playerStore.addNextTrack(selectedTrack.value);
+                playerStore.setPlayNext(selectedTrack.value);
             }
         }
     },
