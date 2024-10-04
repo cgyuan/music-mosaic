@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { usePluginStore } from './pluginStore';
+import { RepeatMode } from '@/components/NowPlaying/enum';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -54,7 +55,6 @@ export const usePlayerStore = defineStore('player', () => {
         await setAudioSrc(track);
         play();
     }
-
 
     async function getMediaSource(track: IMusic.IMusicItem) {
         if (track.url) {
@@ -125,18 +125,52 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function nextTrack() {
+        if (repeatMode.value === RepeatMode.Loop) {
+            // For single track loop, just restart the current track
+            if (audioElement.value) {
+                audioElement.value.currentTime = 0;
+                await play();
+            }
+            return;
+        }
+
         const currentIndex = playlist.value.findIndex(track => track.id === currentTrack.value?.id);
+        let nextTrack: IMusic.IMusicItem | undefined;
+
         if (currentIndex < playlist.value.length - 1) {
-            const nextTrack = playlist.value[currentIndex + 1];
+            nextTrack = playlist.value[currentIndex + 1];
+        } else if (repeatMode.value === RepeatMode.Queue) {
+            // If we're at the end of the queue, start over
+            nextTrack = playlist.value[0];
+        }
+
+        if (nextTrack) {
             await setCurrentTrackAndPlay(nextTrack);
+        } else {
+            // If there's no next track and we're not repeating, stop playback
+            pause();
         }
     }
 
     async function previousTrack() {
         const currentIndex = playlist.value.findIndex(track => track.id === currentTrack.value?.id);
+        let prevTrack: IMusic.IMusicItem | undefined;
+
         if (currentIndex > 0) {
-            const prevTrack = playlist.value[currentIndex - 1];
+            prevTrack = playlist.value[currentIndex - 1];
+        } else if (repeatMode.value !== RepeatMode.Loop) {
+            // If we're at the start of the queue, go to the last track
+            prevTrack = playlist.value[playlist.value.length - 1];
+        }
+
+        if (prevTrack) {
             await setCurrentTrackAndPlay(prevTrack);
+        } else {
+            // If there's no previous track and we're not repeating, restart the current track
+            if (audioElement.value) {
+                audioElement.value.currentTime = 0;
+                await play();
+            }
         }
     }
 
@@ -146,6 +180,26 @@ export const usePlayerStore = defineStore('player', () => {
 
     function removeFromPlaylist(index: number) {
         playlist.value.splice(index, 1);
+    }
+
+    const repeatMode = ref<RepeatMode>(RepeatMode.Queue);
+
+    function setRepeatMode(mode: RepeatMode) {
+        repeatMode.value = mode;
+        if (mode === RepeatMode.Shuffle) {
+            shufflePlaylist();
+        }
+    }
+
+    function shufflePlaylist() {
+        playlist.value = [...playlist.value].sort(() => Math.random() - 0.5);
+    }
+
+    function addToPlaylist(track: IMusic.IMusicItem) {
+        playlist.value.push(track);
+        if (repeatMode.value === RepeatMode.Shuffle) {
+            shufflePlaylist();
+        }
     }
 
     return {
@@ -169,5 +223,8 @@ export const usePlayerStore = defineStore('player', () => {
         previousTrack,
         clearPlaylist,
         removeFromPlaylist,
+        repeatMode,
+        setRepeatMode,
+        addToPlaylist,
     };
 });

@@ -1,9 +1,10 @@
 <template>
     <div class="now-playing">
-        <Slider v-model="progress" class="progress-slider"/>
+        <Slider v-model="progress" class="progress-slider" />
         <div class="content">
             <div class="left-section">
-                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg" :alt="currentTrack?.title">
+                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg"
+                    :alt="currentTrack?.title">
                 <div class="song-details">
                     <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
                     <div class="artist-and-time">
@@ -16,20 +17,25 @@
             <div class="center-section">
                 <div class="playback-controls">
                     <Button icon="pi pi-step-backward" text rounded @click="previousTrack" />
-                    <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button" @click="togglePlay" />
+                    <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button"
+                        @click="togglePlay" />
                     <Button icon="pi pi-step-forward" text rounded @click="nextTrack" />
                 </div>
             </div>
             <div class="right-section">
                 <div class="volume-control" @mouseenter="showVolumePopover" @mouseleave="hideVolumePopover">
-                    <Button icon="pi pi-volume-up" text rounded  />
+                    <Button icon="pi pi-volume-up" text rounded />
                     <div v-if="isVolumePopoverVisible" class="volume-popover">
                         <Slider v-model="volume" orientation="vertical" :min="0" :max="1" :step="0.01" />
                         <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
                     </div>
                 </div>
-                <Button icon="pi pi-file-edit" text rounded />
-                <Button icon="pi pi-sync" text rounded />
+                <Button text rounded>
+                    <SvgAsset iconName="lyric" :size="22" />
+                </Button>
+                <Button text rounded @click="toggleRepeatMode">
+                    <SvgAsset :iconName="repeatModeIcon" :size="22" />
+                </Button>
                 <Button icon="pi pi-list" text rounded @click="showPlaylist" />
             </div>
         </div>
@@ -43,6 +49,8 @@ import Button from 'primevue/button';
 import Slider from 'primevue/slider';
 import PlaylistDrawer from '@/components/PlaylistDrawer.vue';
 import { storeToRefs } from 'pinia';
+import { RepeatMode } from './enum';
+import SvgAsset from '../SvgAsset.vue';
 
 const playerStore = usePlayerStore();
 const { volume } = storeToRefs(playerStore);
@@ -50,7 +58,6 @@ const progress = computed({
     get: () => playerStore.progress,
     set: (value) => playerStore.seek(value)
 });
-
 
 const currentTrack = computed(() => playerStore.currentTrack);
 const isPlaying = computed(() => playerStore.isPlaying);
@@ -95,6 +102,21 @@ const showVolumePopover = () => {
 
 const hideVolumePopover = () => {
     isVolumePopoverVisible.value = false;
+};
+
+const repeatModeIcon = computed(() => {
+    switch (playerStore.repeatMode) {
+        case RepeatMode.Shuffle: return 'shuffle';
+        case RepeatMode.Queue: return 'repeat-song-1';
+        case RepeatMode.Loop: return 'repeat-song';
+    }
+});
+
+const toggleRepeatMode = () => {
+    const modes = [RepeatMode.Queue, RepeatMode.Loop, RepeatMode.Shuffle];
+    const currentIndex = modes.indexOf(playerStore.repeatMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    playerStore.setRepeatMode(modes[nextIndex]);
 };
 
 </script>
