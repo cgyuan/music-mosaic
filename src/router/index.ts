@@ -28,9 +28,9 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Main/pages/LocalMusic.vue')
       },
       {
-        path: '/poppular',
-        name: 'popular-playlists',
-        component: () => import('@/views/Main/pages/PopularPlaylists.vue')
+        path: '/popular-music-sheets',
+        name: 'popular-music-sheets',
+        component: () => import('@/views/Main/pages/PopMusicSheets.vue')
       },
       {
         path: '/recent',

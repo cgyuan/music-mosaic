@@ -61,7 +61,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import Button from 'primevue/button';
 import SidebarItem from './SidebarItem.vue';
 import { SvgAssetIconNames } from '../SvgAsset.vue';
 import MusicSheetModal from './MusicSheetModal.vue';
@@ -95,7 +94,7 @@ const navMenus = [
     {
         label: '热门歌单',
         icon: 'fire',
-        path: '/poppular'
+        path: '/popular-music-sheets'
     },
     {
         label: '下载管理',
