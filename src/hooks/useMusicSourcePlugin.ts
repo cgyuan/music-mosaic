@@ -5,7 +5,7 @@ import qs from "qs";
 import * as cheerio from "cheerio";
 import he from "he";
 import { nanoid } from "nanoid";
-import { fetch, ResponseType, HttpOptions, HttpVerb } from '@tauri-apps/api/http';
+import { fetch, ResponseType, HttpOptions, HttpVerb, Body } from '@tauri-apps/api/http';
 import { validatePlugin } from "@/utils/pluginValidator";
 import { invoke } from '@tauri-apps/api/tauri';
 
@@ -32,43 +32,32 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             options = { ...urlOrConfig, method };
         }
 
+
         // Set response type to Text to handle JSONP
         options.responseType = ResponseType.Text;
         
-        // Handle query params
-        if ('params' in options && options.params) {
-            url += '?' + qs.stringify(options.params);
+        // Handle query params for GET requests
+        if (method === 'GET' && 'params' in options && options.params) {
+            options.query = Object.entries(options.params).reduce((acc, [key, value]) => {
+                acc[key] = String(value);
+                return acc;
+            }, {} as Record<string, string>);
+            delete options.params;
         }
 
-        // Handle data property for POST requests
+        // Handle data for POST requests
         if (method === 'POST' && 'data' in options) {
-            options.headers = {
-                ...options.headers,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            };
-            
             if (typeof options.data === 'string') {
-                // If data is already a string, wrap it in the expected format
-                options.body = { type: "Text", payload: options.data };
+                options.body = Body.text(options.data);
             } else if (typeof options.data === 'object' && options.data !== null) {
-                console.log('options.data', options.data);
-                // If data is an object, convert it to a URL-encoded string and wrap it
-                const formData = Object.entries(options.data as Record<string, unknown>)
-                    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
-                    .join('&');
-                options.body = { type: "Text", payload: formData };
-            } else {
-                // Handle other types of data or throw an error
-                throw new Error('Unsupported data type for POST request');
+                options.body = Body.json(options.data);
             }
-            
             delete options.data;
         }
 
-        console.log('options', options);
+        console.log('Fetch request:', { url, options });
 
-
-        if (url.startsWith('https://api.bilibili.com') || url.startsWith('http://kbangserver.kuwo.cn')) {
+        if (url.startsWith('https://api.bilibili.com')) {
             const response = await invoke('http_request', {
                 method: options.method,
                 url,
@@ -78,22 +67,30 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
             return { data: JSON.parse(response as string), status: 200, headers: {} };
         }
 
-        const response = await fetch(url, options);
+        try {
+            const response = await fetch(url, options);
+            console.log('Fetch response:', response);
 
-        // Parse JSONP or JSON response
-        let data;
-        if (typeof response.data === 'string') {
-            try {
-                data = JSON.parse(response.data);
-            } catch (error) {
+            // Parse response
+            let data;
+            if (typeof response.data === 'string') {
+                try {
+                    data = JSON.parse(response.data);
+                } catch (error) {
+                    console.log('Response is not JSON, returning as string');
+                    data = response.data;
+                }
+            } else {
                 data = response.data;
             }
-           
-        } else {
-            data = response.data;
-        }
 
-        return { data, status: response.status, headers: response.headers };
+            console.log('Parsed data:', data);
+
+            return { data, status: response.status, headers: response.headers };
+        } catch (error) {
+            console.error('Fetch error:', error);
+            throw error;
+        }
     };
 };
 

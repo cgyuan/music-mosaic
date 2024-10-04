@@ -15,7 +15,8 @@ export const usePluginStore = defineStore('plugin', () => {
     const storedPlugins = ref<StoredPlugin[]>([]);
     const plugins = ref<IPlugin.IPluginInstance[]>([]);
     const currentPluginId = ref<string | null>(null);
-    const { parsePlugin } = useMusicSourcePlugin()
+    const activePluginIndex = ref<number>(0);
+    const { parsePlugin } = useMusicSourcePlugin();
 
     function loadPlugins() {
         plugins.value = storedPlugins.value.map(p => {
@@ -73,6 +74,7 @@ export const usePluginStore = defineStore('plugin', () => {
         storedPlugins,
         plugins,
         currentPluginId,
+        activePluginIndex,
         addPlugin,
         removePlugin,
         updatePlugin,

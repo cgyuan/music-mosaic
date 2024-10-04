@@ -67,6 +67,11 @@ import MusicSheetModal from './MusicSheetModal.vue';
 import ContextMenu from 'primevue/contextmenu';
 import MusicSheet from '@/music-sheet';
 import { MusicSheetType } from '@/common/constant';
+import { usePluginStore } from '@/store/pluginStore';
+import { storeToRefs } from 'pinia';
+
+const pluginStore = usePluginStore();
+const { activePluginIndex } = storeToRefs(pluginStore);
 
 const musicSheets = MusicSheet.frontend.useAllSheets();
 const starredSheets = MusicSheet.frontend.useAllStarredSheets();
@@ -142,6 +147,7 @@ const handleStaredMusicSheetClick = (item: IMusic.IDBMusicSheetItem) => {
 };
 
 const navigateTo = (path: string) => {
+    activePluginIndex.value = 0;
     router.push(path);
 };
 

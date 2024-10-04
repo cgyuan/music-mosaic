@@ -32,25 +32,54 @@ onMounted(() => {
 });
 
 const getMusicListDetail = async (page: number) => {
-    if (currentPlugin && currentPlugin.getTopListDetail) {
-        try {
-            state.value = RequestStateCode.PENDING_FIRST_PAGE;
+    if (musicSheetType === MusicSheetType.Ranking) {
+        if (currentPlugin && currentPlugin.getTopListDetail) {
+            try {
+                state.value = RequestStateCode.PENDING_FIRST_PAGE;
 
-            const res = await currentPlugin.getTopListDetail(musicSheetItem.value, page);
-            if (res.musicList) {
-                res.musicList = res.musicList.map(item => {
-                    item.platform = currentPlugin?.platform || '';
-                    return item;
-                });
+                const res = await currentPlugin.getTopListDetail(musicSheetItem.value, page);
+                if (res.musicList) {
+                    res.musicList = res.musicList.map(item => {
+                        item.platform = currentPlugin?.platform || '';
+                        return item;
+                    });
+                }
+                musicSheetItem.value = {
+                    ...musicSheetItem.value,
+                    ...res,
+                };
+                console.log('musicSheetItem', musicSheetItem.value, res)
+            } catch (error) {
+                console.error('Error fetching music list detail:', error);
+            } finally {
+                state.value = RequestStateCode.FINISHED;
             }
-            musicSheetItem.value = res as IMusic.IMusicSheetItem;
-            console.log('musicSheetItem', musicSheetItem.value, res)
-        } catch (error) {
-            console.error('Error fetching music list detail:', error);
-        } finally {
-            state.value = RequestStateCode.FINISHED;
+        }
+    } else if (musicSheetType === MusicSheetType.Cloud) {
+        if (currentPlugin && currentPlugin.getMusicSheetInfo) {
+            try {
+                state.value = RequestStateCode.PENDING_FIRST_PAGE;
+
+                const res = await currentPlugin.getMusicSheetInfo(musicSheetItem.value, page);
+                if (res && res.musicList) {
+                    res.musicList = res.musicList.map(item => {
+                        item.platform = currentPlugin?.platform || '';
+                        return item;
+                    });
+                }
+                musicSheetItem.value = {
+                    ...musicSheetItem.value,
+                    ...res,
+                };
+                console.log('musicSheetItem', musicSheetItem.value, res)
+            } catch (error) {
+                console.error('Error fetching music list detail:', error);
+            } finally {
+                state.value = RequestStateCode.FINISHED;
+            }
         }
     }
+
 };
 
 </script>

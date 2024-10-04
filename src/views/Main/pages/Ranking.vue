@@ -46,9 +46,7 @@ import router from '@/router';
 import { MusicSheetType } from '@/common/constant';
 
 const pluginStore = usePluginStore();
-const { plugins } = storeToRefs(pluginStore);
-
-const activePluginIndex = ref(0);
+const { plugins, activePluginIndex } = storeToRefs(pluginStore);
 
 const rankingLists = ref<IMusic.IMusicSheetGroupItem[]>([]);
 const rankingListsRef = ref<HTMLElement | null>(null);

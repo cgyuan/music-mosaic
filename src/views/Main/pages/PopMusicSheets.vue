@@ -79,9 +79,8 @@ import router from '@/router';
 import Popover from 'primevue/popover';
 
 const pluginStore = usePluginStore();
-const { plugins } = storeToRefs(pluginStore);
+const { plugins, activePluginIndex } = storeToRefs(pluginStore);
 
-const activePluginIndex = ref(0);
 const recommendTags = ref<IMusic.IMusicSheetItem[]>([]);
 const allTags = ref<IMusic.IMusicSheetGroupItem[]>([]);
 const selectedTag = ref<IMusic.IMusicSheetItem | null>();
