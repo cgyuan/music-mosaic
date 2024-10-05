@@ -37,9 +37,6 @@ export const usePlayerStore = defineStore('player', () => {
         if (currentTrack.value) {
             setAudioSrc(currentTrack.value);
         }
-        if (audioElement.value) {
-            audioElement.value.volume = volumeValue.value;
-        }
     }
 
     function setCurrentTrack(track: IMusic.IMusicItem) {
@@ -83,6 +80,7 @@ export const usePlayerStore = defineStore('player', () => {
         const src = await getMediaSource(track);
         if (!audioElement.value) {
             audioElement.value = new Audio();
+            audioElement.value.volume = volumeValue.value;
             audioElement.value.addEventListener('timeupdate', () => {
                 currentTime.value = audioElement.value?.currentTime || 0;
             });
@@ -91,6 +89,12 @@ export const usePlayerStore = defineStore('player', () => {
             });
             audioElement.value.addEventListener('ended', () => {
                 nextTrack();
+            });
+            audioElement.value.addEventListener('pause', () => {
+                isPlaying.value = false;
+            });
+            audioElement.value.addEventListener('play', () => {
+                isPlaying.value = true;
             });
         }
         if (src) {

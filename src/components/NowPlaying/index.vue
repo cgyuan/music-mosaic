@@ -53,14 +53,13 @@ import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
 
 const playerStore = usePlayerStore();
-const { volume } = storeToRefs(playerStore);
+const { volume, isPlaying } = storeToRefs(playerStore);
 const progress = computed({
     get: () => playerStore.progress,
     set: (value) => playerStore.seek(value)
 });
 
 const currentTrack = computed(() => playerStore.currentTrack);
-const isPlaying = computed(() => playerStore.isPlaying);
 const currentTime = computed(() => playerStore.currentTime);
 const duration = computed(() => playerStore.duration);
 
