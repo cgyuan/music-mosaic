@@ -72,7 +72,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue';
-import TabMenu from 'primevue/tabmenu';
 import Chip from 'primevue/chip';
 import DataView from 'primevue/dataview';
 import { usePluginStore } from '@/store/pluginStore.ts';

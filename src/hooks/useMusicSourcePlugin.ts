@@ -56,8 +56,12 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
         }
 
         console.log('Fetch request:', { url, options });
-
-        if (url.startsWith('https://api.bilibili.com')) {
+        
+        if (url.startsWith('https://api.bilibili.com') || url.startsWith('https://m.music.migu.cn')) {
+            if (options.query) {
+                const searchParams = new URLSearchParams(options.query);
+                url = `${url}?${searchParams.toString()}`;
+            }
             const response = await invoke('http_request', {
                 method: options.method,
                 url,
