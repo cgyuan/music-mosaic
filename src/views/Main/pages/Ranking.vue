@@ -1,9 +1,12 @@
 <template>
     <div class="ranking">
-        <div class="plugin-tabs">
-            <TabMenu :model="tabMenuItems" :activeIndex="activePluginIndex" @tab-change="onTabChange" />
-        </div>
-
+        <Tabs v-model:value="activePluginIndex" scrollable :style="{ width: 'calc(100% - 200px)' }">
+            <TabList>
+                <Tab v-for="(tab, index) in tabMenuItems" :key="tab.id!" :value="index">
+                    {{ tab.label }}
+                </Tab>
+            </TabList>
+        </Tabs>
         <div class="ranking-lists" ref="rankingListsRef">
             <div v-for="(group, groupIndex) in rankingLists" :key="groupIndex" class="ranking-group">
                 <h2 class="group-title">{{ group.title }}</h2>
@@ -36,7 +39,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import TabMenu from 'primevue/tabmenu';
 import DataView from 'primevue/dataview';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
@@ -58,9 +60,14 @@ const activePlugin = computed(() => supportPlugins.value[activePluginIndex.value
 
 const tabMenuItems = computed(() => {
     return supportPlugins.value.map(plugin => ({
+        id: plugin.id,
         label: plugin.platform,
         icon: 'pi pi-fw pi-music'
     }));
+});
+
+watch(activePluginIndex, () => {
+    onTabChange();
 });
 
 watch(supportPlugins, (newPlugins) => {
@@ -82,8 +89,7 @@ onMounted(() => {
     }
 });
 
-const onTabChange = (event: { index: number }) => {
-    activePluginIndex.value = event.index;
+const onTabChange = () => {
     pluginStore.setCurrentPluginId(activePlugin.value.id!!);
     loadRanking();
 };
@@ -109,7 +115,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
         name: 'music-sheet-detail',
         params: {
             id: item.id,
-            itemData: JSON.stringify(item) 
+            itemData: JSON.stringify(item)
         },
         query: {
             type: MusicSheetType.Ranking
@@ -124,6 +130,8 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
+    box-sizing: border-box;
     padding: 0 20px;
 }
 

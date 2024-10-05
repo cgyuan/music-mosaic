@@ -1,8 +1,12 @@
 <template>
     <div class="popular-music-sheet">
-        <div class="plugin-tabs">
-            <TabMenu :model="tabMenuItems" :activeIndex="activePluginIndex" @tab-change="onTabChange" />
-        </div>
+        <Tabs class="plugin-tabs" v-model:value="activePluginIndex" scrollable :style="{ width: 'calc(100% - 200px)' }">
+            <TabList>
+                <Tab v-for="(tab, index) in tabMenuItems" :key="tab.id!" :value="index">
+                    {{ tab.label }}
+                </Tab>
+            </TabList>
+        </Tabs>
         <div class="recommend-tags">
             <div class="tag-container">
                 <Chip class="first-tag" :class="{ 
@@ -104,9 +108,14 @@ const activePlugin = computed(() => supportPlugins.value[activePluginIndex.value
 // Create a computed property for the TabMenu items
 const tabMenuItems = computed(() => {
     return supportPlugins.value.map(plugin => ({
+        id: plugin.id,
         label: plugin.platform,
         icon: 'pi pi-fw pi-music'
     }));
+});
+
+watch(activePluginIndex, () => {
+    onTabChange();
 });
 
 watch(supportPlugins, async (newVal, oldVal) => {
@@ -131,7 +140,7 @@ onMounted(async () => {
     }
 });
 
-const onTabChange = async (event: { index: number }) => {
+const onTabChange = async () => {
     isFromPopover.value = true;
     defaultTagText.value = '默认';
     selectedTag.value = {
@@ -139,7 +148,6 @@ const onTabChange = async (event: { index: number }) => {
         id: '',
         platform: activePlugin.value.platform
     };
-    activePluginIndex.value = event.index;
     pluginStore.setCurrentPluginId(activePlugin.value.id!!);
     await loadRecommendTags();
     await loadRecommendSheets();

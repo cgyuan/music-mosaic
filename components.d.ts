@@ -43,7 +43,12 @@ declare module 'vue' {
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']
     SvgAsset: typeof import('./src/components/SvgAsset.vue')['default']
     SwitchCase: typeof import('./src/components/SwitchCase.vue')['default']
+    Tab: typeof import('primevue/tab')['default']
+    TabList: typeof import('primevue/tablist')['default']
     TabMenu: typeof import('primevue/tabmenu')['default']
+    TabPanel: typeof import('primevue/tabpanel')['default']
+    TabPanels: typeof import('primevue/tabpanels')['default']
+    Tabs: typeof import('primevue/tabs')['default']
   }
   export interface ComponentCustomProperties {
     Tooltip: typeof import('primevue/tooltip')['default']
