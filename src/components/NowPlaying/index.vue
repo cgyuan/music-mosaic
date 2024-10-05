@@ -158,11 +158,15 @@ const toggleRepeatMode = () => {
 
 .song-details {
     display: flex;
+    width: 150px;
     flex-direction: column;
 }
 
 .song-title {
     font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .artist-and-time {
@@ -183,6 +187,9 @@ const toggleRepeatMode = () => {
     background-color: #fff3e0;
     padding: 0.2rem 0.5rem;
     border-radius: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .center-section {

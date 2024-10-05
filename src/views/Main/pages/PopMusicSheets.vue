@@ -1,6 +1,6 @@
 <template>
     <div class="popular-music-sheet">
-        <Tabs class="plugin-tabs" v-model:value="activePluginIndex" scrollable :style="{ width: 'calc(100% - 200px)' }">
+        <Tabs class="plugin-tabs" v-model:value="activePluginIndex" scrollable>
             <TabList>
                 <Tab v-for="(tab, index) in tabMenuItems" :key="tab.id!" :value="index">
                     {{ tab.label }}
