@@ -2,6 +2,7 @@
 import MusicSheet from './music-sheet';
 import { usePlayerStore } from '@/store/playerStore';
 import { usePluginStore } from '@/store/pluginStore';
+import { setupRecentlyPlaylist } from '@/hooks/useRecentPlayed'
 
 const pluginStore = usePluginStore();
 pluginStore.$persistedState.isReady().then(() => {
@@ -14,6 +15,7 @@ playerStore.$persistedState.isReady().then(() => {
 });
 
 MusicSheet.frontend.setupMusicSheets();
+setupRecentlyPlaylist();
 </script>
 
 <template>

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { usePluginStore } from './pluginStore';
 import { RepeatMode } from '@/components/NowPlaying/enum';
+import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -93,10 +94,11 @@ export const usePlayerStore = defineStore('player', () => {
             audioElement.value.addEventListener('pause', () => {
                 isPlaying.value = false;
             });
-            audioElement.value.addEventListener('play', () => {
-                isPlaying.value = true;
-            });
         }
+        audioElement.value.addEventListener('play', () => {
+            addToRecentlyPlaylist(JSON.parse(JSON.stringify(track)));
+            isPlaying.value = true;
+        });
         if (src) {
             audioElement.value.src = src;
         }
