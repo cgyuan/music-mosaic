@@ -27,6 +27,12 @@ body {
     overflow: hidden;
 }
 
+.text-ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
 .p-chip-label {
     font-size: 14px;
 }

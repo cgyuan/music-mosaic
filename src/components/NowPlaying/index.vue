@@ -8,7 +8,7 @@
                 <div class="song-details">
                     <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
                     <div class="artist-and-time">
-                        <span class="artist">{{ currentTrack?.artist || 'Unknown artist' }}</span>
+                        <span class="artist text-ellipsis">{{ currentTrack?.artist || 'Unknown artist' }}</span>
                         <span class="playback-time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
                     </div>
                 </div>
