@@ -59,6 +59,11 @@ const routes: Array<RouteRecordRaw> = [
           id: route.params.id,
           itemData: route.params.itemData
         })
+      },
+      {
+        path: '/search/:query',
+        name: 'search',
+        component: () => import('@/views/Main/pages/Search/index.vue')
       }
     ]
   }

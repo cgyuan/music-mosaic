@@ -1,0 +1,95 @@
+<template>
+  <div class="search-page">
+    <h1 class="search-title"><span class="highlight">「{{ searchQuery }}」</span>的搜索结果</h1>
+    <div class="search-categories">
+      <span v-for="(category, index) in categories" 
+            :key="index" 
+            class="category"
+            :class="{ 'active': activeIndex === index }"
+            @click="activeIndex = index">
+        {{ category }}
+      </span>
+    </div>
+    <div class="tab-content">
+      <MusicSearch :query="searchQuery"/>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
+import MusicSearch from './MusicSearch.vue';
+
+
+const route = useRoute();
+const searchQuery = ref(route.params.query as string);
+const activeIndex = ref(0);
+
+
+
+const categories = ['音乐', '专辑', '作者', '歌单'];
+
+onMounted(() => {
+});
+
+</script>
+
+<style scoped>
+.search-page {
+  height: 100%;
+  /* padding: 20px; */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.search-title {
+  font-size: 24px;
+  margin: 0 0 20px 0;
+  font-weight: normal;
+  margin: 0;
+  padding: 20px 20px 0;
+}
+
+.highlight {
+  color: #f0a050;
+  font-weight: bold;
+}
+
+.search-categories {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0 20px;
+}
+
+.category {
+  cursor: pointer;
+  padding: 10px 0;
+  font-size: 16px;
+  color: #495057;
+  position: relative;
+}
+
+.category.active {
+  color: #f0a050;
+}
+
+.category.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #f0a050;
+}
+
+.tab-content {
+  flex: 1;
+  overflow: hidden; /* Add this to prevent content from overflowing */
+  display: flex; /* Add this to allow child to expand */
+}
+</style>

@@ -1,7 +1,14 @@
 <template>
     <div class="music-list-wrapper">
-        <CustomDataTable :loading="isLoading" :value="musicList || []"
-            :columns="columns" keyField="id" :stripedRows="true" class="music-list" :bufferSize="10"
+        <CustomDataTable 
+            ref="dataTableRef"
+            :loading="isLoading" 
+            :value="musicList || []"
+            :columns="columns" 
+            keyField="id" 
+            :stripedRows="true" 
+            class="music-list" 
+            :bufferSize="10"
             :show-header="showHeader"
             @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
             <template #header  v-if="$slots.header">
@@ -72,6 +79,8 @@ const props = withDefaults(defineProps<{
 }>(), {
     showHeader: true
 });
+
+const dataTableRef = ref<InstanceType<typeof CustomDataTable> | null>(null);
 
 const isLoading = computed(() => {
     if (props.state) {
@@ -193,9 +202,16 @@ watch(showMusicSheetDialog, (newValue) => {
     }
 });
 
+const resetScroll = () => {
+  if (dataTableRef.value) {
+    dataTableRef.value.scrollToIndex(0);
+  }
+};
+
 defineExpose({
     playAll,
-    handleAddAll
+    handleAddAll,
+    resetScroll
 })
 </script>
 

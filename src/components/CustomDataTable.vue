@@ -28,7 +28,7 @@
                     <table>
                         <tbody>
                             <tr v-for="(item, localIndex) in visibleItems"
-                                :key="item[keyField] || (startIndex + localIndex)" class="data-row"
+                                :key="item[keyField].toString() + (startIndex + localIndex)" class="data-row"
                                 :class="{ 'striped': (startIndex + localIndex) % 2 === 1 }"
                                 @dblclick="onRowDblClick(item, $event)" @contextmenu="onRowContextMenu(item, $event)"
                                 :ref="el => { if (el) setRowRef(startIndex + localIndex, el as HTMLElement) }">
@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
+import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue';
 import throttle from 'lodash.throttle';
 
 interface Column {
@@ -149,6 +149,29 @@ function onScroll() {
     }
 }
 
+let previousValueLength = 0;
+
+// Modify the watch effect
+watch(() => props.value, (newValue, oldValue) => {
+    if (newValue.length > previousValueLength) {
+        // New items were added
+        const addedItemsCount = newValue.length - previousValueLength;
+        nextTick(() => {
+            // Extend rowHeights array for new items
+            rowHeights.value = rowHeights.value.concat(new Array(addedItemsCount).fill(estimatedRowHeight));
+            updateVisibleRange();
+        });
+    } else if (newValue.length < previousValueLength) {
+        // Items were removed
+        rowHeights.value = rowHeights.value.slice(0, newValue.length);
+        updateVisibleRange();
+    } else {
+        // The number of items didn't change, but their content might have
+        updateVisibleRange();
+    }
+    previousValueLength = newValue.length;
+}, { deep: true });
+
 function updateVisibleRange() {
     if (!containerRef.value) return;
 
@@ -185,14 +208,6 @@ function updateVisibleRange() {
     updateTotalHeight();
 }
 
-// Watch for changes in value (data)
-watch(() => props.value.length, () => {
-    rowHeights.value = [];
-    updateVisibleRange();
-});
-
-// Update visible range when data or container size changes
-// watch(() => props.value, updateVisibleRange);
 watch(() => containerRef.value?.clientHeight, updateVisibleRange);
 
 onMounted(() => {
@@ -254,11 +269,14 @@ function scrollToIndex(index: number, options: ScrollOptions = {}) {
         } else {
             containerRef.value.scrollTop = targetScrollTop;
         }
+
+        // Add this line to update the visible range after scrolling
+        // updateVisibleRange();
     }
 }
 
-// Expose the method to parent components
-defineExpose({ scrollToIndex });
+// Expose methods to parent components
+defineExpose({ scrollToIndex, updateVisibleRange });
 </script>
 
 <style scoped>

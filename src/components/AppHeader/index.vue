@@ -26,7 +26,11 @@
         <div class="center-content">
             <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText v-model="searchQuery" placeholder="Search" />
+                <InputText 
+                    v-model="searchQuery" 
+                    placeholder="Search" 
+                    @keyup.enter="handleSearch"
+                />
             </IconField>
         </div>
         
@@ -69,6 +73,12 @@ const goBack = () => {
 const goForward = () => {
     if (canGoForward.value) {
         router.forward();
+    }
+};
+
+const handleSearch = () => {
+    if (searchQuery.value.trim()) {
+        router.push({ name: 'search', params: { query: searchQuery.value.trim() } });
     }
 };
 

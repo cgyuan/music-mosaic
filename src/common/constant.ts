@@ -114,6 +114,7 @@ export enum TrackPlayerSyncType {
 export enum MusicSheetType {
   Playlist = "playlist",
   Favorite = "favorite",
+  Search = "search",
   Download = "download",
   Local = "local",
   Cloud = "cloud",

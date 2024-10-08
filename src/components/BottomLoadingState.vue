@@ -23,11 +23,10 @@ defineProps<{
     justify-content: center;
     padding: 1rem;
     cursor: pointer;
-    color: #007bff;
 }
 
 .load-more:hover {
-    text-decoration: underline;
+    color: #007bff;
 }
 
 .loading-icon {
