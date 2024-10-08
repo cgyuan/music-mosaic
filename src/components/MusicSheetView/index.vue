@@ -1,11 +1,12 @@
 <template>
-    <MusicList ref="musicListRef" :platform="platform" :musicList="musicSheetItem.musicList || []" :state="state"
-        :musicSheetType="musicSheetType">
-        <template #header>
-            <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="musicListRef?.playAll"
-                @addAll="musicListRef?.handleAddAll" :platform="platform" />
-        </template>
-    </MusicList>
+    <div class="music-sheet-view">
+        <MusicList ref="musicListRef" :platform="platform" :musicList="musicSheetItem.musicList || []" :state="state">
+            <template #header>
+                <Header :musicSheet="musicSheetItem" :musicSheetType="musicSheetType" @playAll="musicListRef?.playAll"
+                    @addAll="musicListRef?.handleAddAll" :platform="platform" />
+            </template>
+        </MusicList>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -22,9 +23,20 @@ defineProps<{
 }>();
 
 const musicListRef = ref<InstanceType<typeof MusicList>>()
-
 </script>
 
 <style scoped>
+.music-sheet-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
+.music-sheet-view :deep(.music-list-wrapper) {
+    flex: 1;
+}
+
+.music-sheet-view :deep(.music-list) {
+    padding: 20px;
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
     <div class="custom-datatable" ref="containerRef" @scroll="onScroll">
         <div class="content">
-            <div class="header" v-if="showHeader">
+            <div class="header" v-if="showHeader && $slots.header">
                 <slot name="header" />
             </div>
             <table :class="{ 'striped': stripedRows }">
@@ -43,6 +43,7 @@
                     </table>
                 </div>
             </div>
+            <slot name="footer" v-if="$slots.footer"/>
         </div>
     </div>
 </template>

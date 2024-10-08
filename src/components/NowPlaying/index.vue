@@ -3,7 +3,7 @@
         <Slider v-model="progress" class="progress-slider" />
         <div class="content">
             <div class="left-section">
-                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg"
+                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
                     :alt="currentTrack?.title">
                 <div class="song-details">
                     <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
@@ -51,6 +51,7 @@ import PlaylistDrawer from '@/components/PlaylistDrawer.vue';
 import { storeToRefs } from 'pinia';
 import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
+import albumCover from '@/assets/imgs/album-cover.jpg';
 
 const playerStore = usePlayerStore();
 const { volume, isPlaying } = storeToRefs(playerStore);

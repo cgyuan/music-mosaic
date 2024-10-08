@@ -1,71 +1,84 @@
 <template>
-    <CustomDataTable :loading="state === RequestStateCode.PENDING_FIRST_PAGE" :value="musicList || []"
-        :columns="columns" keyField="id" :stripedRows="true" class="music-sheet-detail" :bufferSize="10"
-        :show-header="true"
-        @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
-        <template #header>
-            <slot name="header"></slot>
-        </template>
-        <template #cell:actions="{ item }">
-            <div class="item-actions">
-                <MusicFavorite :musicItem="item" :size="20" />
-                <MusicDownloaded :musicItem="item" :size="20" />
-            </div>
-        </template>
-        <template #cell:index="{ index }">
-            <div class="item-actions">
-                {{ index + 1 }}
-            </div>
-        </template>
-        <template #cell:duration="{ item }">
-            {{ formatDuration(item.duration) }}
-        </template>
-        <template #cell:platform="{ item }">
-            <span class="source-tag">{{ item.platform || platform }}</span>
-        </template>
+    <div class="music-list-wrapper">
+        <CustomDataTable :loading="isLoading" :value="musicList || []"
+            :columns="columns" keyField="id" :stripedRows="true" class="music-list" :bufferSize="10"
+            :show-header="showHeader"
+            @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
+            <template #header  v-if="$slots.header">
+                <slot name="header"></slot>
+            </template>
+            <template #footer v-if="$slots.footer">
+                <slot name="footer"></slot>
+            </template>
+            <template #cell:actions="{ item }">
+                <div class="item-actions">
+                    <MusicFavorite :musicItem="item" :size="20" />
+                    <MusicDownloaded :musicItem="item" :size="20" />
+                </div>
+            </template>
+            <template #cell:index="{ index }">
+                <div class="item-actions">
+                    {{ index + 1 }}
+                </div>
+            </template>
+            <template #cell:duration="{ item }">
+                {{ formatDuration(item.duration) }}
+            </template>
+            <template #cell:platform="{ item }">
+                <span class="source-tag">{{ item.platform || platform }}</span>
+            </template>
 
-        <template #loading>
-            <Loading />
-        </template>
-        <template #empty>
-            <Empty />
-        </template>
-    </CustomDataTable>
+            <template #loading>
+                <Loading />
+            </template>
+            <template #empty>
+                <Empty />
+            </template>
+        </CustomDataTable>
 
-    <ContextMenu ref="cm" :model="contextMenuItems" />
-    <Dialog v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
-        <div class="music-sheett-selection">
-            <div class="new-music-sheett">
-                <i class="pi pi-plus"></i>
-                <span>新建歌单</span>
+        <ContextMenu ref="cm" :model="contextMenuItems" />
+        <Dialog v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
+            <div class="music-sheett-selection">
+                <div class="new-music-sheett">
+                    <i class="pi pi-plus"></i>
+                    <span>新建歌单</span>
+                </div>
+                <div v-for="item in musicSheets" :key="item.id" class="music-sheett-item" @click="addToMusicSheet(item.id)">
+                    <img :src="item.artwork || albumCover" :alt="item.title">
+                    <span>{{ item.title }}</span>
+                </div>
             </div>
-            <div v-for="item in musicSheets" :key="item.id" class="music-sheett-item" @click="addToMusicSheet(item.id)">
-                <img :src="item.artwork || albumCover" :alt="item.title">
-                <span>{{ item.title }}</span>
-            </div>
-        </div>
-    </Dialog>
+        </Dialog>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { usePlayerStore } from '@/store/playerStore';
 import Loading from '@/components/Loading.vue';
 import Empty from '@/components/Empty.vue';
 import ContextMenu from 'primevue/contextmenu';
-import { MusicSheetType, RequestStateCode } from '@/common/constant';
+import { RequestStateCode } from '@/common/constant';
 import CustomDataTable from '@/components/CustomDataTable.vue';
 import Dialog from 'primevue/dialog';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import MusicSheet from '@/music-sheet';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     platform?: string;
     musicList: IMusic.IMusicItem[],
-    state: RequestStateCode;
-    musicSheetType: MusicSheetType;
-}>();
+    state?: RequestStateCode;
+    showHeader?: boolean,
+}>(), {
+    showHeader: true
+});
 
+const isLoading = computed(() => {
+    if (props.state) {
+        return [RequestStateCode.PENDING_FIRST_PAGE].includes(props.state);
+    }
+    return false;
+});
 const playerStore = usePlayerStore();
 
 const addAll = ref(false);
@@ -187,11 +200,15 @@ defineExpose({
 </script>
 
 <style scoped>
-.music-sheet-detail {
+.music-list-wrapper {
     height: 100%;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.music-list {
+    flex: 1;
     overflow-y: auto;
-    box-sizing: border-box;
 }
 
 :deep(.custom-datatable) {
