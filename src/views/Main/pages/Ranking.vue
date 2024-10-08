@@ -10,25 +10,7 @@
         <div class="ranking-lists" ref="rankingListsRef">
             <div v-for="(group, groupIndex) in rankingLists" :key="groupIndex" class="ranking-group">
                 <h2 class="group-title">{{ group.title }}</h2>
-                <DataView :value="group.data" :layout="'grid'" :rows="10">
-                    <template #grid="slotProps">
-                        <div class="ranking-grid">
-                            <div v-for="(item, index) in slotProps.items" :key="index" class="ranking-item"
-                                @click="goToMusicListDetail(item)">
-                                <div class="ranking-image">
-                                    <div class="image-container">
-                                        <img :src="item.coverImg || albumCover" :alt="item.title" />
-                                    </div>
-                                </div>
-                                <div class="ranking-info">
-                                    <div class="ranking-title">{{ item.title || 'Untitled' }}</div>
-                                    <div class="ranking-description" v-if="item.description">{{ item.description }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-                </DataView>
+                <AlbumDataView :active-plugin="activePlugin" :albums="group.data" />
             </div>
             <Loading v-if="isLoading" />
         </div>
@@ -37,13 +19,11 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
-import DataView from 'primevue/dataview';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
+import AlbumDataView from '@/components/AlbumDataView/index.vue'
 import Loading from '@/components/Loading.vue';
-import albumCover from '@/assets/imgs/album-cover.jpg';
-import router from '@/router';
-import { MusicSheetType } from '@/common/constant';
+
 
 const pluginStore = usePluginStore();
 const { plugins, activePluginIndex } = storeToRefs(pluginStore);
@@ -107,20 +87,6 @@ const loadRanking = async () => {
     }
 };
 
-const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
-    item.platform = activePlugin.value.platform;
-    router.push({
-        name: 'music-sheet-detail',
-        params: {
-            id: item.id,
-            itemData: JSON.stringify(item)
-        },
-        query: {
-            type: MusicSheetType.Ranking
-        }
-    });
-};
-
 </script>
 
 <style scoped>
@@ -150,62 +116,5 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     margin-bottom: 1rem;
 }
 
-.ranking-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
-    gap: 1rem;
-}
 
-.ranking-item {
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-}
-
-.ranking-image {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-}
-
-.image-container {
-    width: 100%;
-    height: 100%;
-    transition: transform 0.3s ease;
-}
-
-.image-container:hover {
-    transform: scale(1.05);
-}
-
-.ranking-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.ranking-info {
-    padding: 0.5rem;
-}
-
-.ranking-title {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin-bottom: 0.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.ranking-description {
-    font-size: 0.8rem;
-    color: #666;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 </style>

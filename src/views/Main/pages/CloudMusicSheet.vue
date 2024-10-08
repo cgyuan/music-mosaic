@@ -55,6 +55,29 @@ const getMusicListDetail = async (page: number) => {
                 state.value = RequestStateCode.FINISHED;
             }
         }
+    } else if (musicSheetType === MusicSheetType.Album) {
+        if (currentPlugin && currentPlugin.getAlbumInfo) {
+            try {
+                state.value = RequestStateCode.PENDING_FIRST_PAGE;
+                const res = await currentPlugin.getAlbumInfo(musicSheetItem.value as unknown as IAlbum.IAlbumItem, page);
+                if (res && res.musicList) {
+                    res.musicList = res.musicList.map(item => {
+                        item.platform = currentPlugin?.platform || '';
+                        return item;
+                    });
+                }
+                musicSheetItem.value = {
+                    ...musicSheetItem.value,
+                    ...res,
+                };
+                console.log('musicSheetItem', musicSheetItem.value, res);
+            } catch (error) {
+                console.error('Error fetching album info:', error);
+            } finally {
+                state.value = RequestStateCode.FINISHED;
+            }
+        }
+
     } else if (musicSheetType === MusicSheetType.Cloud) {
         if (currentPlugin && currentPlugin.getMusicSheetInfo) {
             try {

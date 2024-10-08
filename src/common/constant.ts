@@ -119,5 +119,6 @@ export enum MusicSheetType {
   Local = "local",
   Cloud = "cloud",
   Ranking = "ranking",
+  Album = "album",
   Recent = "recent",
 }

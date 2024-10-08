@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     2: typeof import('./src/components/CustomDataTable copy 2.vue')['default']
+    AlbumDataView: typeof import('./src/components/AlbumDataView/index.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader/index.vue')['default']
     AppSideBar: typeof import('./src/components/AppSideBar/index.vue')['default']
     BottomLoadingState: typeof import('./src/components/BottomLoadingState.vue')['default']

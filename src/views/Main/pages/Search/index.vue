@@ -2,11 +2,8 @@
   <div class="search-page">
     <h1 class="search-title"><span class="highlight">「{{ searchQuery }}」</span>的搜索结果</h1>
     <div class="search-categories">
-      <span v-for="(category, index) in categories" 
-            :key="index" 
-            class="category"
-            :class="{ 'active': activeIndex === index }"
-            @click="activeIndex = index">
+      <span v-for="(category, index) in categories" :key="index" class="category"
+        :class="{ 'active': activeIndex === index }" @click="activeIndex = index">
         {{ category }}
       </span>
     </div>
@@ -21,18 +18,21 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import MusicSearch from './MusicSearch.vue';
 import MusicSheetSearch from './MusicSheetSearch.vue';
+import AlbumSearch from './AlbumSearch.vue';
 
 const route = useRoute();
 const searchQuery = ref(route.params.query as string);
 const activeIndex = ref(0);
 
-const categories = ['音乐', '歌单', /*'专辑', '作者'*/];
+const categories = ['音乐', '专辑', '歌单', /*'专辑', '作者'*/];
 
 const activeComponent = computed(() => {
   switch (activeIndex.value) {
     case 0:
       return MusicSearch;
     case 1:
+      return AlbumSearch;
+    case 2:
       return MusicSheetSearch;
     default:
       return MusicSearch;
@@ -98,7 +98,9 @@ onMounted(() => {
 
 .tab-content {
   flex: 1;
-  overflow: hidden; /* Add this to prevent content from overflowing */
-  display: flex; /* Add this to allow child to expand */
+  overflow: hidden;
+  /* Add this to prevent content from overflowing */
+  display: flex;
+  /* Add this to allow child to expand */
 }
 </style>
