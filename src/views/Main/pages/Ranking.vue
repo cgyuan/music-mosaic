@@ -30,9 +30,7 @@
                     </template>
                 </DataView>
             </div>
-            <div class="empty-state">
-                <Loading v-if="isLoading" />
-            </div>
+            <Loading v-if="isLoading" />
         </div>
     </div>
 </template>
@@ -209,14 +207,5 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.empty-state {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 2rem;
-    color: #999;
 }
 </style>
