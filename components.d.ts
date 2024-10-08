@@ -12,6 +12,7 @@ declare module 'vue' {
     AppSideBar: typeof import('./src/components/AppSideBar/index.vue')['default']
     BottomLoadingState: typeof import('./src/components/BottomLoadingState.vue')['default']
     Button: typeof import('primevue/button')['default']
+    Chip: typeof import('primevue/chip')['default']
     Column: typeof import('primevue/column')['default']
     CommonMusicSheet: typeof import('./src/components/CommonMusicSheet.vue')['default']
     ContextMenu: typeof import('primevue/contextmenu')['default']

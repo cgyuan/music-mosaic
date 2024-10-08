@@ -6,7 +6,7 @@
                     @click="goToMusicListDetail(item)">
                     <div class="music-sheet-image">
                         <div class="image-container">
-                            <img :src="item.artwork" :alt="item.title" />
+                            <img :src="item.artwork || item.coverImg" :alt="item.title" />
                         </div>
                     </div>
                     <div class="music-sheet-info">

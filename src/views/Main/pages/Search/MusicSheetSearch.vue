@@ -1,12 +1,11 @@
 <template>
-    <div class="music-search">
+    <div class="music-sheet-search">
         <SourceSelector :plugins="supportPlugins" :active-plugin-index="activePluginIndex" :select-source="selectSource" />
-        <div class="music-list-container">
-            <MusicList ref="musicListRef" :platform="activePlugin.platform" :music-list="activePluginMusicList">
-                <template #footer>
-                    <BottomLoadingState :state="activePluginState" @load-more="loadMore" />
-                </template>
-            </MusicList>
+        <div class="music-sheet-container">
+            <MusicSheetDataView :active-plugin="activePlugin" 
+                :is-loading="activePluginState === RequestStateCode.PENDING_FIRST_PAGE"
+                :music-sheets="activePluginMusicSheets" />
+            <BottomLoadingState :state="activePluginState" @load-more="loadMore" v-if="activePluginMusicSheets.length > 0"/>
         </div>
     </div>
 </template>
@@ -15,7 +14,7 @@ import SourceSelector from './SourceSelector.vue';
 import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
 import { computed, ref, onMounted, reactive } from 'vue';
-import MusicList from '@/components/MusicList.vue';
+import MusicSheetDataView from '@/components/MusicSheetDataView/index.vue';
 import BottomLoadingState from '@/components/BottomLoadingState.vue';
 import { RequestStateCode } from '@/common/constant';
 
@@ -23,7 +22,6 @@ const props = defineProps<{
     query: string
 }>();
 
-const musicListRef = ref<InstanceType<typeof MusicList> | null>(null);
 const activePluginIndex = ref(0);
 
 const pluginStore = usePluginStore();
@@ -31,7 +29,7 @@ const { plugins } = storeToRefs(pluginStore);
 
 // Create a reactive object to store data for each plugin, using platform as key
 const pluginData = reactive<{[key: string]: {
-  musicList: IMusic.IMusicItem[],
+  musicSheets: IMusic.IMusicSheetItem[],
   state: RequestStateCode,
   curPage: number
 }}>({});
@@ -41,10 +39,19 @@ const supportPlugins = computed(() => plugins.value.filter(plugin => plugin.sear
 const selectSource = (index: number) => {
     activePluginIndex.value = index;
     const selectedPlugin = supportPlugins.value[index];
-    if (selectedPlugin && pluginData[selectedPlugin.platform].musicList.length === 0) {
-        loadMusics();
+    if (selectedPlugin && pluginData[selectedPlugin.platform].musicSheets.length === 0) {
+        loadData();
     }
-    musicListRef.value?.resetScroll();
+    // Scroll to the top after changing the source
+    scrollToTop();
+};
+
+// Add this new function to handle scrolling
+const scrollToTop = () => {
+    const container = document.querySelector('.music-sheet-container');
+    if (container) {
+        container.scrollTop = 0;
+    }
 };
 
 const activePlugin = computed(() => supportPlugins.value[activePluginIndex.value]);
@@ -54,29 +61,30 @@ onMounted(() => {
     supportPlugins.value.forEach(plugin => {
         if (!pluginData[plugin.platform]) {
             pluginData[plugin.platform] = {
-                musicList: [],
+                musicSheets: [],
                 state: RequestStateCode.PENDING_REST_PAGE,
                 curPage: 1
             };
         }
     });
-    loadMusics();
+    loadData();
 });
 
-const loadMusics = async () => {
+const loadData = async () => {
     if (activePlugin.value) {
         const platform = activePlugin.value.platform;
         pluginData[platform].state = RequestStateCode.PENDING_REST_PAGE;
         console.log("query:", props.query);
 
         try {
-            const res = await activePlugin.value.search!(props.query, pluginData[platform].curPage, "music");
+            const res = await activePlugin.value.search!(props.query, pluginData[platform].curPage, "sheet");
 
             pluginData[platform].state = res.isEnd ? RequestStateCode.FINISHED : RequestStateCode.PARTLY_DONE;
-            pluginData[platform].musicList = pluginData[platform].musicList.concat(res.data.map((item) => {
+            pluginData[platform].musicSheets = pluginData[platform].musicSheets.concat(res.data.map((item) => {
                 item.platform = activePlugin.value.platform;
                 return item;
             }));
+            console.log("pluginData[platform].musicSheets", pluginData[platform].musicSheets);
         } catch (error) {
             pluginData[platform].state = RequestStateCode.PARTLY_DONE;
         }
@@ -89,32 +97,35 @@ const loadMore = () => {
         return
     }
     pluginData[platform].curPage++;
-    loadMusics();
+    loadData();
 }
 
 // Computed properties for the active plugin's data
-const activePluginMusicList = computed(() => pluginData[activePlugin.value.platform]?.musicList || []);
+const activePluginMusicSheets = computed(() => pluginData[activePlugin.value.platform]?.musicSheets || []);
 const activePluginState = computed(() => pluginData[activePlugin.value.platform]?.state || RequestStateCode.PENDING_REST_PAGE);
 </script>
 
 <style scoped>
-.music-search {
+.music-sheet-search {
     display: flex;
     flex-direction: column;
     height: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
-.music-list-container {
+.music-sheet-container {
+    width: 100%;
     flex: 1;
     overflow: auto;
+    padding: 0 20px;
 }
 
-.music-list-container :deep(.music-list-wrapper) {
+.music-sheet-container :deep(.music-list-wrapper) {
     flex: 1;
 }
 
-.music-list-container :deep(.music-list) {
+.music-sheet-container :deep(.music-list) {
     padding: 0 20px 0;
 }
 </style>

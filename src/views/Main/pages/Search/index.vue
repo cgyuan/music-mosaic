@@ -11,24 +11,33 @@
       </span>
     </div>
     <div class="tab-content">
-      <MusicSearch :query="searchQuery"/>
+      <component :is="activeComponent" :query="searchQuery" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import MusicSearch from './MusicSearch.vue';
-
+import MusicSheetSearch from './MusicSheetSearch.vue';
 
 const route = useRoute();
 const searchQuery = ref(route.params.query as string);
 const activeIndex = ref(0);
 
+const categories = ['音乐', '歌单', /*'专辑', '作者'*/];
 
-
-const categories = ['音乐', '专辑', '作者', '歌单'];
+const activeComponent = computed(() => {
+  switch (activeIndex.value) {
+    case 0:
+      return MusicSearch;
+    case 1:
+      return MusicSheetSearch;
+    default:
+      return MusicSearch;
+  }
+});
 
 onMounted(() => {
 });
