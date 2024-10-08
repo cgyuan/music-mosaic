@@ -37,6 +37,7 @@ declare module 'vue' {
     MusicFavorite: typeof import('./src/components/MusicFavorite.vue')['default']
     MusicList: typeof import('./src/components/MusicList.vue')['default']
     MusicSheet: typeof import('./src/components/MusicSheet.vue')['default']
+    MusicSheetCard: typeof import('./src/components/MusicSheetDataView/MusicSheetCard.vue')['default']
     MusicSheetDataView: typeof import('./src/components/MusicSheetDataView/index.vue')['default']
     MusicSheetModal: typeof import('./src/components/AppSideBar/MusicSheetModal.vue')['default']
     MusicSheetView: typeof import('./src/components/MusicSheetView/index.vue')['default']
