@@ -41,18 +41,18 @@
         <div class="recommend-sheets" ref="recommendSheetsRef" @scroll="handleScroll">
             <DataView :value="recommendSheets" :layout="'grid'" :rows="10">
                 <template #grid="slotProps">
-                    <div class="playlist-grid">
-                        <div v-for="(item, index) in slotProps.items" :key="index" class="playlist-item" @click="goToMusicListDetail(item)">
-                            <div class="playlist-image">
+                    <div class="music-sheet-grid">
+                        <div v-for="(item, index) in slotProps.items" :key="index" class="music-sheet-item" @click="goToMusicListDetail(item)">
+                            <div class="music-sheet-image">
                                 <div class="image-container">
                                     <img :src="item.artwork" :alt="item.title" />
                                 </div>
                             </div>
-                            <div class="playlist-info">
-                                <div class="playlist-title">{{ item.title || 'Untitled' }}</div>
-                                <div class="playlist-subtitle">{{ item.artist || item.description || 'No description' }}
+                            <div class="music-sheet-info">
+                                <div class="music-sheet-title">{{ item.title || 'Untitled' }}</div>
+                                <div class="music-sheet-subtitle">{{ item.artist || item.description || 'No description' }}
                                 </div>
-                                <div class="playlist-plays" v-if="item.playCount !== undefined">
+                                <div class="music-sheet-plays" v-if="item.playCount !== undefined">
                                     <i class="pi pi-play"></i> {{ formatPlayCount(item.playCount) }}
                                 </div>
                             </div>
@@ -291,13 +291,13 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     /* Negative margin to compensate for padding */
 }
 
-.playlist-grid {
+.music-sheet-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
     gap: 1rem;
 }
 
-.playlist-item {
+.music-sheet-item {
     display: flex;
     flex-direction: column;
     background-color: #fff;
@@ -307,7 +307,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     cursor: pointer;
 }
 
-.playlist-image {
+.music-sheet-image {
     width: 100%;
     aspect-ratio: 1 / 1;
     overflow: hidden;
@@ -323,18 +323,18 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     transform: scale(1.05);
 }
 
-.playlist-image img {
+.music-sheet-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
 }
 
-.playlist-info {
+.music-sheet-info {
     padding: 0.5rem;
 }
 
-.playlist-title {
+.music-sheet-title {
     font-size: 0.9rem;
     font-weight: bold;
     margin-bottom: 0.25rem;
@@ -343,7 +343,7 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     text-overflow: ellipsis;
 }
 
-.playlist-subtitle {
+.music-sheet-subtitle {
     font-size: 0.8rem;
     color: #666;
     margin-bottom: 0.25rem;
@@ -352,12 +352,12 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     text-overflow: ellipsis;
 }
 
-.playlist-plays {
+.music-sheet-plays {
     font-size: 0.8rem;
     color: #999;
 }
 
-.playlist-plays i {
+.music-sheet-plays i {
     margin-right: 0.25rem;
 }
 
