@@ -76,6 +76,7 @@ onMounted(() => {
 });
 
 watch(currentTrack, () => {
+  parsedLyrics.value = [];
   loadAndRenderLyric();
 });
 
