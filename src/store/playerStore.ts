@@ -58,7 +58,9 @@ export const usePlayerStore = defineStore('player', () => {
         if (track.url) {
             return track.url;
         }
+        
         const plugin = pluginStore.getPluginByPlatform(track.platform);
+        console.log("track", track, plugin);
         if (plugin && plugin.getMediaSource) {
             try {
                 const mediaSource = await plugin.getMediaSource(track, 'standard');

@@ -40,7 +40,6 @@ export async function addToRecentlyPlaylist(musicItem: IMusic.IMusicItem) {
     });
   }
   newPlayList = [musicItem].concat(newPlayList).slice(0, HARD_LIMIT);
-  console.log('newPlayList', newPlayList);
   setRecentlyPlaylist(newPlayList);
 }
 

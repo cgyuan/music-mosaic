@@ -57,7 +57,7 @@ const createAxiosLikeMethod = (method: HttpVerb) => {
 
         console.log('Fetch request:', { url, options });
         
-        if (url.startsWith('https://api.bilibili.com') || url.startsWith('https://m.music.migu.cn')) {
+        if (url.startsWith('https://api.bilibili.com') || url.startsWith('https://m.music.migu.cn') || url.startsWith("http://mobi.kuwo.cn")) {
             if (options.query) {
                 const searchParams = new URLSearchParams(options.query);
                 url = `${url}?${searchParams.toString()}`;

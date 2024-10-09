@@ -51,7 +51,7 @@ export default class Store<T> {
   }
 
   public setValue(value: T | UpdateFunc<T>): void {
-    console.log("setValue", value);
+    // console.log("setValue", value);
     let newValue: T;
     if (typeof value === 'function') {
       newValue = (value as UpdateFunc<T>)(this.value);

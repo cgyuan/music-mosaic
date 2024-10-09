@@ -30,6 +30,7 @@ import Button from 'primevue/button';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
+// import { invoke } from '@tauri-apps/api/tauri';
 
 const props = defineProps<{
   platform?: string,
@@ -58,7 +59,8 @@ const loadAndRenderLyric = async () => {
   if (plugin && currentTrack.value) {
     try {
       const res = await plugin.getLyric!(currentTrack.value);
-      console.log('lyric', res);
+      // console.log('lyric', res);
+      // await invoke('plugin_log', { message: res?.rawLrc });
       if (res?.rawLrc) {
         const lyrics = parseLyrics(res.rawLrc);
         parsedLyrics.value = lyrics.filter((lyric): lyric is { time: number; text: string } => lyric !== null);
@@ -80,12 +82,22 @@ watch(currentTrack, () => {
 const parseLyrics = (rawLyrics: string) => {
   const lines = rawLyrics.split('\n');
   return lines.map(line => {
-    const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
-    if (match) {
-      const [, minutes, seconds, text] = match;
+    // Match [mm:ss.xx] format
+    const match1 = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+    if (match1) {
+      const [, minutes, seconds, text] = match1;
       const time = parseInt(minutes) * 60 + parseFloat(seconds);
       return { time, text: text.trim() };
     }
+    
+    // Match [ss.ss] format
+    const match2 = line.match(/\[(\d+\.\d+)\](.*)/);
+    if (match2) {
+      const [, seconds, text] = match2;
+      const time = parseFloat(seconds);
+      return { time, text: text.trim() };
+    }
+    
     return null;
   }).filter(Boolean);
 };
