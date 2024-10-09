@@ -1,5 +1,6 @@
 <template>
-  <div class="lyric-detail" :class="{ 'show': show }">
+  <div class="lyric-detail background-image" :class="{ 'show': show }">
+    <div class="background-overlay" :style="backgroundStyle"></div>
     <div class="lyric-container">
       <h1 class="song-title">{{ currentTrack?.title }}</h1>
       <p class="artists">{{ currentTrack?.artist }}</p>
@@ -30,6 +31,8 @@ import Button from 'primevue/button';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
+// @ts-ignore
+import ColorThief from 'colorthief'
 // import { invoke } from '@tauri-apps/api/tauri';
 
 const props = defineProps<{
@@ -119,13 +122,47 @@ const scrollToCurrentLine = () => {
     const containerHeight = lyricsContainer.value.clientHeight;
     const lineTop = currentLineRef.value.offsetTop;
     const lineHeight = currentLineRef.value.clientHeight;
-    lyricsContainer.value.scrollTop = lineTop - containerHeight / 2 + lineHeight / 2;
+    lyricsContainer.value.scrollTop = lineTop - containerHeight * 0.6 + lineHeight / 2;
   }
 };
 
 const close = () => {
   emit('close');
 };
+
+const backgroundColors = ref<string[]>([]);
+const backgroundStyle = computed(() => {
+  if (backgroundColors.value.length >= 3) {
+    const [color1, color2, color3] = backgroundColors.value;
+    return {
+      background: `linear-gradient(to bottom, ${color1}, ${color2}, ${color3})`,
+    };
+  }
+  return {
+    background: 'linear-gradient(to bottom, #f0f2f5, #e6e9ed)',
+  };
+});
+
+const extractColors = async (imageUrl: string) => {
+  const colorThief = new ColorThief();
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  img.src = imageUrl;
+
+  img.onload = () => {
+    const palette = colorThief.getPalette(img, 3);
+    backgroundColors.value = palette.map((color: number[]) => {
+      const [r, g, b] = color;
+      return `rgb(${r}, ${g}, ${b})`; // Full opacity
+    });
+  };
+};
+
+watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || albumCover, (newImageUrl) => {
+  if (newImageUrl) {
+    extractColors(newImageUrl);
+  }
+}, { immediate: true });
 </script>
 
 <style scoped>
@@ -135,8 +172,8 @@ const close = () => {
   left: 0;
   right: 0;
   height: calc(100vh - 57px - 68px);
-  background-color: white;
   transition: bottom 0.3s ease-in-out;
+  background: white;
   z-index: 998;
   display: flex;
   width: 100vw;
@@ -144,17 +181,37 @@ const close = () => {
   align-items: center;
 }
 
+.background-image {
+  background-size: cover;
+  background-position: center;
+}
+
 .lyric-detail.show {
   bottom: 68px;
 }
 
+.background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0.6;
+  transition: background 0.5s ease-in-out;
+  opacity: 1;
+}
+
 .lyric-container {
+  position: relative;
   max-width: 800px;
   width: 100%;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   height: 100%;
+  border-radius: 10px;
+  padding: 20px;
+  z-index: 1;
 }
 
 .song-title {
@@ -162,6 +219,7 @@ const close = () => {
   font-weight: bold;
   margin-bottom: 5px;
   text-align: center;
+  color: #333;
 }
 
 .artists {
@@ -218,5 +276,6 @@ const close = () => {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 2;
 }
 </style>
