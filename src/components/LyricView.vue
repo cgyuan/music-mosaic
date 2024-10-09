@@ -1,6 +1,7 @@
 <template>
-  <div class="lyric-detail background-image" :class="{ 'show': show }">
+  <div class="lyric-detail" :class="{ 'show': show }">
     <div class="background-overlay" :style="backgroundStyle"></div>
+    <div class="content-overlay"></div>
     <div class="lyric-container">
       <h1 class="song-title">{{ currentTrack?.title }}</h1>
       <p class="artists">{{ currentTrack?.artist }}</p>
@@ -10,7 +11,8 @@
           <img :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover" :alt="currentTrack?.title">
         </div>
         
-        <div class="lyrics-content" ref="lyricsContainer">
+        <div class="lyrics-content" 
+             ref="lyricsContainer">
           <p v-for="(line, index) in parsedLyrics" 
              :key="index" 
              :class="['lyric-line', { 'active': index === currentLineIndex }]"
@@ -20,7 +22,9 @@
         </div>
       </div>
     </div>
-    <Button icon="pi pi-times" class="p-button-rounded p-button-text close-button" @click="close" />
+    <Button class="p-button-rounded p-button-text close-button" @click="close">
+      <SvgAsset icon-name="chevron-down" />
+    </Button>
   </div>
 </template>
 
@@ -34,6 +38,7 @@ import { storeToRefs } from 'pinia';
 // @ts-ignore
 import ColorThief from 'colorthief'
 // import { invoke } from '@tauri-apps/api/tauri';
+import SvgAsset from './SvgAsset.vue';
 
 const props = defineProps<{
   platform?: string,
@@ -122,7 +127,10 @@ const scrollToCurrentLine = () => {
     const containerHeight = lyricsContainer.value.clientHeight;
     const lineTop = currentLineRef.value.offsetTop;
     const lineHeight = currentLineRef.value.clientHeight;
-    lyricsContainer.value.scrollTop = lineTop - containerHeight * 0.6 + lineHeight / 2;
+    lyricsContainer.value.scrollTo({
+      top: lineTop - containerHeight * 0.6 + lineHeight / 2,
+      behavior: 'smooth'
+    });
   }
 };
 
@@ -135,11 +143,11 @@ const backgroundStyle = computed(() => {
   if (backgroundColors.value.length >= 3) {
     const [color1, color2, color3] = backgroundColors.value;
     return {
-      background: `linear-gradient(to bottom, ${color1}, ${color2}, ${color3})`,
+      backgroundImage: `linear-gradient(to bottom, ${color1}, ${color2}, ${color3})`,
     };
   }
   return {
-    background: 'linear-gradient(to bottom, #f0f2f5, #e6e9ed)',
+    backgroundImage: 'linear-gradient(to bottom, #f0f2f5, #e6e9ed)',
   };
 });
 
@@ -179,6 +187,7 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   width: 100vw;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
 }
 
 .background-image {
@@ -197,8 +206,17 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   right: 0;
   bottom: 0;
   opacity: 0.6;
-  transition: background 0.5s ease-in-out;
-  opacity: 1;
+}
+
+.content-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .lyric-container {
@@ -257,6 +275,12 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+}
+
+.lyrics-content::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
 }
 
 .lyric-line {
