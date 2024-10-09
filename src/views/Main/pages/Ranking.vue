@@ -10,7 +10,7 @@
         <div class="ranking-lists" ref="rankingListsRef">
             <div v-for="(group, groupIndex) in rankingLists" :key="groupIndex" class="ranking-group">
                 <h2 class="group-title">{{ group.title }}</h2>
-                <AlbumDataView :active-plugin="activePlugin" :albums="group.data" />
+                <AlbumDataView :active-plugin="activePlugin" :albums="group.data" :media-sheet-type="MusicSheetType.Ranking"/>
             </div>
             <Loading v-if="isLoading" />
         </div>
@@ -23,6 +23,7 @@ import { usePluginStore } from '@/store/pluginStore.ts';
 import { storeToRefs } from 'pinia';
 import AlbumDataView from '@/components/AlbumDataView/index.vue'
 import Loading from '@/components/Loading.vue';
+import { MusicSheetType } from '@/common/constant';
 
 
 const pluginStore = usePluginStore();
