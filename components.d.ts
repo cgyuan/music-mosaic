@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     2: typeof import('./src/components/CustomDataTable copy 2.vue')['default']
     AlbumDataView: typeof import('./src/components/AlbumDataView/index.vue')['default']
+    AlbumDetails: typeof import('./src/components/AlbumDetails.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader/index.vue')['default']
     AppSideBar: typeof import('./src/components/AppSideBar/index.vue')['default']
     BottomLoadingState: typeof import('./src/components/BottomLoadingState.vue')['default']
@@ -32,6 +33,7 @@ declare module 'vue' {
     InputText: typeof import('primevue/inputtext')['default']
     Loading: typeof import('./src/components/Loading.vue')['default']
     LoadingOrEmpty: typeof import('./src/components/LoadingOrEmpty.vue')['default']
+    LyricView: typeof import('./src/components/LyricView.vue')['default']
     MainContent: typeof import('./src/components/MainContent/index.vue')['default']
     MusicDownload: typeof import('./src/components/MusicDownload.vue')['default']
     MusicDownloaded: typeof import('./src/components/MusicDownloaded.vue')['default']

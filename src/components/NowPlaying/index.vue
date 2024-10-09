@@ -1,44 +1,52 @@
 <template>
-    <div class="now-playing">
-        <Slider v-model="progress" class="progress-slider" />
-        <div class="content">
-            <div class="left-section">
-                <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
-                    :alt="currentTrack?.title">
-                <div class="song-details">
-                    <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
-                    <div class="artist-and-time">
-                        <span class="artist text-ellipsis">{{ currentTrack?.artist || 'Unknown artist' }}</span>
-                        <span class="playback-time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
+    <div>
+        <div class="now-playing">
+            <Slider v-model="progress" class="progress-slider" />
+            <div class="content">
+                <div class="left-section">
+                    <div class="album-cover-container" @click="toggleLyricView">
+                        <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
+                            :alt="currentTrack?.title">
+                        <div class="album-cover-overlay">
+                            <SvgAsset :iconName="showLyricView ? 'chevron-double-down' : 'chevron-double-up'" :size="24" color="white" />
+                        </div>
+                    </div>
+                    <div class="song-details">
+                        <div class="song-title">{{ currentTrack?.title || 'No track selected' }}</div>
+                        <div class="artist-and-time">
+                            <span class="artist text-ellipsis">{{ currentTrack?.artist || 'Unknown artist' }}</span>
+                            <span class="playback-time">{{ formatTime(currentTime) }}/{{ formatTime(duration) }}</span>
+                        </div>
+                    </div>
+                    <div class="song-source">{{ currentTrack?.platform || 'Unknown source' }}</div>
+                </div>
+                <div class="center-section">
+                    <div class="playback-controls">
+                        <Button icon="pi pi-step-backward" text rounded @click="previousTrack" />
+                        <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button"
+                            @click="togglePlay" />
+                        <Button icon="pi pi-step-forward" text rounded @click="nextTrack" />
                     </div>
                 </div>
-                <div class="song-source">{{ currentTrack?.platform || 'Unknown source' }}</div>
-            </div>
-            <div class="center-section">
-                <div class="playback-controls">
-                    <Button icon="pi pi-step-backward" text rounded @click="previousTrack" />
-                    <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button"
-                        @click="togglePlay" />
-                    <Button icon="pi pi-step-forward" text rounded @click="nextTrack" />
-                </div>
-            </div>
-            <div class="right-section">
-                <div class="volume-control" @mouseenter="showVolumePopover" @mouseleave="hideVolumePopover">
-                    <Button icon="pi pi-volume-up" text rounded />
-                    <div v-if="isVolumePopoverVisible" class="volume-popover">
-                        <Slider v-model="volume" orientation="vertical" :min="0" :max="1" :step="0.01" />
-                        <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
+                <div class="right-section">
+                    <div class="volume-control" @mouseenter="showVolumePopover" @mouseleave="hideVolumePopover">
+                        <Button icon="pi pi-volume-up" text rounded />
+                        <div v-if="isVolumePopoverVisible" class="volume-popover">
+                            <Slider v-model="volume" orientation="vertical" :min="0" :max="1" :step="0.01" />
+                            <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
+                        </div>
                     </div>
+                    <Button text rounded>
+                        <SvgAsset iconName="lyric" :size="22" />
+                    </Button>
+                    <Button text rounded @click="toggleRepeatMode">
+                        <SvgAsset :iconName="repeatModeIcon" :size="22" />
+                    </Button>
+                    <Button icon="pi pi-list" text rounded @click="showPlaylist" />
                 </div>
-                <Button text rounded>
-                    <SvgAsset iconName="lyric" :size="22" />
-                </Button>
-                <Button text rounded @click="toggleRepeatMode">
-                    <SvgAsset :iconName="repeatModeIcon" :size="22" />
-                </Button>
-                <Button icon="pi pi-list" text rounded @click="showPlaylist" />
             </div>
         </div>
+        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform"/>
     </div>
 </template>
 
@@ -52,6 +60,8 @@ import { storeToRefs } from 'pinia';
 import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
+import LyricView from '../LyricView.vue';
+import { platform } from 'os';
 
 const playerStore = usePlayerStore();
 const { volume, isPlaying } = storeToRefs(playerStore);
@@ -119,6 +129,12 @@ const toggleRepeatMode = () => {
     playerStore.setRepeatMode(modes[nextIndex]);
 };
 
+const showLyricView = ref(false);
+
+const toggleLyricView = () => {
+    showLyricView.value = !showLyricView.value;
+};
+
 </script>
 
 <style scoped>
@@ -128,6 +144,7 @@ const toggleRepeatMode = () => {
     background-color: #f8f9fa;
     border-top: 1px solid #e9ecef;
     z-index: 999;
+    position: relative;
 }
 
 .progress-slider {
@@ -149,11 +166,41 @@ const toggleRepeatMode = () => {
     flex: 1;
 }
 
-.album-cover {
+.album-cover-container {
+    position: relative;
     width: 48px;
     height: 48px;
+}
+
+.album-cover {
+    width: 100%;
+    height: 100%;
     border-radius: 4px;
     object-fit: cover;
+}
+
+.album-cover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 4px;
+}
+
+.album-cover-container:hover .album-cover-overlay {
+    opacity: 1;
+}
+
+.album-cover-overlay i {
+    color: white;
+    font-size: 1.5rem;
 }
 
 .song-details {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useMusicSourcePlugin } from '@/hooks/useMusicSourcePlugin';
 
 interface StoredPlugin {
@@ -70,11 +70,16 @@ export const usePluginStore = defineStore('plugin', () => {
         return plugins.value.find(p => p.platform === platform);
     }
 
+    const lyricSupportPlugins = computed(() => {
+        return plugins.value.filter(p => p.getLyric)
+    });
+
     return {
         storedPlugins,
         plugins,
         currentPluginId,
         activePluginIndex,
+        lyricSupportPlugins,
         addPlugin,
         removePlugin,
         updatePlugin,

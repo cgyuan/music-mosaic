@@ -123,7 +123,7 @@ defineExpose({ visible });
   right: 0;
   bottom: 68px;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 998;
+  z-index: 9999;
 }
 
 .playlist-drawer {
@@ -135,7 +135,7 @@ defineExpose({ visible });
   background-color: white;
   /* box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); */
   transition: right 0.3s ease;
-  z-index: 999;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
 }
