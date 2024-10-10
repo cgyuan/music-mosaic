@@ -80,7 +80,17 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function setAudioSrc(track: IMusic.IMusicItem) {
-        const src = await getMediaSource(track);
+        audioElement.value && audioElement.value.pause();
+        
+        // Add 5-second timeout to getMediaSource
+        const src = await Promise.race([
+            getMediaSource(track),
+            new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Timeout getting media source')), 5000))
+        ]).catch(error => {
+            console.error('Error or timeout getting media source:', error);
+            return null;
+        });
+
         if (!audioElement.value) {
             audioElement.value = new Audio();
             audioElement.value.volume = volumeValue.value;
