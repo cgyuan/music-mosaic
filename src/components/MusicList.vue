@@ -46,7 +46,7 @@
         <ContextMenu ref="cm" :model="contextMenuItems" />
         <Dialog v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
             <div class="music-sheett-selection">
-                <div class="new-music-sheett">
+                <div class="new-music-sheett" @click="uiStore.showNewMusicSheetModal()">
                     <i class="pi pi-plus"></i>
                     <span>新建歌单</span>
                 </div>
@@ -70,6 +70,7 @@ import CustomDataTable from '@/components/CustomDataTable.vue';
 import Dialog from 'primevue/dialog';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import MusicSheet from '@/music-sheet';
+import { useUIStore } from '@/store/uiStore';
 
 const props = withDefaults(defineProps<{
     platform?: string;
@@ -79,6 +80,8 @@ const props = withDefaults(defineProps<{
 }>(), {
     showHeader: true
 });
+
+const uiStore =  useUIStore();
 
 const dataTableRef = ref<InstanceType<typeof CustomDataTable> | null>(null);
 
@@ -248,6 +251,7 @@ defineExpose({
     display: flex;
     flex-direction: column;
     gap: 10px;
+    max-height: 300px;
 }
 
 .new-music-sheett,

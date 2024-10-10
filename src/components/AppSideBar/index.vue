@@ -16,7 +16,7 @@
                     <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
-                <SvgAsset iconName="plus" :size="16" @click.stop="showCreatePlaylistModal" />
+                <SvgAsset iconName="plus" :size="16" @click.stop="showCreateMusicSheetModal" />
             </div>
             <SidebarItem v-if="isMusicSheetOpen"
                 v-for="item in musicSheets" 
@@ -69,18 +69,19 @@ import MusicSheet from '@/music-sheet';
 import { MusicSheetType } from '@/common/constant';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
+import { useUIStore } from '@/store/uiStore';
 
 const pluginStore = usePluginStore();
 const { activePluginIndex } = storeToRefs(pluginStore);
+
+const uiStore = useUIStore();
+const { isMusicSheetModalVisible, isEditingMusicSheet } = storeToRefs(uiStore);
 
 const musicSheets = MusicSheet.frontend.useAllSheets();
 const starredSheets = MusicSheet.frontend.useAllStarredSheets();
 
 const route = useRoute();
 const router = useRouter();
-
-const isEditingMusicSheet = ref(false);
-const isMusicSheetModalVisible = ref(false);
 
 let selectedMusicSheet = null as IMusic.IDBMusicSheetItem | null;
 
@@ -151,10 +152,9 @@ const navigateTo = (path: string) => {
     router.push(path);
 };
 
-const showCreatePlaylistModal = () => {
-    isEditingMusicSheet.value = false;
+const showCreateMusicSheetModal = () => {
     selectedMusicSheet = null;
-    isMusicSheetModalVisible.value = true;
+    uiStore.showNewMusicSheetModal();
 };
 
 const handleMusicSheetSubmit = async (title: string) => {

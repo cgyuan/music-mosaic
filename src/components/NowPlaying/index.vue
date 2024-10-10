@@ -61,10 +61,14 @@ import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import LyricView from '../LyricView.vue';
-import { platform } from 'os';
+import { useUIStore } from '@/store/uiStore';
 
 const playerStore = usePlayerStore();
 const { volume, isPlaying } = storeToRefs(playerStore);
+
+const uiStore = useUIStore();
+const { showLyricView } = storeToRefs(uiStore);
+
 const progress = computed({
     get: () => playerStore.progress,
     set: (value) => playerStore.seek(value)
@@ -128,8 +132,6 @@ const toggleRepeatMode = () => {
     const nextIndex = (currentIndex + 1) % modes.length;
     playerStore.setRepeatMode(modes[nextIndex]);
 };
-
-const showLyricView = ref(false);
 
 const toggleLyricView = () => {
     showLyricView.value = !showLyricView.value;

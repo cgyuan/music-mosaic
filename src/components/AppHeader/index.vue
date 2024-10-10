@@ -52,7 +52,11 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import SvgAsset from '../SvgAsset.vue';
+import { useUIStore } from '@/store/uiStore';
+import { storeToRefs } from 'pinia';
 
+
+const { showLyricView } = storeToRefs(useUIStore());
 const router = useRouter();
 const route = useRoute();
 const searchQuery = ref('');
@@ -65,12 +69,20 @@ const updateNavigationState = () => {
 };
 
 const goBack = () => {
+    if (showLyricView.value) {
+        showLyricView.value = false;
+        return;
+    }
     if (canGoBack.value) {
         router.back();
     }
 };
 
 const goForward = () => {
+    if (showLyricView.value) {
+        showLyricView.value = false;
+        return;
+    }
     if (canGoForward.value) {
         router.forward();
     }
@@ -78,6 +90,7 @@ const goForward = () => {
 
 const handleSearch = () => {
     if (searchQuery.value.trim()) {
+        showLyricView.value = false;
         router.push({ name: 'search', params: { query: searchQuery.value.trim() } });
     }
 };
