@@ -46,7 +46,7 @@
                 </div>
             </div>
         </div>
-        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform"/>
+        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform" :showTranslation="true"/>
     </div>
 </template>
 

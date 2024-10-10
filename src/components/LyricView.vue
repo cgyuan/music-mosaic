@@ -13,12 +13,13 @@
         
         <div class="lyrics-content" 
              ref="lyricsContainer">
-          <p v-for="(line, index) in parsedLyrics" 
-             :key="index" 
-             :class="['lyric-line', { 'active': index === currentLineIndex }]"
-             :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
-            {{ line.text }}
-          </p>
+          <div v-for="(line, index) in parsedLyrics" 
+               :key="index" 
+               :class="['lyric-line', { 'active': index === currentLineIndex }]"
+               :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
+            <p>{{ line.text }}</p>
+            <p v-if="showTranslation && line.translation" class="translation">{{ line.translation }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -37,12 +38,13 @@ import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
 // @ts-ignore
 import ColorThief from 'colorthief'
-// import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/tauri';
 import SvgAsset from './SvgAsset.vue';
 
 const props = defineProps<{
   platform?: string,
-  show: boolean
+  show: boolean,
+  showTranslation?: boolean
 }>();
 
 const emit = defineEmits(['close']);
@@ -54,7 +56,7 @@ const { lyricSupportPlugins } = storeToRefs(pluginStore);
 const currentTrack = computed(() => playerStore.currentTrack);
 const currentTime = computed(() => playerStore.currentTime);
 
-const parsedLyrics = ref<Array<{ time: number, text: string }>>([]);
+const parsedLyrics = ref<Array<{ time: number, text: string, translation?: string }>>([]);
 const currentLineIndex = ref(0);
 const currentLineRef = ref<HTMLElement | null>(null);
 const lyricsContainer = ref<HTMLElement | null>(null);
@@ -67,11 +69,18 @@ const loadAndRenderLyric = async () => {
   if (plugin && currentTrack.value) {
     try {
       const res = await plugin.getLyric!(currentTrack.value);
-      // console.log('lyric', res);
-      // await invoke('plugin_log', { message: res?.rawLrc });
       if (res?.rawLrc) {
         const lyrics = parseLyrics(res.rawLrc);
-        parsedLyrics.value = lyrics.filter((lyric): lyric is { time: number; text: string } => lyric !== null);
+        const translations = res.translation ? parseLyrics(res.translation) : [];
+        
+        // Merge lyrics and translations based on timestamps
+        parsedLyrics.value = lyrics.map(lyric => {
+          const translation = translations.find(t => t.time === lyric.time);
+          return {
+            ...lyric,
+            translation: translation?.text
+          };
+        });
       }
     } catch (error) {
       console.error("getLyric error", error);
@@ -91,8 +100,8 @@ watch(currentTrack, () => {
 const parseLyrics = (rawLyrics: string) => {
   const lines = rawLyrics.split('\n');
   return lines.map(line => {
-    // Match [mm:ss.xx] format
-    const match1 = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+     // Match [mm:ss.xx] format
+     const match1 = line.match(/\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/);
     if (match1) {
       const [, minutes, seconds, text] = match1;
       const time = parseInt(minutes) * 60 + parseFloat(seconds);
@@ -108,7 +117,7 @@ const parseLyrics = (rawLyrics: string) => {
     }
     
     return null;
-  }).filter(Boolean);
+  }).filter((line): line is { time: number; text: string } => line !== null);
 };
 
 watch(currentTime, (newTime) => {
@@ -214,7 +223,7 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -284,16 +293,25 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
 }
 
 .lyric-line {
-  margin-bottom: 10px;
   font-size: 16px;
   text-align: center;
   transition: all 0.3s ease;
 }
 
+.lyric-line p {
+  margin: 6px 0;
+}
+
 .lyric-line.active {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: bold;
   color: #f0a050;
+}
+
+.lyric-line .translation {
+  font-size: 14px;
+  color: #999;
+  margin-top: 5px;
 }
 
 .close-button {
