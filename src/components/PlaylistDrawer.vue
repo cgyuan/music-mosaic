@@ -41,6 +41,9 @@
         <template #cell:remove="{ item, index }">
           <SvgAsset class="remove-icon" iconName="x-mark" :size="16" @click.stop="removeFromPlaylist(index)" />
         </template>
+        <template #empty>
+          <Empty />
+        </template>
       </CustomDataTable>
     </div>
   </Teleport>
@@ -54,6 +57,7 @@ import MusicFavorite from './MusicFavorite.vue';
 import MusicDownloaded from './MusicDownloaded.vue';
 import CustomDataTable from './CustomDataTable.vue';
 import SvgAsset from '@/components/SvgAsset.vue';
+import Empty from '@/components/Empty.vue';
 
 const dataTable = ref<InstanceType<typeof CustomDataTable> | null>(null);
 const playerStore = usePlayerStore();

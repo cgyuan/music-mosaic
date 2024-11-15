@@ -193,6 +193,12 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     function clearPlaylist() {
+        if (audioElement.value) {
+            audioElement.value.pause();
+        }
+        duration.value = 0;
+        currentTime.value = 0;
+        currentTrack.value = null;
         playlist.value = [];
     }
 

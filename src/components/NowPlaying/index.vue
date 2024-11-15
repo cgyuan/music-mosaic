@@ -3,7 +3,9 @@
         <div class="now-playing">
             <Slider v-model="progress" class="progress-slider" />
             <div class="content">
-                <div class="left-section">
+                <div class="left-section" :style="{
+                    visibility: currentTrack ? 'visible' : 'hidden'
+                }">
                     <div class="album-cover-container" @click="toggleLyricView">
                         <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
                             :alt="currentTrack?.title">
@@ -79,6 +81,7 @@ const currentTime = computed(() => playerStore.currentTime);
 const duration = computed(() => playerStore.duration);
 
 const togglePlay = () => {
+    if (!currentTrack.value) return;
     if (isPlaying.value) {
         playerStore.pause();
     } else {
@@ -87,10 +90,12 @@ const togglePlay = () => {
 };
 
 const previousTrack = () => {
+    if (!currentTrack.value) return;
     playerStore.previousTrack();
 };
 
 const nextTrack = () => {
+    if (!currentTrack.value) return;
     playerStore.nextTrack();
 };
 
