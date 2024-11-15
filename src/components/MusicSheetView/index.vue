@@ -29,6 +29,7 @@ const musicListRef = ref<InstanceType<typeof MusicList>>()
 .music-sheet-view {
     height: 100%;
     display: flex;
+    width: 100%;
     flex-direction: column;
 }
 

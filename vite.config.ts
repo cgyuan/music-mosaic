@@ -3,7 +3,8 @@ import vue from "@vitejs/plugin-vue";
 import Components from 'unplugin-vue-components/vite';
 import {PrimeVueResolver} from '@primevue/auto-import-resolver';
 import { resolve } from 'path';
-import svgLoader from 'vite-svg-loader'
+import svgLoader from 'vite-svg-loader';
+import { CodeInspectorPlugin } from 'code-inspector-plugin';
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
@@ -14,6 +15,9 @@ export default defineConfig(async () => ({
       resolvers: [
         PrimeVueResolver()
       ]
+    }),
+    CodeInspectorPlugin({
+      bundler: 'vite',
     })
   ],
 
