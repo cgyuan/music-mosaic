@@ -195,6 +195,19 @@ export const usePlayerStore = defineStore('player', () => {
     function clearPlaylist() {
         if (audioElement.value) {
             audioElement.value.pause();
+            audioElement.value.src = '';
+            
+            // Clear media session metadata and state
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = null;
+                navigator.mediaSession.playbackState = 'none';
+                // Clear all media session action handlers
+                ['play', 'pause', 'previoustrack', 'nexttrack'].forEach(action => {
+                    navigator.mediaSession.setActionHandler(action as MediaSessionAction, null);
+                });
+            }
+            
+            audioElement.value = null;
         }
         duration.value = 0;
         currentTime.value = 0;

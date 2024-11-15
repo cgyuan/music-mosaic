@@ -58,12 +58,16 @@ import MusicDownloaded from './MusicDownloaded.vue';
 import CustomDataTable from './CustomDataTable.vue';
 import SvgAsset from '@/components/SvgAsset.vue';
 import Empty from '@/components/Empty.vue';
+import { useUIStore } from '@/store/uiStore';
+import { storeToRefs } from 'pinia';
 
 const dataTable = ref<InstanceType<typeof CustomDataTable> | null>(null);
 const playerStore = usePlayerStore();
 const visible = ref(false);
 const playlist = computed(() => playerStore.playlist);
 const isTransitionComplete = ref(false);
+
+const { showLyricView } = storeToRefs(useUIStore());
 
 const columns = [
   { field: 'actions', header: '', width: '100px' },
@@ -74,6 +78,7 @@ const columns = [
 ];
 
 const clearPlaylist = () => {
+  showLyricView.value = false;
   playerStore.clearPlaylist();
 };
 
