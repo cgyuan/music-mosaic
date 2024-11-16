@@ -27,7 +27,7 @@ const downloadingProgress = new Map<string, IDownloadStatus>();
 type IOnStateChangeFunc = (data: IDownloadStatus) => void;
 
 async function setupDownloader() {
-    setupDownloadedMusicList();
+    await setupDownloadedMusicList();
 }
 
 async function getMediaSource(track: IMusic.IMusicItem) {

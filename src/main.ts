@@ -11,6 +11,7 @@ import "primeicons/primeicons.css";
 import { definePreset } from "@primevue/themes";
 import { indexedDBStorage } from "./utils/indexedDBStorage";
 import Chip from "primevue/chip";
+import Downloader from '@/downloader';
 
 const app = createApp(App);
 
@@ -82,4 +83,8 @@ app.use(PrimeVue, {
     }
 });
 
-app.mount("#app");
+(async () => {
+    await Downloader.setupDownloader();
+    app.mount("#app");
+})();
+
