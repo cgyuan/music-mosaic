@@ -21,6 +21,7 @@ use reqwest;
 use std::fs::File;
 use std::io::Write;
 use std::collections::HashMap;
+use std::process::Command;
 
 #[command]
 async fn http_request(method: String, url: String, headers: Option<Value>, body: Option<String>) -> Result<String, String> {
@@ -81,8 +82,41 @@ async fn check_path_exists(path: String) -> Result<bool, String> {
 
 #[tauri::command]
 async fn delete_file(path: String) -> Result<(), String> {
+    // check if file exists
+    if !std::path::Path::new(&path).exists() {
+        return Err("File does not exist".to_string());
+    }
     std::fs::remove_file(path)
         .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn open_folder(path: String) -> Result<(), String> {
+    #[cfg(target_os = "windows")]
+    {
+        Command::new("explorer")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        Command::new("open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        Command::new("xdg-open")
+            .arg(&path)
+            .spawn()
+            .map_err(|e| e.to_string())?;h
+    }
+
+    Ok(())
 }
 
 #[tauri::command]
@@ -120,7 +154,7 @@ async fn download_file(url: String, file_path: String, headers: HashMap<String, 
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![http_request, plugin_log, download_file])
+        .invoke_handler(tauri::generate_handler![http_request, plugin_log, download_file, delete_file, open_folder])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

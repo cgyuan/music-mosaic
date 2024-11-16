@@ -65,12 +65,20 @@ import { usePlayerStore } from '@/store/playerStore';
 import Loading from '@/components/Loading.vue';
 import Empty from '@/components/Empty.vue';
 import ContextMenu from 'primevue/contextmenu';
-import { RequestStateCode } from '@/common/constant';
+import { DownloadState, RequestStateCode } from '@/common/constant';
 import CustomDataTable from '@/components/CustomDataTable.vue';
 import Dialog from 'primevue/dialog';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import MusicSheet from '@/music-sheet';
 import { useUIStore } from '@/store/uiStore';
+import Downloader from '@/downloader';
+import { useRoute } from 'vue-router';
+import { isDownloaded, removeDownloadedMusic } from '@/downloader/downloaded-sheet';
+import { invoke } from '@tauri-apps/api/tauri';
+import { getInternalData } from '@/common/media-util';
+
+const route = useRoute();
+const path = route.path;
 
 const props = withDefaults(defineProps<{
     platform?: string;
@@ -103,7 +111,7 @@ const selectedTrack = ref<IMusic.IMusicItem | null>(null);
 
 const showMusicSheetDialog = ref(false);
 
-const contextMenuItems = ref([
+const contextMenuItems = computed(() => [
     {
         label: '下一首播放',
         icon: 'pi pi-play',
@@ -122,16 +130,43 @@ const contextMenuItems = ref([
             }
         }
     },
-    {
+    ...(path.startsWith('/my-music-sheet-detail') ? [{
+        label: '从歌单内移除',
+        icon: 'pi pi-trash',
+        command: () => {
+            console.log('delete');
+            const sheetId = route.params.id as string;
+            MusicSheet.frontend.removeMusicFromSheet(selectedTrack.value!, sheetId);
+        }
+    }] : []),
+    ...(selectedTrack.value && !isDownloaded(selectedTrack.value) ? [{
         label: '下载',
         icon: 'pi pi-download',
         command: () => {
-            if (selectedTrack.value) {
-                // Implement download functionality
-                console.log('Download:', selectedTrack.value);
+            Downloader.startDownload(selectedTrack.value!);
+        }
+    }] : [
+        {
+            label: '删除本地下载',
+            icon: 'pi pi-trash',
+            command: () => {
+                removeDownloadedMusic(selectedTrack.value!, true);
+            }
+        },
+        {
+            label: '打开歌曲所在文件夹',
+            icon: 'pi pi-folder',
+            command: () => {
+                const path = getInternalData(selectedTrack.value!, "downloadData")?.path;
+                if (path) {
+                    // get the folder path
+                    const folderPath = path.replace(/\\/g, "/").split("/").slice(0, -1).join("/");
+                    console.log("folderPath", folderPath);
+                    invoke("open_folder", { path: folderPath });
+                }
             }
         }
-    }
+    ])
 ]);
 
 const columns = [

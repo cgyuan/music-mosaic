@@ -13,6 +13,7 @@ import musicSheetDB from "../db/music-sheet-db";
 import { internalDataKey, musicRefSymbol } from "@/common/constant";
 import { DownloadEvts, ee } from "./ee";
 import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { invoke } from '@tauri-apps/api/tauri';
 
 const downloadedMusicListStore = new Store<IMusic.IMusicItem[]>([]);
 const downloadedSet = new Set<string>();
@@ -125,7 +126,10 @@ export async function removeDownloadedMusic(
       removeResults = await Promise.all(
         toBeRemovedMusicDetail.map((it) => {
           try {
-            // TODO: 删除文件
+            const path = getInternalData<IMusic.IMusicItemInternalData>(it!, "downloadData")?.path;
+            if (path) {
+              invoke("delete_file", { path });
+            }
             return true;
           } catch (e: any) {
             // 删除失败
@@ -135,6 +139,7 @@ export async function removeDownloadedMusic(
         })
       );
     }
+
     // 3. 修改数据库
     await musicSheetDB.transaction("rw", musicSheetDB.musicStore, async () => {
       const needDelete: any[] = [];
