@@ -46,11 +46,11 @@
         <ContextMenu ref="cm" :model="contextMenuItems" />
         <Dialog v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
             <div class="music-sheett-selection">
-                <div class="new-music-sheett" @click="uiStore.showNewMusicSheetModal()">
+                <div class="new-music-sheet" @click="uiStore.showNewMusicSheetModal()">
                     <i class="pi pi-plus"></i>
                     <span>新建歌单</span>
                 </div>
-                <div v-for="item in musicSheets" :key="item.id" class="music-sheett-item" @click="addToMusicSheet(item.id)">
+                <div v-for="item in musicSheets" :key="item.id" class="music-sheet-item" @click="addToMusicSheet(item.id)">
                     <img :src="item.artwork || albumCover" :alt="item.title">
                     <span>{{ item.title }}</span>
                 </div>
@@ -163,7 +163,9 @@ const onRowDoubleClick = async (event: { item: IMusic.IMusicItem }) => {
     // Add the current music list to the playlist
     playerStore.setPlaylist([]);
     await nextTick();
-    playerStore.setPlaylist(props.musicList || []);
+    // clone the music list to avoid direct mutation  
+    const musicList = JSON.parse(JSON.stringify(props.musicList || []));
+    playerStore.setPlaylist(musicList);
     playerStore.setCurrentTrackAndPlay(event.item);
 
 };
@@ -254,8 +256,8 @@ defineExpose({
     max-height: 300px;
 }
 
-.new-music-sheett,
-.music-sheett-item {
+.new-music-sheet,
+.music-sheet-item {
     display: flex;
     align-items: center;
     padding: 10px;
@@ -263,17 +265,26 @@ defineExpose({
     border-radius: 4px;
 }
 
-.new-music-sheett:hover,
-.music-sheett-item:hover {
+.new-music-sheet:hover,
+.music-sheet-item:hover {
     background-color: #f0f0f0;
 }
 
-.new-music-sheett i {
+.music-sheet-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.new-music-sheet i {
     font-size: 24px;
     margin-right: 10px;
 }
 
-.music-sheett-item img {
+.music-sheet-item img {
     width: 40px;
     height: 40px;
     object-fit: cover;

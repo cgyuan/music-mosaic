@@ -23,7 +23,15 @@
         "removeDir": true,
         "removeFile": true,
         "renameFile": true,
-        "exists": true
+        "exists": true,
+        "scope": [
+          "$HOME/**",
+          "$HOME/.music-download/**",
+          "$HOME/.music-download"
+        ]
+      },
+      "path": {
+        "all": true
       },
       "dialog": {
         "all": true,

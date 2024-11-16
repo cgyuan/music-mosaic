@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { usePluginStore } from './pluginStore';
 import { RepeatMode } from '@/components/NowPlaying/enum';
 import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
+import { isSameMedia } from '@/common/media-util';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -117,7 +118,19 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     function setPlayNext(track: IMusic.IMusicItem) {
+        if (isSameMedia(currentTrack.value, track)) {
+            return;
+        }
         const currentIndex = playlist.value.findIndex(track => track.id === currentTrack.value?.id);
+        // check if the track is already in the playlist
+        if (playlist.value.find(t => isSameMedia(t, track))) {
+            // remove the track from the playlist
+            playlist.value.splice(playlist.value.findIndex(t => isSameMedia(t, track)), 1);
+            // add the track after the current track
+            playlist.value.splice(currentIndex + 1, 0, track);
+            return;
+        }
+
         if (currentIndex < playlist.value.length - 1) {
             playlist.value.splice(currentIndex + 1, 0, track);
         } else {

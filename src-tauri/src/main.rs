@@ -17,6 +17,10 @@ fn plugin_log(message: String, window: tauri::Window) {
 use tauri::command;
 use serde_json::Value;
 use url::Url;
+use reqwest;
+use std::fs::File;
+use std::io::Write;
+use std::collections::HashMap;
 
 #[command]
 async fn http_request(method: String, url: String, headers: Option<Value>, body: Option<String>) -> Result<String, String> {
@@ -70,9 +74,53 @@ async fn http_request(method: String, url: String, headers: Option<Value>, body:
 //     Ok(body)
 // }
 
+#[tauri::command]
+async fn check_path_exists(path: String) -> Result<bool, String> {
+    Ok(std::path::Path::new(&path).exists())
+}
+
+#[tauri::command]
+async fn delete_file(path: String) -> Result<(), String> {
+    std::fs::remove_file(path)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+async fn download_file(url: String, file_path: String, headers: HashMap<String, String>) -> Result<(), String> {
+    let client = reqwest::Client::new();
+    let mut request = client.get(&url);
+    
+    // Add headers
+    for (key, value) in headers {
+        request = request.header(&key, value);
+    }
+
+    let response = request
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if !response.status().is_success() {
+        return Err(format!("HTTP error: {}", response.status()));
+    }
+
+    let bytes = response
+        .bytes()
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut file = File::create(file_path)
+        .map_err(|e| e.to_string())?;
+
+    file.write_all(&bytes)
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![http_request, plugin_log])
+        .invoke_handler(tauri::generate_handler![http_request, plugin_log, download_file])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

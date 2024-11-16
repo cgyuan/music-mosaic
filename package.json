@@ -17,6 +17,7 @@
     "big-integer": "^1.6.52",
     "cheerio": "^1.0.0",
     "colorthief": "^2.4.0",
+    "comlink": "^4.4.2",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
     "dexie": "^4.0.8",
@@ -35,6 +36,7 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.0.7",
     "qs": "^6.13.0",
+    "rimraf": "^6.0.1",
     "vue": "^3.3.4",
     "vue-router": "^4.0.13"
   },
