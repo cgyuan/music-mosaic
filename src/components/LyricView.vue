@@ -1,7 +1,7 @@
 <template>
   <div class="lyric-detail" :class="{ 'show': show }">
     <div class="background-overlay" :style="{
-      backgroundImage: 'url(' + currentTrack?.artwork || currentTrack?.coverImg || albumCover + ')'
+      backgroundImage: `url(${currentTrack?.artwork || currentTrack?.coverImg || albumCover})`
     }"></div>
     <div class="lyric-container">
       <h1 class="song-title">{{ currentTrack?.title }}</h1>
