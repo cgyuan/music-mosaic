@@ -1,22 +1,21 @@
 <template>
   <div class="lyric-detail" :class="{ 'show': show }">
-    <div class="background-overlay" :style="backgroundStyle"></div>
-    <div class="content-overlay"></div>
+    <div class="background-overlay" :style="{
+      backgroundImage: 'url(' + currentTrack?.artwork || currentTrack?.coverImg || albumCover + ')'
+    }"></div>
     <div class="lyric-container">
       <h1 class="song-title">{{ currentTrack?.title }}</h1>
       <p class="artists">{{ currentTrack?.artist }}</p>
-      
+
       <div class="content-wrapper">
         <div class="album-cover">
           <img :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover" :alt="currentTrack?.title">
         </div>
-        
-        <div class="lyrics-content" 
-             ref="lyricsContainer">
-          <div v-for="(line, index) in parsedLyrics" 
-               :key="index" 
-               :class="['lyric-line', { 'active': index === currentLineIndex }]"
-               :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
+
+        <div class="lyrics-content" ref="lyricsContainer">
+          <div v-for="(line, index) in parsedLyrics" :key="index"
+            :class="['lyric-line', { 'active': index === currentLineIndex }]"
+            :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
             <p>{{ line.text }}</p>
             <p v-if="showTranslation && line.translation" class="translation">{{ line.translation }}</p>
           </div>
@@ -36,9 +35,6 @@ import Button from 'primevue/button';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
-// @ts-ignore
-import ColorThief from 'colorthief'
-import { invoke } from '@tauri-apps/api/tauri';
 import SvgAsset from './SvgAsset.vue';
 
 const props = defineProps<{
@@ -72,7 +68,7 @@ const loadAndRenderLyric = async () => {
       if (res?.rawLrc) {
         const lyrics = parseLyrics(res.rawLrc);
         const translations = res.translation ? parseLyrics(res.translation) : [];
-        
+
         // Merge lyrics and translations based on timestamps
         parsedLyrics.value = lyrics.map(lyric => {
           const translation = translations.find(t => t.time === lyric.time);
@@ -100,14 +96,14 @@ watch(currentTrack, () => {
 const parseLyrics = (rawLyrics: string) => {
   const lines = rawLyrics.split('\n');
   return lines.map(line => {
-     // Match [mm:ss.xx] format
-     const match1 = line.match(/\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/);
+    // Match [mm:ss.xx] format
+    const match1 = line.match(/\[(\d{2}):(\d{2}\.\d{2,3})\](.*)/);
     if (match1) {
       const [, minutes, seconds, text] = match1;
       const time = parseInt(minutes) * 60 + parseFloat(seconds);
       return { time, text: text.trim() };
     }
-    
+
     // Match [ss.ss] format
     const match2 = line.match(/\[(\d+\.\d+)\](.*)/);
     if (match2) {
@@ -115,7 +111,7 @@ const parseLyrics = (rawLyrics: string) => {
       const time = parseFloat(seconds);
       return { time, text: text.trim() };
     }
-    
+
     return null;
   }).filter((line): line is { time: number; text: string } => line !== null);
 };
@@ -146,40 +142,6 @@ const scrollToCurrentLine = () => {
 const close = () => {
   emit('close');
 };
-
-const backgroundColors = ref<string[]>([]);
-const backgroundStyle = computed(() => {
-  if (backgroundColors.value.length >= 3) {
-    const [color1, color2, color3] = backgroundColors.value;
-    return {
-      backgroundImage: `linear-gradient(to bottom, ${color1}, ${color2}, ${color3})`,
-    };
-  }
-  return {
-    backgroundImage: 'linear-gradient(to bottom, #f0f2f5, #e6e9ed)',
-  };
-});
-
-const extractColors = async (imageUrl: string) => {
-  const colorThief = new ColorThief();
-  const img = new Image();
-  img.crossOrigin = 'Anonymous';
-  img.src = imageUrl;
-
-  img.onload = () => {
-    const palette = colorThief.getPalette(img, 3);
-    backgroundColors.value = palette.map((color: number[]) => {
-      const [r, g, b] = color;
-      return `rgb(${r}, ${g}, ${b})`; // Full opacity
-    });
-  };
-};
-
-watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || albumCover, (newImageUrl) => {
-  if (newImageUrl) {
-    extractColors(newImageUrl);
-  }
-}, { immediate: true });
 </script>
 
 <style scoped>
@@ -214,18 +176,16 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0.6;
-}
-
-.content-overlay {
+  background-size: cover;
+  background-repeat: no-repeat;
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  filter: blur(50px);
+  opacity: 0.5;
+  mask-image: linear-gradient(to bottom, #fff, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, #fff, transparent);
+  z-index: -1;
+  transition: background-image ease 300ms;
+
 }
 
 .lyric-container {
@@ -284,12 +244,15 @@ watch(() => currentTrack.value?.artwork || currentTrack.value?.coverImg || album
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
-  scrollbar-width: none; /* For Firefox */
-  -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+  scrollbar-width: none;
+  /* For Firefox */
+  -ms-overflow-style: none;
+  /* For Internet Explorer and Edge */
 }
 
 .lyrics-content::-webkit-scrollbar {
-  display: none; /* For Chrome, Safari, and Opera */
+  display: none;
+  /* For Chrome, Safari, and Opera */
 }
 
 .lyric-line {
