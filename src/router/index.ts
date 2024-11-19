@@ -64,6 +64,11 @@ const routes: Array<RouteRecordRaw> = [
         path: '/search/:query',
         name: 'search',
         component: () => import('@/views/Main/pages/Search/index.vue')
+      },
+      {
+        path: '/settings',
+        name: 'settings',
+        component: () => import('@/views/Main/pages/Settings/index.vue')
       }
     ]
   }

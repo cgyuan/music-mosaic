@@ -46,6 +46,7 @@ declare module 'vue' {
     MusicSheetView: typeof import('./src/components/MusicSheetView/index.vue')['default']
     NowPlaying: typeof import('./src/components/NowPlaying/index.vue')['default']
     PlaylistDrawer: typeof import('./src/components/PlaylistDrawer.vue')['default']
+    RadioButton: typeof import('primevue/radiobutton')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SidebarItem: typeof import('./src/components/AppSideBar/SidebarItem.vue')['default']
