@@ -1,44 +1,30 @@
 <template>
-    <div class="app-header">
-        <div class="left-controls">
-            <Button 
-                severity="secondary" 
-                text 
-                rounded 
-                icon="pi pi-arrow-left"  
-                size="small" 
-                @click="goBack" 
-                :disabled="!canGoBack" 
-                :class="{ 'disabled-button': !canGoBack }"
-            />
-            <Button 
-                severity="secondary" 
-                text 
-                rounded 
-                icon="pi pi-arrow-right"  
-                size="small" 
-                @click="goForward" 
-                :disabled="!canGoForward" 
-                :class="{ 'disabled-button': !canGoForward }"
-            />
-        </div>
-        
+    <div class="app-header" data-tauri-drag-region>
+
         <div class="center-content">
+            <div class="left-controls">
+                <Button severity="secondary" text rounded size="small" @click="goBack"
+                    :disabled="!canGoBack" :class="{ 'disabled-button': !canGoBack }">
+                    <SvgAsset iconName="chevron-left"></SvgAsset>
+                </Button>
+                <Button :style="{
+                    display: 'none',
+                }" severity="secondary" text rounded size="small" @click="goForward"
+                    :disabled="!canGoForward" :class="{ 'disabled-button': !canGoForward }">
+                    <SvgAsset iconName="chevron-right"></SvgAsset>
+                </Button>
+            </div>
             <IconField>
                 <InputIcon class="pi pi-search" />
-                <InputText 
-                    v-model="searchQuery" 
-                    placeholder="Search" 
-                    @keyup.enter="handleSearch"
-                />
+                <InputText v-model="searchQuery" placeholder="请在这里输入搜索内容" @keyup.enter="handleSearch" />
             </IconField>
         </div>
-        
+
         <div class="right-controls">
             <Button severity="secondary" text rounded>
                 <SvgAsset iconName="t-shirt-line"></SvgAsset>
             </Button>
-            <Button severity="secondary" text rounded>
+            <Button severity="secondary" text rounded @click="router.push({ name: 'settings' })">
                 <SvgAsset iconName="cog-8-tooth"></SvgAsset>
             </Button>
             <Button severity="secondary" text rounded>
@@ -110,31 +96,51 @@ watch(route, updateNavigationState);
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 1rem;
-    background-color: white;
+    height: 57px;
+    background-color: var(--primaryColor);
     border-bottom: 1px solid #e9ecef;
 }
 
-.left-controls, .right-controls {
+.left-controls,
+.right-controls {
     display: flex;
     align-items: center;
 }
 
 .center-content {
-    flex-grow: 1;
+    margin-left: 200px;
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
 .p-inputtext {
-    width: 300px;
+    width: 250px;
 }
 
 :deep(.p-button.p-button-text) {
-    color: #6c757d;
+    color: var(--headerTextColor);
     padding: 0.25rem;
 }
 
-.disabled-button {
-    color: #d3d3d3 !important; /* Lighter color for disabled buttons */
+:deep(.p-button) {
+    width: 30px;
+    height: 30px !important;
+}
+
+:deep(.p-inputtext) {
+    background: var(--maskColor);
+    outline: none;
+    border: none;
+    color: var(--headerTextColor);
+}
+
+:deep(.p-iconfield .p-inputicon) {
+    color: var(--placeholderColor);
+}
+
+:deep(.p-inputtext::placeholder) {
+    color: var(--placeholderColor);
 }
 </style>

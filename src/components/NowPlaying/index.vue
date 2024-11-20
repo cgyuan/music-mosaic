@@ -10,7 +10,8 @@
                         <img class="album-cover" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
                             :alt="currentTrack?.title">
                         <div class="album-cover-overlay">
-                            <SvgAsset :iconName="showLyricView ? 'chevron-double-down' : 'chevron-double-up'" :size="24" color="white" />
+                            <SvgAsset :iconName="showLyricView ? 'chevron-double-down' : 'chevron-double-up'" :size="24"
+                                color="white" />
                         </div>
                     </div>
                     <div class="song-details">
@@ -24,10 +25,15 @@
                 </div>
                 <div class="center-section">
                     <div class="playback-controls">
-                        <Button icon="pi pi-step-backward" text rounded @click="previousTrack" />
-                        <Button :icon="isPlaying ? 'pi pi-pause' : 'pi pi-play'" text rounded class="play-button"
-                            @click="togglePlay" />
-                        <Button icon="pi pi-step-forward" text rounded @click="nextTrack" />
+                        <div class="controller-button">
+                            <SvgAsset iconName="skip-left" @click="previousTrack"></SvgAsset>
+                        </div>
+                        <div class="controller-button play-or-pause primary-btn">
+                            <SvgAsset :iconName="isPlaying ? 'pause' : 'play'" @click="togglePlay"></SvgAsset>
+                        </div>
+                        <div class="controller-button">
+                            <SvgAsset iconName="skip-right" @click="nextTrack"></SvgAsset>
+                        </div>
                     </div>
                 </div>
                 <div class="right-section">
@@ -48,7 +54,8 @@
                 </div>
             </div>
         </div>
-        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform" :showTranslation="true"/>
+        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform"
+            :showTranslation="true" />
     </div>
 </template>
 
@@ -263,6 +270,31 @@ const toggleLyricView = () => {
     color: #ff5722 !important;
 }
 
+.controller-button {
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.play-or-pause {
+    width: 40px;
+    height: 40px;
+}
+
+.play-or-pause .svg {
+    width: 24px;
+    height: 24px;
+}
+
+.primary-btn {
+    background-color: var(--primaryColor);
+    color: white;
+}
+
 .right-section {
     display: flex;
     align-items: center;
@@ -292,7 +324,7 @@ const toggleLyricView = () => {
 }
 
 :deep(.p-slider-range) {
-    background: #ff5722;
+    background: var(--primaryColor);
 }
 
 .progress-slider :deep(.p-slider-handle) {

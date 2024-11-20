@@ -47,7 +47,7 @@ const MyPreset = definePreset(Aura, {
         },
         formField: {
             borderRadius: '9999px',
-            paddingX: '0.3rem',
+            paddingX: '0.5rem',
             paddingY: '0.3rem',
         },
     },

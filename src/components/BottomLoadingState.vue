@@ -26,7 +26,7 @@ defineProps<{
 }
 
 .load-more:hover {
-    color: #007bff;
+    color: var(--primaryColor);
 }
 
 .loading-icon {
@@ -34,7 +34,7 @@ defineProps<{
     width: 20px;
     height: 20px;
     margin-right: 10px;
-    border: 2px solid #007bff;
+    border: 2px solid var(--primaryColor);
     border-radius: 50%;
     border-top-color: transparent;
     animation: spin 1s linear infinite;

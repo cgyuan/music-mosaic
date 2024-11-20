@@ -245,15 +245,6 @@ const loadMore = async () => {
     /* Negative margin to compensate for padding */
 }
 
-:deep(.p-chip) {
-    cursor: pointer;
-}
-
-:deep(.p-chip.selected) {
-    background-color: #007bff;
-    color: #fff;
-}
-
 .tag-popover-content {
     width: 400px;
     max-height: 400px;

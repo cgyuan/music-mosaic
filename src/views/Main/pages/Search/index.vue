@@ -62,7 +62,7 @@ onMounted(() => {
 }
 
 .highlight {
-  color: #f0a050;
+  color: var(--primaryColor);
   font-weight: bold;
 }
 
@@ -83,7 +83,7 @@ onMounted(() => {
 }
 
 .category.active {
-  color: #f0a050;
+  color: var(--primaryColor);
 }
 
 .category.active::after {
@@ -93,7 +93,7 @@ onMounted(() => {
   left: 0;
   width: 100%;
   height: 2px;
-  background-color: #f0a050;
+  background-color: var(--primaryColor);
 }
 
 .tab-content {

@@ -11,7 +11,22 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
+
+    --primaryColor: #f17d34; /* 主色调 */
+    --backgroundColor: #fdfdfd; /* 背景色 */
+    --dividerColor: rgba(0, 0, 0, 0.1); /* 分割线颜色 */
+    --listHoverColor: rgba(0, 0, 0, 0.05); /* 列表悬浮颜色 */
+    --listActiveColor: rgba(0, 0, 0, 0.1); /* 列表选中颜色 */
+    --textColor: #333333; /* 主文本颜色 */
+    --maskColor: rgba(51, 51, 51, 0.2); /* 遮罩层颜色 */
+    --shadowColor: rgba(0, 0, 0, 0.2); /* 对话框等阴影颜色 */
+    --placeholderColor: #f4f4f4; /* 输入区背景颜色 */
+    --successColor: #08A34C; /* 成功颜色 */
+    --dangerColor: #FC5F5F; /* 危险颜色 */
+    --infoColor: #0A95C8; /* 通知颜色 */
+    --headerTextColor: white; /* 顶部文本颜色 */
   }
+
 
 * {
   box-sizing: border-box;
@@ -37,6 +52,24 @@ body {
     font-size: 14px;
 }
 
+.p-chip {
+  cursor: pointer;
+}
+
+.p-chip.selected {
+  background-color: var(--primaryColor);
+  color: #fff;
+}
+
 .p-tab {
-  font-size: 16px;
+  font-size: 14px;
+  color: var(--textColor) !important;
+}
+
+.p-tab-active {
+  color: var(--primaryColor) !important;
+}
+
+.p-tablist-active-bar {
+  background-color: var(--primaryColor) !important;
 }

@@ -38,6 +38,20 @@
         "open": true,
         "save": true
       },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "maximize": true,
+        "minimize": true,
+        "setIcon": true,
+        "setIgnoreCursorEvents": true,
+        "setResizable": true,
+        "show": true,
+        "startDragging": true,
+        "unmaximize": true,
+        "unminimize": true
+      },
       "http": {
         "all": false,
         "request": true,
@@ -47,8 +61,10 @@
     "windows": [
       {
         "title": "groove-genie",
-        "width": 800,
-        "height": 600
+        "width": 1200,
+        "height": 800,
+        "hiddenTitle": true,
+        "titleBarStyle": "Overlay"
       }
     ],
     "security": {
