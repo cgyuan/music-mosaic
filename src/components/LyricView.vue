@@ -7,7 +7,7 @@
     <div class="music-title">{{ currentTrack?.title }}</div>
     <div class="music-info">
       <span>{{ currentTrack?.artist || '未知作者' }}</span>
-      <span v-if="currentTrack?.album">-{{ currentTrack?.album }}</span>
+      <span v-if="currentTrack?.album">-　{{ currentTrack?.album }}</span>
       <Tag v-if="props.platform" :fill="true">{{ props.platform }}</Tag>
     </div>
 
@@ -152,7 +152,7 @@ watch(currentTime, (newTime) => {
 
 const scrollToCurrentLine = () => {
   if (currentLineRef.value && lyricsContainer.value) {
-    const offset = 30; 
+    const offset = 55; 
     const lineRect = currentLineRef.value.getBoundingClientRect();
     const containerRect = lyricsContainer.value.getBoundingClientRect();
     
@@ -249,7 +249,7 @@ const handleAnimationEnd = (event: AnimationEvent) => {
 .music-album-options {
   width: 260px;
   height: 260px;
-  margin-top: 90px;
+  margin-top: 70px;
   margin-right: 96px;
   object-fit: cover;
   -webkit-user-drag: none;

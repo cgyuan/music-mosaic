@@ -1,6 +1,7 @@
 <template>
     <Dialog 
         :visible="visible" 
+        :draggable="false"
         @update:visible="updateVisible" 
         modal 
         :header="isEditing ? '重命名歌单' : '创建新歌单'" 

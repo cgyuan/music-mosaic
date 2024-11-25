@@ -51,7 +51,7 @@
         </div>
         <ContextMenu ref="cm" :model="contextMenuItems" />
 
-        <Dialog v-model:visible="showPlaylistDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
+        <Dialog :draggable="false" v-model:visible="showPlaylistDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
             <div class="playlist-selection">
                 <div class="new-playlist" @click="createNewPlaylist">
                     <i class="pi pi-plus"></i>

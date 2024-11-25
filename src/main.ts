@@ -12,6 +12,7 @@ import { definePreset } from "@primevue/themes";
 import { indexedDBStorage } from "./utils/indexedDBStorage";
 import Downloader from '@/downloader';
 import 'animate.css';
+import ToastService from 'primevue/toastservice';
 
 const app = createApp(App);
 
@@ -29,7 +30,7 @@ pinia.use(
 );
 
 app.use(pinia);
-
+app.use(ToastService);
 const MyPreset = definePreset(Aura, {
     semantic: {
         primary: {

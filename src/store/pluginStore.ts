@@ -9,6 +9,7 @@ interface StoredPlugin {
     version?: string;
     supportedSearchType?: IMedia.SupportMediaType[];
     srcUrl?: string;
+    author?: string;
 }
 
 export const usePluginStore = defineStore('plugin', () => {
@@ -27,16 +28,35 @@ export const usePluginStore = defineStore('plugin', () => {
     }
     
     function addPlugin(plugin: IPlugin.IPluginInstance, code: string) {
-        plugins.value.push(plugin);
-        storedPlugins.value.push({
-            id: plugin.id!!,
-            code,
-            platform: plugin.platform,
-            version: plugin.version,
-            supportedSearchType: plugin.supportedSearchType,
-            srcUrl: plugin.srcUrl,
-        });
-        console.log('addPlugin', storedPlugins.value);
+        // 检查是否已存在, 根据platform检查
+        if (plugins.value.find(p => p.platform === plugin.platform)) {
+            // 替换保持顺序不变
+            const index = plugins.value.findIndex(p => p.platform === plugin.platform);
+            plugins.value[index] = plugin;
+            
+            // 同时更新 storedPlugins
+            const storedIndex = storedPlugins.value.findIndex(p => p.platform === plugin.platform);
+            storedPlugins.value[storedIndex] = {
+                id: plugin.id!!,
+                code,
+                platform: plugin.platform,
+                version: plugin.version,
+                supportedSearchType: plugin.supportedSearchType,
+                srcUrl: plugin.srcUrl,
+                author: plugin.author
+            };
+        } else {
+            plugins.value.push(plugin);
+            storedPlugins.value.push({
+                id: plugin.id!!,
+                code,
+                platform: plugin.platform,
+                version: plugin.version,
+                supportedSearchType: plugin.supportedSearchType,
+                srcUrl: plugin.srcUrl,
+                author: plugin.author
+            });
+        }
     }
 
     function removePlugin(id: string) {
@@ -74,6 +94,30 @@ export const usePluginStore = defineStore('plugin', () => {
         return plugins.value.filter(p => p.getLyric)
     });
 
+    function movePluginUp(plugin: IPlugin.IPluginInstance) {
+        const index = plugins.value.findIndex(p => p.id === plugin.id);
+        if (index > 0) {
+            [plugins.value[index], plugins.value[index - 1]] = [plugins.value[index - 1], plugins.value[index]];
+        }
+        // 同时更新 storedPlugins
+        const storedIndex = storedPlugins.value.findIndex(p => p.id === plugin.id);
+        if (storedIndex > 0) {
+            [storedPlugins.value[storedIndex], storedPlugins.value[storedIndex - 1]] = [storedPlugins.value[storedIndex - 1], storedPlugins.value[storedIndex]];
+        }
+    }
+
+    function movePluginDown(plugin: IPlugin.IPluginInstance) {
+        const index = plugins.value.findIndex(p => p.id === plugin.id);
+        if (index < plugins.value.length - 1) {
+            [plugins.value[index], plugins.value[index + 1]] = [plugins.value[index + 1], plugins.value[index]];
+        }
+        // 同时更新 storedPlugins
+        const storedIndex = storedPlugins.value.findIndex(p => p.id === plugin.id);
+        if (storedIndex < storedPlugins.value.length - 1) {
+            [storedPlugins.value[storedIndex], storedPlugins.value[storedIndex + 1]] = [storedPlugins.value[storedIndex + 1], storedPlugins.value[storedIndex]];
+        }
+    }
+
     return {
         storedPlugins,
         plugins,
@@ -88,6 +132,8 @@ export const usePluginStore = defineStore('plugin', () => {
         getCurrentPlugin,
         loadPlugins,
         getPluginByPlatform,
+        movePluginUp,
+        movePluginDown,
     };
 }, {
     persistedState: {

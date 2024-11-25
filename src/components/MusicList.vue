@@ -44,7 +44,7 @@
         </CustomDataTable>
 
         <ContextMenu ref="cm" :model="contextMenuItems" />
-        <Dialog v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
+        <Dialog :draggable="false" v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
             <div class="music-sheett-selection">
                 <div class="new-music-sheet" @click="uiStore.showNewMusicSheetModal()">
                     <i class="pi pi-plus"></i>

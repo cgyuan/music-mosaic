@@ -60,6 +60,7 @@ declare module 'vue' {
     TabPanels: typeof import('primevue/tabpanels')['default']
     Tabs: typeof import('primevue/tabs')['default']
     Tag: typeof import('./src/components/Tag.vue')['default']
+    Toast: typeof import('primevue/toast')['default']
   }
   export interface ComponentCustomProperties {
     Tooltip: typeof import('primevue/tooltip')['default']

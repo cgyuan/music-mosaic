@@ -1,5 +1,8 @@
 <template>
     <div class="plugin-manager">
+        <Toast :style="{
+            top: '60px',
+        }"/>
         <div class="header">
             <h1>插件管理</h1>
 
@@ -7,14 +10,18 @@
                 <div data-type="normalButton" role="button" @click="selectPluginFile">
                     <span>从本地文件安装</span>
                 </div>
-                <div data-type="normalButton" role="button">
+                <div data-type="normalButton" role="button" @click="showInstallPluginOnlineDialog">
                     <span>从网络安装插件</span>
                 </div>
                 <div class="spacer"></div>
-                <div data-type="normalButton" role="button">
+                <div data-type="normalButton" role="button" :style="{
+                    display: 'none',
+                }">
                     <span>订阅设置</span>
                 </div>
-                <div data-type="normalButton" role="button">
+                <div data-type="normalButton" role="button" :style="{
+                    display: 'none',
+                }">
                     <span>更新订阅</span>
                 </div>
             </div>
@@ -30,7 +37,7 @@
                 {{ item.author || '未知作者' }}
             </template>
 
-            <template #cell:actions="{ item }">
+            <template #cell:actions="{ item, index }">
                 <div class="table-action-buttons">
                     <div :style="{
                         color: 'var(--dangerColor, #FC5F5F)',
@@ -39,7 +46,7 @@
                     </div>
                     <div :style="{
                         color: 'var(--successColor, #08A34C)',
-                    }" role="button">
+                    }" role="button" @click="updatePlugin(item)">
                         <span>更新</span>
                     </div>
                     <div :style="{
@@ -47,11 +54,22 @@
                     }" v-if="item.supportedSearchType?.includes('sheet')" role="button">
                         <span>导入歌单</span>
                     </div>
+                    <div :style="{
+                        color: 'var(--primaryColor)',
+                    }" role="button" v-if="index < storedPlugins.length - 1" @click="movePluginDown(item)">
+                        <i class="pi pi-arrow-down"></i>
+                    </div>
+                    <div :style="{
+                        color: 'var(--primaryColor)',
+                    }" role="button" v-if="index > 0" @click="movePluginUp(item)">
+                        <i class="pi pi-arrow-up"></i>
+                    </div>
                 </div>
             </template>
         </CustomDataTable>
 
-        <Dialog class="backdrop-color" header="确认卸载" v-model:visible="confirmDialogVisible" :modal="true" :closable="false">
+        <Dialog :draggable="false" class="backdrop-color" header="确认卸载" v-model:visible="confirmDialogVisible"
+            :modal="true" :closable="false">
             <p>确定要卸载插件 {{ pluginToRemove!!.platform }} 吗？</p>
             <template #footer>
                 <div data-type="normalButton" role="button" @click="confirmDialogVisible = false">
@@ -62,12 +80,30 @@
                 </div>
             </template>
         </Dialog>
+        <Dialog :visible="installPluginOnlineDialogVisible" :draggable="false" modal
+            @update:visible="hideInstallPluginOnlineDialog" header="从网络安装插件" :style="{ width: '400px' }">
+            <Loading v-if="loading" />
+            <div v-else>
+                <div class="p-fluid">
+                    <div class="p-field">
+                        <InputText id="plugin-url" v-model="pluginUrl" placeholder="请输入插件的URL" autofocus />
+                    </div>
+                </div>
+                <div class="button-container">
+                    <div data-type="primaryButton" role="button" @click="installPluginOnline(false)"
+                        :data-disabled="!pluginUrl.trim()">
+                        <span :style="{
+                            fontSize: '16px',
+                        }">安装</span>
+                    </div>
+                </div>
+            </div>
+        </Dialog>
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import Button from 'primevue/button';
 import CustomDataTable from '../../../components/CustomDataTable.vue';
 import Dialog from 'primevue/dialog';
 import { selectAndReadFile, FileSelectResult } from '../../../utils/fileUtils';
@@ -75,10 +111,12 @@ import { useMusicSourcePlugin } from '../../../hooks/useMusicSourcePlugin';
 import { invoke } from '@tauri-apps/api/tauri';
 import { usePluginStore } from '../../../store/pluginStore';
 import { storeToRefs } from 'pinia';
+import Loading from '@/components/Loading.vue';
+import { useToast } from "primevue/usetoast";
 
 const pluginStore = usePluginStore();
 const { storedPlugins } = storeToRefs(pluginStore);
-
+const toast = useToast();
 pluginStore.$persistedState.isReady().then(() => {
     console.log('pluginStore is ready');
 });
@@ -87,6 +125,12 @@ const { parsePlugin } = useMusicSourcePlugin()
 
 const confirmDialogVisible = ref(false);
 const pluginToRemove = ref<IPlugin.IPluginInstance | null>(null);
+
+const pluginUrl = ref('');
+const installPluginOnlineDialogVisible = ref(false);
+const loading = ref(false);
+
+const willUpdatePlugin = ref<IPlugin.IPluginInstance | null>(null);
 
 const selectPluginFile = async () => {
     try {
@@ -99,6 +143,81 @@ const selectPluginFile = async () => {
     } catch (error) {
         console.error('Error in selectPluginFile:', error);
     }
+};
+
+const showInstallPluginOnlineDialog = () => {
+    installPluginOnlineDialogVisible.value = true;
+};
+
+const installPluginOnline = async (update = false) => {
+    loading.value = true;
+    try {
+        const response = await invoke('http_request', {
+            method: 'GET',
+            url: pluginUrl.value,
+            headers: {}
+        });
+        const fileName = pluginUrl.value.split('/').pop();
+        if (response) {
+            processFileContent(response as string, fileName!);
+        }
+        if (update) {
+            toast.add({
+                severity: 'success',
+                summary: '成功',
+                detail: `插件 ${willUpdatePlugin.value?.platform} 已更新到最新版本`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'success',
+                summary: '成功',
+                detail: '插件安装成功',
+                life: 3000
+            });
+        }
+    } catch (error) {
+        console.error('Error in installPluginOnline:', error);
+        if (update) {
+            toast.add({
+                severity: 'error',
+                summary: '失败',
+                detail: `插件 ${willUpdatePlugin.value?.platform} 更新失败`,
+                life: 3000
+            });
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: '失败',
+                detail: '插件安装失败',
+                life: 3000
+            });
+        }
+    } finally {
+        hideInstallPluginOnlineDialog();
+        loading.value = false;
+    }
+};
+
+const updatePlugin = (plugin: IPlugin.IPluginInstance) => {
+    willUpdatePlugin.value = plugin;
+    if (plugin.srcUrl) {
+        pluginUrl.value = plugin.srcUrl;
+        installPluginOnline(true);
+    }
+};
+
+const hideInstallPluginOnlineDialog = () => {
+    installPluginOnlineDialogVisible.value = false;
+    pluginUrl.value = '';
+};
+
+const movePluginUp = (plugin: IPlugin.IPluginInstance) => {
+    pluginStore.movePluginUp(plugin);
+};
+
+const movePluginDown = (plugin: IPlugin.IPluginInstance) => {
+    pluginStore.movePluginDown(plugin);
 };
 
 const processFileContent = async (code: string, fileName: string) => {
@@ -202,4 +321,26 @@ h1 {
 :deep(.p-button-info) {
     color: #17a2b8;
 }
+
+.p-dialog {
+    border-radius: 8px;
+}
+
+.p-field {
+    margin-bottom: 1rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+:deep(.p-inputtext) {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 4px;
+}
+
 </style>
