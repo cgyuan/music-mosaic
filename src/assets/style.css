@@ -27,7 +27,9 @@
     --headerTextColor: white; /* 顶部文本颜色 */
 
     font-size: 13px;
-  }
+    --scrollbarColor: rgba(0, 0, 0, 0.2);
+    --scrollbarHoverColor: rgba(0, 0, 0, 0.3);
+}
 
 * {
   box-sizing: border-box;
@@ -166,4 +168,34 @@ div[role="button"][data-type="dangerButton"][data-fill="true"] {
 
 .p-button:not(:disabled):hover {
   background-color: transparent !important;
+}
+
+/* 自定义滚动条样式 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--scrollbarColor, rgba(0, 0, 0, 0.2));
+    border-radius: 3px;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbarHoverColor, rgba(0, 0, 0, 0.3));
+}
+
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-thumb {
+        background: var(--scrollbarColor, rgba(255, 255, 255, 0.2));
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--scrollbarHoverColor, rgba(255, 255, 255, 0.3));
+    }
 }

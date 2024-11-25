@@ -32,7 +32,7 @@ import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
 import ImportMusicSheetModal from './ImportMusicSheetModal.vue';
 
-const props = defineProps<{
+defineProps<{
     modelValue: boolean
 }>();
 

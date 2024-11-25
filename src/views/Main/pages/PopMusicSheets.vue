@@ -210,7 +210,6 @@ const loadMore = async () => {
 .recommend-tags {
     margin-bottom: 1rem;
     overflow: visible;
-    /* Ensure no horizontal scrollbar appears */
 }
 
 .first-tag::after {
@@ -257,19 +256,6 @@ const loadMore = async () => {
     padding: 1rem;
     padding-right: calc(1rem - 6px);
     margin-right: -6px;
-}
-
-.tag-popover-scroll::-webkit-scrollbar {
-    width: 6px;
-}
-
-.tag-popover-scroll::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 3px;
-}
-
-.tag-popover-scroll::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
 }
 
 .tag-popover-content h3 {

@@ -259,6 +259,12 @@ const showPluginList = () => {
     padding: 1rem 0;
     overflow-y: auto;
     border-right: 1px solid var(--dividerColor);
+    scrollbar-width: none; 
+    -ms-overflow-style: none; 
+}
+
+.app-sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .sidebar-section {
