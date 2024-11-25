@@ -16,8 +16,10 @@
                     <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
-                <SvgAsset iconName="arrow-left-end-on-rectangle" :size="16" @click.stop="showPluginList" />
-                <SvgAsset iconName="plus" :size="16" @click.stop="showCreateMusicSheetModal" />
+                <div class="section-actions">
+                    <SvgAsset iconName="arrow-left-end-on-rectangle" :size="16" @click.stop="showPluginList" />
+                    <SvgAsset iconName="plus" :size="16" @click.stop="showCreateMusicSheetModal" />
+                </div>
             </div>
             <SidebarItem v-if="isMusicSheetOpen"
                 v-for="item in musicSheets" 
@@ -57,6 +59,7 @@
     />
     <ContextMenu :model="contextMenuItems" ref="contextMenu" />
     <ContextMenu :model="staredContextMenuItems" ref="staredContextMenu" />
+    <PluginListModal v-model="showPluginListModal" />
 </template>
 
 <script setup lang="ts">
@@ -71,6 +74,7 @@ import { MusicSheetType } from '@/common/constant';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
 import { useUIStore } from '@/store/uiStore';
+import PluginListModal from '../PluginListModal.vue';
 
 const pluginStore = usePluginStore();
 const { activePluginIndex } = storeToRefs(pluginStore);
@@ -240,8 +244,10 @@ const toggleStaredMusicSheetSection = () => {
     isStaredMusicSheetOpen.value = !isStaredMusicSheetOpen.value;
 };
 
+const showPluginListModal = ref(false);
+
 const showPluginList = () => {
-    
+    showPluginListModal.value = true;
 };
 </script>
 

@@ -1,13 +1,15 @@
 <template>
   <div class="app-container">
     <AppHeader />
+    <Toast :style="{
+      top: '60px',
+    }" />
     <div class="body-container">
       <AppSideBar />
       <MainContent class="">
         <router-view :key="$route.fullPath"></router-view>
       </MainContent>
-      <LyricView :platform="currentTrack?.platform"
-            :showTranslation="true" />
+      <LyricView :platform="currentTrack?.platform" :showTranslation="true" />
     </div>
     <NowPlaying />
     <PlaylistDrawer ref="playlistDrawer" />
@@ -19,6 +21,8 @@ import { provide, ref } from 'vue';
 import LyricView from '@/components/LyricView.vue';
 import { usePlayerStore } from '@/store/playerStore';
 import { storeToRefs } from 'pinia';
+import Toast from 'primevue/toast';
+
 
 const playerStore = usePlayerStore();
 const { currentTrack } = storeToRefs(playerStore);

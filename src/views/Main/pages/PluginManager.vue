@@ -1,8 +1,5 @@
 <template>
     <div class="plugin-manager">
-        <Toast :style="{
-            top: '60px',
-        }"/>
         <div class="header">
             <h1>插件管理</h1>
 

@@ -78,6 +78,7 @@ const showMusicSheetSelection = ref(false);
 const importedMusicList = ref<IMusic.IMusicItem[]>([]);
 
 const updateVisible = (value: boolean) => {
+    sheetUrl.value = '';
     emit('update:visible', value);
 };
 
