@@ -16,6 +16,7 @@
                     <i :class="isMusicSheetOpen ? 'pi pi-angle-down' : 'pi pi-angle-right'"></i>
                     <span>我的歌单</span>
                 </div>
+                <SvgAsset iconName="arrow-left-end-on-rectangle" :size="16" @click.stop="showPluginList" />
                 <SvgAsset iconName="plus" :size="16" @click.stop="showCreateMusicSheetModal" />
             </div>
             <SidebarItem v-if="isMusicSheetOpen"
@@ -62,7 +63,7 @@
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SidebarItem from './SidebarItem.vue';
-import { SvgAssetIconNames } from '../SvgAsset.vue';
+import SvgAsset, { SvgAssetIconNames } from '../SvgAsset.vue';
 import MusicSheetModal from './MusicSheetModal.vue';
 import ContextMenu from 'primevue/contextmenu';
 import MusicSheet from '@/music-sheet';
@@ -238,6 +239,10 @@ const isStaredMusicSheetOpen = ref(true);
 const toggleStaredMusicSheetSection = () => {
     isStaredMusicSheetOpen.value = !isStaredMusicSheetOpen.value;
 };
+
+const showPluginList = () => {
+    
+};
 </script>
 
 <style scoped>
@@ -270,6 +275,7 @@ const toggleStaredMusicSheetSection = () => {
     display: flex;
     align-items: center;
     gap: 0.2rem;
+    font-size: 1.1rem;
     color: var(--textColor);
 }
 

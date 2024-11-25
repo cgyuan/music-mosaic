@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <CustomDataTable :value="storedPlugins" :columns="columns" keyField="id" :stripedRows="true" showHeader
+        <CustomDataTable :value="plugins" :columns="columns" keyField="id" :stripedRows="true" showHeader
             class="plugin-table">
             <template #cell:index="{ index }">
                 {{ index + 1 }}
@@ -51,12 +51,12 @@
                     </div>
                     <div :style="{
                         color: 'var(--infoColor, #0A95C8)',
-                    }" v-if="item.supportedSearchType?.includes('sheet')" role="button">
+                    }" v-if="item.supportedSearchType?.includes('sheet')" role="button" @click="importMusicSheet(item)">
                         <span>导入歌单</span>
                     </div>
                     <div :style="{
                         color: 'var(--primaryColor)',
-                    }" role="button" v-if="index < storedPlugins.length - 1" @click="movePluginDown(item)">
+                    }" role="button" v-if="index < plugins.length - 1" @click="movePluginDown(item)">
                         <i class="pi pi-arrow-down"></i>
                     </div>
                     <div :style="{
@@ -99,6 +99,10 @@
                 </div>
             </div>
         </Dialog>
+        <ImportMusicSheetModal 
+            v-model:visible="importMusicSheetDialogVisible"
+            :plugin="selectedPlugin ?? undefined"
+        />
     </div>
 </template>
 
@@ -113,9 +117,10 @@ import { usePluginStore } from '../../../store/pluginStore';
 import { storeToRefs } from 'pinia';
 import Loading from '@/components/Loading.vue';
 import { useToast } from "primevue/usetoast";
+import ImportMusicSheetModal from '../../../components/ImportMusicSheetModal.vue';
 
 const pluginStore = usePluginStore();
-const { storedPlugins } = storeToRefs(pluginStore);
+const { plugins } = storeToRefs(pluginStore);
 const toast = useToast();
 pluginStore.$persistedState.isReady().then(() => {
     console.log('pluginStore is ready');
@@ -256,6 +261,14 @@ const columns = [
     { field: 'author', header: '作者', width: '20%' },
     { field: 'actions', header: '操作', width: '35%' }
 ];
+
+const importMusicSheetDialogVisible = ref(false);
+const selectedPlugin = ref<IPlugin.IPluginInstance | null>(null);
+
+const importMusicSheet = (plugin: IPlugin.IPluginInstance) => {
+    selectedPlugin.value = plugin;
+    importMusicSheetDialogVisible.value = true;
+};
 </script>
 
 <style scoped>

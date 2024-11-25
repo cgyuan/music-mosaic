@@ -207,18 +207,13 @@ const onRowDoubleClick = async (event: { item: IMusic.IMusicItem }) => {
 
 const addToMusicSheet = (sheetId: string) => {
     if (addAll.value) {
+        console.log(props.musicList);
         MusicSheet.frontend.addMusicToSheet(JSON.parse(JSON.stringify(props.musicList || [])), sheetId);
     } else if (selectedTrack.value) {
         MusicSheet.frontend.addMusicToSheet(JSON.parse(JSON.stringify(selectedTrack.value)), sheetId);
     }
     showMusicSheetDialog.value = false;
 };
-
-const createNewMusicSheet = () => {
-    // Implement new music-sheett creation logic
-    console.log('Create new music-sheett');
-};
-
 
 const handleDialogHide = () => {
     addAll.value = false;
