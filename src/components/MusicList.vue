@@ -171,12 +171,12 @@ const contextMenuItems = computed(() => [
 
 const columns = [
     { field: 'actions', header: '', width: '6rem' },
-    { field: 'index', header: '#', width: '3rem' },
+    { field: 'index', header: '#', width: '3.5rem' },
     { field: 'title', header: '标题' },
     { field: 'artist', header: '作者' },
     { field: 'album', header: '专辑' },
     { field: 'duration', header: '时长', width: '5rem' },
-    { field: 'platform', header: '来源', width: '8rem' }
+    { field: 'platform', header: '来源', width: '10rem' }
 ];
 
 const onRowRightClick = (event: { item: IMusic.IMusicItem, event: MouseEvent }) => {
@@ -278,10 +278,11 @@ defineExpose({
 }
 
 .source-tag {
-    background-color: #f0f0f0;
+    background-color: var(--primaryColor);
     border-radius: 12px;
     padding: 2px 8px;
     font-size: 12px;
+    color: white;
 }
 
 .music-sheett-selection {
@@ -298,11 +299,12 @@ defineExpose({
     padding: 10px;
     cursor: pointer;
     border-radius: 4px;
+    color: var(--textColor);
 }
 
 .new-music-sheet:hover,
 .music-sheet-item:hover {
-    background-color: #f0f0f0;
+    background-color: var(--listHoverColor);
 }
 
 .music-sheet-item span {

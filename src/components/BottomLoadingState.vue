@@ -23,6 +23,7 @@ defineProps<{
     justify-content: center;
     padding: 1rem;
     cursor: pointer;
+    color: var(--textColor);
 }
 
 .load-more:hover {

@@ -1,7 +1,9 @@
 <template>
     <div>
-        <div class="now-playing">
-            <Slider v-model="progress" class="progress-slider" />
+        <div class="now-playing music-bar-container">
+            <div class="progress-container">
+                <Slider v-model="progress" class="progress-slider" />
+            </div>
             <div class="content">
                 <div class="left-section" :style="{
                     visibility: currentTrack ? 'visible' : 'hidden'
@@ -25,20 +27,22 @@
                 </div>
                 <div class="center-section">
                     <div class="playback-controls">
-                        <div class="controller-button">
+                        <div class="controller-button skip">
                             <SvgAsset iconName="skip-left" @click="previousTrack"></SvgAsset>
                         </div>
                         <div class="controller-button play-or-pause primary-btn">
                             <SvgAsset :iconName="isPlaying ? 'pause' : 'play'" @click="togglePlay"></SvgAsset>
                         </div>
-                        <div class="controller-button">
+                        <div class="controller-button skip">
                             <SvgAsset iconName="skip-right" @click="nextTrack"></SvgAsset>
                         </div>
                     </div>
                 </div>
                 <div class="right-section">
                     <div class="volume-control" @mouseenter="showVolumePopover" @mouseleave="hideVolumePopover">
-                        <Button icon="pi pi-volume-up" text rounded />
+                        <Button text rounded @click="toggleMute">
+                            <SvgAsset :iconName="mute ? 'speaker-x-mark' : 'speaker-wave'" :size="22" />
+                        </Button>
                         <div v-if="isVolumePopoverVisible" class="volume-popover">
                             <Slider v-model="volume" orientation="vertical" :min="0" :max="1" :step="0.01" />
                             <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
@@ -50,12 +54,12 @@
                     <Button text rounded @click="toggleRepeatMode">
                         <SvgAsset :iconName="repeatModeIcon" :size="22" />
                     </Button>
-                    <Button icon="pi pi-list" text rounded @click="showPlaylist" />
+                    <Button text rounded @click="showPlaylist">
+                        <SvgAsset iconName="playlist" :size="22" />
+                    </Button>
                 </div>
             </div>
         </div>
-        <LyricView :show="showLyricView" @close="showLyricView = false" :platform="currentTrack?.platform"
-            :showTranslation="true" />
     </div>
 </template>
 
@@ -73,7 +77,7 @@ import LyricView from '../LyricView.vue';
 import { useUIStore } from '@/store/uiStore';
 
 const playerStore = usePlayerStore();
-const { volume, isPlaying } = storeToRefs(playerStore);
+const { volume, isPlaying, mute } = storeToRefs(playerStore);
 
 const uiStore = useUIStore();
 const { showLyricView } = storeToRefs(uiStore);
@@ -94,6 +98,10 @@ const togglePlay = () => {
     } else {
         playerStore.play();
     }
+};
+
+const toggleMute = () => {
+    playerStore.toggleMute();
 };
 
 const previousTrack = () => {
@@ -155,10 +163,13 @@ const toggleLyricView = () => {
 .now-playing {
     display: flex;
     flex-direction: column;
-    background-color: #f8f9fa;
-    border-top: 1px solid #e9ecef;
     z-index: 999;
     position: relative;
+    height: 64px;
+}
+
+.progress-container {
+    height: 4px;
 }
 
 .progress-slider {
@@ -167,10 +178,11 @@ const toggleLyricView = () => {
 }
 
 .content {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
+    padding: 0 1rem;
 }
 
 .left-section {
@@ -228,14 +240,15 @@ const toggleLyricView = () => {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+    color: var(--textColor);
 }
 
 .artist-and-time {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.9rem;
-    color: #6c757d;
+    font-size: 0.75rem;
+    color: var(--textColor);
 }
 
 .playback-time {
@@ -243,11 +256,11 @@ const toggleLyricView = () => {
 }
 
 .song-source {
-    font-size: 0.8rem;
-    color: #ff9800;
-    background-color: #fff3e0;
+    font-size: 1rem;
+    color: white;
+    background-color: var(--primaryColor);
     padding: 0.2rem 0.5rem;
-    border-radius: 4px;
+    border-radius: 9999px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -278,6 +291,7 @@ const toggleLyricView = () => {
     justify-content: center;
     margin-left: 8px;
     margin-right: 8px;
+    color: var(--textColor);
 }
 
 .play-or-pause {
@@ -304,11 +318,7 @@ const toggleLyricView = () => {
 }
 
 :deep(.p-button.p-button-text) {
-    color: #6c757d;
-}
-
-:deep(.p-button.p-button-text:hover) {
-    background-color: #e9ecef;
+    color: var(--textColor) !important;
 }
 
 :deep(.p-slider) {
@@ -345,7 +355,7 @@ const toggleLyricView = () => {
 }
 
 :deep(.p-slider-handle:focus-visible) {
-    /* outline: none; */
+    outline: none;
     outline-offset: 0;
 }
 
@@ -367,8 +377,8 @@ const toggleLyricView = () => {
     left: 50%;
     width: 50px;
     transform: translateX(-50%);
-    background-color: #ffffff;
-    border: 1px solid #e9ecef;
+    background-color: var(--backgroundColor);
+    border: 1px solid var(--borderColor);
     border-radius: 4px;
     padding: 0.5rem;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
@@ -376,6 +386,7 @@ const toggleLyricView = () => {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    z-index: 99999;
 }
 
 .volume-popover label {

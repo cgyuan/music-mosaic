@@ -10,8 +10,8 @@ import Aura from '@primevue/themes/aura';
 import "primeicons/primeicons.css";
 import { definePreset } from "@primevue/themes";
 import { indexedDBStorage } from "./utils/indexedDBStorage";
-import Chip from "primevue/chip";
 import Downloader from '@/downloader';
+import 'animate.css';
 
 const app = createApp(App);
 
@@ -48,7 +48,7 @@ const MyPreset = definePreset(Aura, {
         formField: {
             borderRadius: '9999px',
             paddingX: '0.5rem',
-            paddingY: '0.3rem',
+            paddingY: '0.5rem',
         },
     },
     components: {
@@ -85,6 +85,6 @@ app.use(PrimeVue, {
 
 (async () => {
     await Downloader.setupDownloader();
-    app.mount("#app");
+    app.mount("#root");
 })();
 

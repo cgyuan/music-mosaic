@@ -1,5 +1,5 @@
 <template>
-    <div role="button" :style="{ color: isFav ? 'red' : 'black', width: size + 'px', height: size + 'px' }"
+    <div role="button" :style="{ color: isFav ? 'red' : 'var(--textColor)', width: size + 'px', height: size + 'px' }"
         @click="toggleFavorite" @dblclick.stop>
         <SvgAsset :iconName="isFav ? 'heart' : 'heart-outline'" :size="size" />
     </div>

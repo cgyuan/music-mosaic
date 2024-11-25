@@ -100,13 +100,13 @@ onUnmounted(() => {
 
 <style scoped>
 .container {
-  /* max-width: 1200px; */
   margin: 0 auto;
   padding: 0 24px;
   font-family: Arial, sans-serif;
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
+  color: var(--textColor);
 }
 
 h1 {
@@ -118,10 +118,10 @@ h1 {
 .tabs {
   position: sticky;
   top: 0;
-  background-color: white;
+  background-color: var(--backgroundColor);
   z-index: 10;
   /* margin-bottom: 24px; */
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--dividerColor);
 }
 
 .tabs ul {
@@ -140,10 +140,13 @@ h1 {
   border: none;
   cursor: pointer;
   position: relative;
+  color: var(--textColor);
+  opacity: 0.7;
 }
 
 .tabs button.active {
-  color: #f0a050;
+  color: var(--primaryColor);
+  opacity: 1;
 }
 
 .tabs button.active::after {
@@ -153,7 +156,7 @@ h1 {
   left: 0;
   right: 0;
   height: 2px;
-  background-color: #f0a050;
+  background-color: var(--primaryColor);
 }
 
 .sections {

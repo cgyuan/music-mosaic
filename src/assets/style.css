@@ -25,8 +25,9 @@
     --dangerColor: #FC5F5F; /* 危险颜色 */
     --infoColor: #0A95C8; /* 通知颜色 */
     --headerTextColor: white; /* 顶部文本颜色 */
-  }
 
+    font-size: 13px;
+  }
 
 * {
   box-sizing: border-box;
@@ -40,6 +41,9 @@
 body {
     margin: 0;
     overflow: hidden;
+    background-color: var(--backgroundColor);
+    /* background-image: url('theme://localhost//Users/yuan/.music-theme-pack/sDzbUVXnTVsV2g6AKLCNe/imgs/autumn.jpg') !important; */
+    background-size: cover;
 }
 
 .text-ellipsis {
@@ -72,4 +76,94 @@ body {
 
 .p-tablist-active-bar {
   background-color: var(--primaryColor) !important;
+  height: 3px !important;
+}
+
+.p-tablist-tab-list {
+  background: transparent !important;
+  border: none !important;
+}
+
+.background-color {
+  background: var(--backgroundColor);
+}
+
+.backdrop-color, .p-dialog, .p-contextmenu, .p-popover {
+  background: var(--backdropColor, var(--backgroundColor)) !important;
+  color: var(--textColor) !important;
+  border-color: var(--dividerColor) !important;
+}
+
+.p-contextmenu-item.p-focus .p-contextmenu-item-content {
+  background-color: var(--listHoverColor) !important;
+}
+
+.p-contextmenu-item-content:hover {
+  background-color: var(--listHoverColor) !important;
+}
+
+.p-contextmenu-item-icon, .p-contextmenu-item-label {
+  color: var(--textColor) !important;
+}
+
+
+
+div[role="button"] {
+  cursor: pointer;
+  user-select: none;
+}
+
+div[role="button"][data-disabled]:not([data-disabled="false"]) {
+  cursor: default;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+div[role="button"][data-type="primaryButton"] {
+  background-color: var(--primaryColor);
+  font-size: 1em;
+  padding: 0.5em 0.8em;
+  border-radius: 1.6em;
+  color: white;
+  width: fit-content;
+  line-height: 1em;
+}
+
+div[role="button"][data-type="normalButton"] {
+  font-size: 1rem;
+  padding: 0.5em 0.8em;
+  border-radius: 1.6em;
+  color: var(--textColor);
+  border: 1px solid currentColor;
+  width: fit-content;
+  line-height: 1em;
+  background-color: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+div[role="button"][data-type="dangerButton"] {
+  font-size: 1em;
+  padding: 0.5em 0.8em;
+  border-radius: 1.6em;
+  color: var(--dangerColor);
+  border: 1px solid currentColor;
+  width: fit-content;
+  line-height: 1em;
+}
+
+div[role="button"][data-type="dangerButton"][data-fill="true"] {
+  color: white;
+  background: var(--dangerColor);
+}
+
+
+.p-button-label {
+  font-size: 1rem;
+}
+
+.p-button-label {
+  color: var(--textColor) !important;
+}
+
+.p-button:not(:disabled):hover {
+  background-color: transparent !important;
 }

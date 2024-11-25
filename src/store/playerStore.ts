@@ -13,6 +13,7 @@ export const usePlayerStore = defineStore('player', () => {
     const currentTime = ref(0);
     const duration = ref(0);
     const audioElement = ref<HTMLAudioElement | null>(null);
+    const mute = ref(false);
 
     const progress = computed(() => {
         if (duration.value === 0) return 0;
@@ -22,8 +23,9 @@ export const usePlayerStore = defineStore('player', () => {
     const volumeValue = ref(1); // Default volume is 1 (100%)
 
     const volume = computed({
-        get: () => volumeValue.value,
+        get: () => mute.value ? 0 : volumeValue.value,
         set: (value) => {
+            mute.value = value === 0;
             volumeValue.value = value;
             if (audioElement.value) {
                 audioElement.value.volume = value;
@@ -146,6 +148,13 @@ export const usePlayerStore = defineStore('player', () => {
     function pause() {
         audioElement.value?.pause();
         isPlaying.value = false;
+    }
+
+    function toggleMute() {
+        mute.value = !mute.value;
+        if (audioElement.value) {
+            audioElement.value.muted = mute.value;
+        }
     }
 
     function seek(value: number) {
@@ -276,5 +285,11 @@ export const usePlayerStore = defineStore('player', () => {
         repeatMode,
         setRepeatMode,
         addToPlaylist,
+        mute,
+        toggleMute,
     };
+}, {
+    persistedState: {
+        includePaths: ['currentTrack', 'playlist', 'repeatMode'],
+    }
 });

@@ -107,11 +107,11 @@ const navMenus = [
         icon: 'array-download-tray',
         path: '/download'
     },
-    {
-        label: '本地音乐',
-        icon: 'folder-open',
-        path: '/local'
-    },
+    // {
+    //     label: '本地音乐',
+    //     icon: 'folder-open',
+    //     path: '/local'
+    // },
     {
         label: '插件管理',
         icon: 'code-bracket-square',
@@ -244,10 +244,10 @@ const toggleStaredMusicSheetSection = () => {
 .app-sidebar {
     width: 200px;
     min-width: 200px;
-    background-color: #f8f9fa;
     height: 100%;
     padding: 1rem 0;
     overflow-y: auto;
+    border-right: 1px solid var(--dividerColor);
 }
 
 .sidebar-section {
@@ -270,6 +270,7 @@ const toggleStaredMusicSheetSection = () => {
     display: flex;
     align-items: center;
     gap: 0.2rem;
+    color: var(--textColor);
 }
 
 .section-actions {

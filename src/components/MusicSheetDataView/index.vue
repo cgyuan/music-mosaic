@@ -28,6 +28,10 @@ defineProps<{
 </script>
 
 <style scoped>
+:deep(.p-dataview-content) {
+    background: transparent;
+}
+
 .music-sheet-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

@@ -1,6 +1,5 @@
 <template>
-    <div class="app-header" data-tauri-drag-region>
-
+    <div class="header-container" data-tauri-drag-region>
         <div class="center-content">
             <div class="left-controls">
                 <Button severity="secondary" text rounded size="small" @click="goBack"
@@ -14,17 +13,19 @@
                     <SvgAsset iconName="chevron-right"></SvgAsset>
                 </Button>
             </div>
-            <IconField>
+            <IconField class="header-search">
                 <InputIcon class="pi pi-search" />
                 <InputText v-model="searchQuery" placeholder="请在这里输入搜索内容" @keyup.enter="handleSearch" />
             </IconField>
         </div>
 
-        <div class="right-controls">
-            <Button severity="secondary" text rounded>
+        <div class="right-controls right-part">
+            <Button severity="secondary" text rounded @click="handleTheme">
                 <SvgAsset iconName="t-shirt-line"></SvgAsset>
             </Button>
-            <Button severity="secondary" text rounded @click="router.push({ name: 'settings' })">
+            <Button :style="{
+                display: 'none',
+            }" severity="secondary" text rounded @click="router.push({ name: 'settings' })">
                 <SvgAsset iconName="cog-8-tooth"></SvgAsset>
             </Button>
             <Button severity="secondary" text rounded>
@@ -81,6 +82,11 @@ const handleSearch = () => {
     }
 };
 
+const handleTheme = () => {
+    showLyricView.value = false;
+    router.push({ name: 'theme' });
+};
+
 onMounted(() => {
     updateNavigationState();
     window.addEventListener('popstate', updateNavigationState);
@@ -91,14 +97,15 @@ watch(route, updateNavigationState);
 </script>
 
 <style scoped>
-.app-header {
+.header-container {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.5rem 1rem;
-    height: 57px;
+    height: 54px;
+    z-index: 2000;
     background-color: var(--primaryColor);
-    border-bottom: 1px solid #e9ecef;
+    /* border-bottom: 1px solid #e9ecef; */
 }
 
 .left-controls,
@@ -129,6 +136,10 @@ watch(route, updateNavigationState);
     height: 30px !important;
 }
 
+.header-search {
+    border-radius: 9999px;
+}
+
 :deep(.p-inputtext) {
     background: var(--maskColor);
     outline: none;
@@ -137,10 +148,12 @@ watch(route, updateNavigationState);
 }
 
 :deep(.p-iconfield .p-inputicon) {
-    color: var(--placeholderColor);
+    color: var(--textColor);
+    opacity: 0.7;
 }
 
 :deep(.p-inputtext::placeholder) {
-    color: var(--placeholderColor);
+    color: var(--textColor);
+    opacity: 0.7;
 }
 </style>

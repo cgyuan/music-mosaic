@@ -50,7 +50,7 @@ const goToMusicListDetail = () => {
 .music-sheet-item {
     display: flex;
     flex-direction: column;
-    background-color: #fff;
+    /* background-color: ÷#fff; */
     border-radius: 8px;
     overflow: hidden;
     cursor: pointer;
@@ -107,11 +107,12 @@ const goToMusicListDetail = () => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--textColor);
 }
 
 .music-sheet-subtitle {
-    font-size: 0.8rem;
-    color: #666;
+    font-size: 0.7rem;
+    color: var(--textColor);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

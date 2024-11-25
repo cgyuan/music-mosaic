@@ -1,11 +1,11 @@
 <template>
-  <Teleport to="#app">
+  <Teleport to="#root">
     <div v-if="visible" class="playlist-drawer-overlay" @click="close"></div>
     <div class="playlist-drawer" :class="{ 'playlist-drawer-visible': visible }" @transitionend="onTransitionEnd">
       <div class="playlist-drawer-header">
         <h5>播放列表 ({{ playlist.length }}首)</h5>
         <div>
-          <Button size="small" icon="pi pi-trash" label="清空" @click="clearPlaylist" />
+          <Button text rounded size="small" label="清空" @click="clearPlaylist" />
         </div>
       </div>
       <CustomDataTable
@@ -127,24 +127,24 @@ defineExpose({ visible });
 <style scoped>
 .playlist-drawer-overlay {
   position: fixed;
-  top: 57px;
+  top: 54px;
   left: 0;
   right: 0;
-  bottom: 68px;
+  bottom: 64px;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
+  z-index: 99;
 }
 
 .playlist-drawer {
   position: fixed;
-  top: 57px;
+  top: 54px;
   right: -600px;
   width: 600px;
-  height: calc(100vh - 57px - 68px);
-  background-color: white;
+  height: calc(100vh - 54px - 64px);
+  background-color: var(--backgroundColor);
   /* box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1); */
   transition: right 0.3s ease;
-  z-index: 99999;
+  z-index: 99;
   display: flex;
   flex-direction: column;
 }
@@ -158,7 +158,8 @@ defineExpose({ visible });
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--borderColor);
+  color: var(--textColor);
 }
 
 .playlist-drawer-header h5 {
@@ -173,7 +174,7 @@ defineExpose({ visible });
 }
 
 .playing-track {
-  color: #2196F3;
+  color: var(--primaryColor);
 }
 
 .item-actions {
@@ -184,10 +185,11 @@ defineExpose({ visible });
 }
 
 .source-tag {
-  background-color: #f0f0f0;
+  background-color: var(--primaryColor);
   border-radius: 12px;
   padding: 2px 8px;
   font-size: 12px;
+  color: white;
 }
 
 .remove-icon {

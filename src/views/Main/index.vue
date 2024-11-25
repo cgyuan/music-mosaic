@@ -1,11 +1,13 @@
 <template>
   <div class="app-container">
     <AppHeader />
-    <div class="main-container">
+    <div class="body-container">
       <AppSideBar />
-      <MainContent>
+      <MainContent class="">
         <router-view :key="$route.fullPath"></router-view>
       </MainContent>
+      <LyricView :platform="currentTrack?.platform"
+            :showTranslation="true" />
     </div>
     <NowPlaying />
     <PlaylistDrawer ref="playlistDrawer" />
@@ -14,6 +16,12 @@
 
 <script setup lang="ts">
 import { provide, ref } from 'vue';
+import LyricView from '@/components/LyricView.vue';
+import { usePlayerStore } from '@/store/playerStore';
+import { storeToRefs } from 'pinia';
+
+const playerStore = usePlayerStore();
+const { currentTrack } = storeToRefs(playerStore);
 
 const playlistDrawer = ref(null);
 
@@ -29,9 +37,11 @@ provide('playlistDrawer', playlistDrawer);
   width: 100vw;
 }
 
-.main-container {
+.body-container {
+  width: 100%;
+  height: calc(100vh - 54px - 64px);
+  flex: auto;
   display: flex;
-  flex: 1;
-  overflow: hidden;
+  position: relative;
 }
 </style>

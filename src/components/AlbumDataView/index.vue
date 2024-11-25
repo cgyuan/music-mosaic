@@ -54,6 +54,10 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
 </script>
 
 <style scoped>
+:deep(.p-dataview-content) {
+    background: transparent;
+}
+
 .album-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
@@ -63,7 +67,6 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
 .album-item {
     display: flex;
     flex-direction: column;
-    background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -103,13 +106,15 @@ const goToMusicListDetail = (item: IMusic.IMusicSheetItem) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--textColor);
 }
 
 .album-description {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     color: #666;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--textColor);
 }
 </style>

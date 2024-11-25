@@ -17,12 +17,13 @@
             </div>
         </div>
         <div class="button-container">
-            <Button 
-                :label="isEditing ? '重命名' : '创建'" 
-                icon="pi pi-check" 
-                @click="submitMusicSheet" 
-                :disabled="!musicSheetName.trim()"
-            />
+            <div data-type="primaryButton" role="button" @click="submitMusicSheet"
+                :data-disabled="!musicSheetName.trim()"
+            >
+                <span :style="{
+                    fontSize: '16px',
+                }">{{ isEditing ? '重命名' : '创建' }}</span>
+            </div>
         </div>
     </Dialog>
 </template>
@@ -30,7 +31,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 
 const props = defineProps<{

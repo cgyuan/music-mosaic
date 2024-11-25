@@ -1,42 +1,65 @@
 <template>
     <div class="plugin-manager">
-        <h1>插件管理</h1>
+        <div class="header">
+            <h1>插件管理</h1>
 
-        <div class="action-buttons">
-            <Button label="从本地文件安装" class="p-button-outlined" @click="selectPluginFile" />
-            <Button label="从网络安装插件" class="p-button-outlined" />
-            <div class="spacer"></div>
-            <Button label="订阅设置" class="p-button-outlined" />
-            <Button label="更新订阅" class="p-button-outlined" />
+            <div class="header-action-buttons">
+                <div data-type="normalButton" role="button" @click="selectPluginFile">
+                    <span>从本地文件安装</span>
+                </div>
+                <div data-type="normalButton" role="button">
+                    <span>从网络安装插件</span>
+                </div>
+                <div class="spacer"></div>
+                <div data-type="normalButton" role="button">
+                    <span>订阅设置</span>
+                </div>
+                <div data-type="normalButton" role="button">
+                    <span>更新订阅</span>
+                </div>
+            </div>
         </div>
 
-        <DataTable :value="storedPlugins" stripedRows scrollable scrollHeight="flex" class="plugin-table">
-            <Column header="#" style="width: 5%;">
-                <template #body="slotProps">
-                    {{ slotProps.index + 1 }}
-                </template>
-            </Column>
-            <Column field="platform" header="来源" style="width: 25%;" />
-            <Column field="version" header="版本号" style="width: 15%;" />
-            <Column header="作者" style="width: 20%;">
-                <template #body="slotProps">
-                    {{ slotProps.data.author || '未知作者' }}
-                </template>
-            </Column>
-            <Column header="操作" style="width: 35%;">
-                <template #body="slotProps">
-                    <Button label="卸载" class="p-button-text p-button-danger" @click="showConfirmDialog(slotProps.data)" />
-                    <Button label="更新" class="p-button-text p-button-success" />
-                    <Button v-if="slotProps.data.supportedSearchType?.includes('sheet')" label="导入歌单" class="p-button-text p-button-info" />
-                </template>
-            </Column>
-        </DataTable>
+        <CustomDataTable :value="storedPlugins" :columns="columns" keyField="id" :stripedRows="true" showHeader
+            class="plugin-table">
+            <template #cell:index="{ index }">
+                {{ index + 1 }}
+            </template>
 
-        <Dialog header="确认卸载" v-model:visible="confirmDialogVisible" :modal="true" :closable="false">
+            <template #cell:author="{ item }">
+                {{ item.author || '未知作者' }}
+            </template>
+
+            <template #cell:actions="{ item }">
+                <div class="table-action-buttons">
+                    <div :style="{
+                        color: 'var(--dangerColor, #FC5F5F)',
+                    }" role="button" @click="showConfirmDialog(item)">
+                        <span>卸载</span>
+                    </div>
+                    <div :style="{
+                        color: 'var(--successColor, #08A34C)',
+                    }" role="button">
+                        <span>更新</span>
+                    </div>
+                    <div :style="{
+                        color: 'var(--infoColor, #0A95C8)',
+                    }" v-if="item.supportedSearchType?.includes('sheet')" role="button">
+                        <span>导入歌单</span>
+                    </div>
+                </div>
+            </template>
+        </CustomDataTable>
+
+        <Dialog class="backdrop-color" header="确认卸载" v-model:visible="confirmDialogVisible" :modal="true" :closable="false">
             <p>确定要卸载插件 {{ pluginToRemove!!.platform }} 吗？</p>
             <template #footer>
-                <Button label="取消" class="p-button-outlined" @click="confirmDialogVisible = false" />
-                <Button label="确认" class="p-button-danger" @click="confirmRemovePlugin" />
+                <div data-type="normalButton" role="button" @click="confirmDialogVisible = false">
+                    <span>取消</span>
+                </div>
+                <div data-type="dangerButton" role="button" @click="confirmRemovePlugin">
+                    <span>确认</span>
+                </div>
             </template>
         </Dialog>
     </div>
@@ -45,8 +68,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import Button from 'primevue/button';
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
+import CustomDataTable from '../../../components/CustomDataTable.vue';
 import Dialog from 'primevue/dialog';
 import { selectAndReadFile, FileSelectResult } from '../../../utils/fileUtils';
 import { useMusicSourcePlugin } from '../../../hooks/useMusicSourcePlugin';
@@ -107,14 +129,27 @@ const confirmRemovePlugin = () => {
         pluginToRemove.value = null;
     }
 };
+
+const columns = [
+    { field: 'index', header: '#', width: '10%' },
+    { field: 'platform', header: '来源', width: '25%' },
+    { field: 'version', header: '版本号', width: '15%' },
+    { field: 'author', header: '作者', width: '20%' },
+    { field: 'actions', header: '操作', width: '35%' }
+];
 </script>
 
 <style scoped>
 .plugin-manager {
-    padding: 20px;
+    padding: 20px 0;
     height: 100%;
     display: flex;
     flex-direction: column;
+    color: var(--textColor);
+}
+
+.header {
+    padding: 0 20px;
 }
 
 h1 {
@@ -123,7 +158,7 @@ h1 {
     font-weight: bold;
 }
 
-.action-buttons {
+.header-action-buttons {
     display: flex;
     gap: 10px;
     margin-bottom: 20px;
@@ -134,29 +169,22 @@ h1 {
 }
 
 .plugin-table {
-    flex-grow: 1;
-    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    padding: 0 20px;
 }
 
-:deep(.p-datatable) {
+.table-action-buttons {
     display: flex;
-    flex-direction: column;
-    height: 100%;
+    gap: 10px;
 }
 
-:deep(.p-datatable-wrapper) {
-    flex-grow: 1;
-    overflow-y: auto;
-}
-
-:deep(.p-datatable-table) {
+:deep(.custom-datatable) {
     font-size: 14px;
 }
 
-:deep(.p-datatable-thead) {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+:deep(.p-button-label) {
+    font-size: 14px;
 }
 
 :deep(.p-button-text) {

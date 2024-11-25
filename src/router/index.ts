@@ -69,6 +69,11 @@ const routes: Array<RouteRecordRaw> = [
         path: '/settings',
         name: 'settings',
         component: () => import('@/views/Main/pages/Settings/index.vue')
+      },
+      {
+        path: '/theme',
+        name: 'theme',
+        component: () => import('@/views/Main/pages/Theme/Index.vue')
       }
     ]
   }

@@ -29,7 +29,7 @@ defineProps<{
 }
 
 :deep(.p-chip.selected) {
-    background-color: #f0a050;
+    background-color: var(--primaryColor);
     color: #fff;
 }
 </style>

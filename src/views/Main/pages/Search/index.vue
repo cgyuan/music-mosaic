@@ -59,6 +59,7 @@ onMounted(() => {
   font-weight: normal;
   margin: 0;
   padding: 20px 20px 0;
+  color: var(--textColor);
 }
 
 .highlight {
@@ -70,7 +71,7 @@ onMounted(() => {
   display: flex;
   gap: 20px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #dee2e6;
+  border-bottom: 1px solid transparent;
   padding: 0 20px;
 }
 
@@ -78,11 +79,14 @@ onMounted(() => {
   cursor: pointer;
   padding: 10px 0;
   font-size: 16px;
-  color: #495057;
+  color: var(--textColor);
+  opacity: 0.7;
   position: relative;
 }
 
 .category.active {
+  font-weight: bold;
+  opacity: 1;
   color: var(--primaryColor);
 }
 

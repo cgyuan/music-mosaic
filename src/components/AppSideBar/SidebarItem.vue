@@ -22,14 +22,16 @@ defineProps<{
   cursor: pointer;
   /* border-radius: 0.25rem; */
   transition: background-color 0.2s;
+  color: var(--textColor);
 }
 
 .sidebar-item:hover {
-  background-color: #e9ecef;
+  background: var(--listHoverColor);
 }
 
 .sidebar-item.active {
-  background-color: #e9ecef;
+  background: var(--listHoverColor);
+  color: var(--primaryColor);
 }
 
 .sidebar-item .icon {

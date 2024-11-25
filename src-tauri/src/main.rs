@@ -22,6 +22,9 @@ use std::fs::File;
 use std::io::Write;
 use std::collections::HashMap;
 use std::process::Command;
+use zip;
+use urlencoding::decode;
+use std::borrow::Cow;
 
 #[command]
 async fn http_request(method: String, url: String, headers: Option<Value>, body: Option<String>) -> Result<String, String> {
@@ -81,6 +84,12 @@ async fn check_path_exists(path: String) -> Result<bool, String> {
 }
 
 #[tauri::command]
+async fn rmdir(path: String) -> Result<(), String> {
+    std::fs::remove_dir_all(path)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 async fn delete_file(path: String) -> Result<(), String> {
     // check if file exists
     if !std::path::Path::new(&path).exists() {
@@ -120,6 +129,29 @@ async fn open_folder(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+async fn readdir(path: String, folder: Option<bool>) -> Result<Vec<String>, String> {
+    let entries = std::fs::read_dir(&path)
+        .map_err(|e| e.to_string())?;
+    
+    let mut files = Vec::new();
+    for entry in entries {
+        let entry = entry.map_err(|e| e.to_string())?;
+        
+        // Skip if folder=true and entry is not a directory
+        if folder.unwrap_or(false) && !entry.file_type().map_err(|e| e.to_string())?.is_dir() {
+            continue;
+        }
+        
+        let name = entry.file_name();
+        if let Some(name_str) = name.to_str() {
+            files.push(name_str.to_string());
+        }
+    }
+    
+    Ok(files)
+}
+
+#[tauri::command]
 async fn download_file(url: String, file_path: String, headers: HashMap<String, String>) -> Result<(), String> {
     let client = reqwest::Client::new();
     let mut request = client.get(&url);
@@ -152,9 +184,67 @@ async fn download_file(url: String, file_path: String, headers: HashMap<String, 
     Ok(())
 }
 
+#[tauri::command]
+async fn unzip_file(file_path: String, output_dir: String) -> Result<(), String> {
+    let file = File::open(&file_path).map_err(|e| e.to_string())?;
+    let mut archive = zip::ZipArchive::new(file).map_err(|e| e.to_string())?;
+
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
+        let outpath = std::path::Path::new(&output_dir).join(file.mangled_name());
+
+        if file.name().ends_with('/') {
+            std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
+        } else {
+            if let Some(p) = outpath.parent() {
+                if !p.exists() {
+                    std::fs::create_dir_all(p).map_err(|e| e.to_string())?;
+                }
+            }
+            let mut outfile = File::create(&outpath).map_err(|e| e.to_string())?;
+            std::io::copy(&mut file, &mut outfile).map_err(|e| e.to_string())?;
+        }
+    }
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn read_file(file_path: String) -> Result<String, String> {
+    let content = std::fs::read_to_string(file_path).map_err(|e| e.to_string())?;
+    Ok(content)
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![http_request, plugin_log, download_file, delete_file, open_folder])
+        .invoke_handler(tauri::generate_handler![http_request, plugin_log, download_file, delete_file, open_folder, unzip_file, readdir, read_file, rmdir])
+        .register_uri_scheme_protocol("theme", |_app, request| {
+            let path = request.uri().strip_prefix("theme://localhost/").unwrap();
+            // URL 解码路径
+            let decoded_path = decode(path)
+                .unwrap_or(Cow::Borrowed(path));
+            let resource_path = std::path::PathBuf::from(decoded_path.as_ref());
+            
+            println!("Requested path: {:?}", path);
+            println!("Decoded path: {:?}", decoded_path);
+            println!("Resource path: {:?}", resource_path);
+            println!("Path exists: {:?}", resource_path.exists());
+            
+            match std::fs::read(&resource_path) {
+                Ok(content) => {
+                    println!("Successfully read file with size: {} bytes", content.len());
+                    tauri::http::ResponseBuilder::new()
+                        .header("Content-Type", "image/*")
+                        .body(content)
+                },
+                Err(e) => {
+                    println!("Error reading file: {:?}", e);
+                    tauri::http::ResponseBuilder::new()
+                        .status(404)
+                        .body(Vec::new())
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

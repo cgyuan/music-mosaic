@@ -1,45 +1,54 @@
 <template>
-  <div class="lyric-detail" :class="{ 'show': show }">
-    <div class="background-overlay" :style="{
-      backgroundImage: `url(${currentTrack?.artwork || currentTrack?.coverImg || albumCover})`
+  <AnimatedDiv class="music-detail-container background-color animate__animated" :show-if="showLyricView"
+    mount-class-name="animate__slideInUp" unmount-class-name="animate__slideOutDown" @animationend="handleAnimationEnd">
+    <div class="music-detail-background" :style="{
+      backgroundImage: `url(${currentTrack?.artwork ?? albumCover})`
     }"></div>
-    <div class="lyric-container">
-      <h1 class="song-title">{{ currentTrack?.title }}</h1>
-      <p class="artists">{{ currentTrack?.artist }}</p>
+    <div class="music-title">{{ currentTrack?.title }}</div>
+    <div class="music-info">
+      <span>{{ currentTrack?.artist || '未知作者' }}</span>
+      <span v-if="currentTrack?.album">-{{ currentTrack?.album }}</span>
+      <Tag v-if="props.platform" :fill="true">{{ props.platform }}</Tag>
+    </div>
 
-      <div class="content-wrapper">
-        <div class="album-cover">
-          <img :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover" :alt="currentTrack?.title">
-        </div>
+    <div class="music-body">
+      <div class="music-album-options">
+        <img class="music-album" :src="currentTrack?.artwork || currentTrack?.coverImg || albumCover"
+          :alt="currentTrack?.title">
+      </div>
 
-        <div class="lyrics-content" ref="lyricsContainer">
-          <div v-for="(line, index) in parsedLyrics" :key="index"
-            :class="['lyric-line', { 'active': index === currentLineIndex }]"
-            :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
-            <p>{{ line.text }}</p>
-            <p v-if="showTranslation && line.translation" class="translation">{{ line.translation }}</p>
-          </div>
+      <div class="lyric-container" ref="lyricsContainer">
+        <div v-for="(line, index) in parsedLyrics" :key="index"
+          :class="['lyric-item ', { 'active': index === currentLineIndex }]"
+          :data-highlight="index === currentLineIndex"
+          :ref="(el) => { if (el && index === currentLineIndex) currentLineRef = el as HTMLElement }">
+          <p>{{ line.text }}</p>
+          <p v-if="showTranslation && line.translation" class="translation">{{ line.translation }}</p>
         </div>
       </div>
     </div>
-    <Button class="p-button-rounded p-button-text close-button" @click="close">
-      <SvgAsset icon-name="chevron-down" />
-    </Button>
-  </div>
+    <div class="hide-music-detail" @click="close">
+      <SvgAsset icon-name="chevron-down" :size="28" />
+    </div>
+  </AnimatedDiv>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { usePlayerStore } from '@/store/playerStore';
-import Button from 'primevue/button';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { usePluginStore } from '@/store/pluginStore';
 import { storeToRefs } from 'pinia';
 import SvgAsset from './SvgAsset.vue';
+import AnimatedDiv from './AnimatedDiv.vue';
+import { useUIStore } from '@/store/uiStore';
+import Tag from './Tag.vue';
+
+const uiStore = useUIStore();
+const { showLyricView } = storeToRefs(uiStore);
 
 const props = defineProps<{
   platform?: string,
-  show: boolean,
   showTranslation?: boolean
 }>();
 
@@ -78,6 +87,7 @@ const loadAndRenderLyric = async () => {
           };
         });
       }
+      scrollToCurrentLine();
     } catch (error) {
       console.error("getLyric error", error);
     }
@@ -86,11 +96,15 @@ const loadAndRenderLyric = async () => {
 
 onMounted(() => {
   loadAndRenderLyric();
+  // scroll to current line
+  scrollToCurrentLine();
 });
 
 watch(currentTrack, () => {
   parsedLyrics.value = [];
-  loadAndRenderLyric();
+  nextTick(() => {
+    loadAndRenderLyric();
+  });
 });
 
 const parseLyrics = (rawLyrics: string) => {
@@ -127,50 +141,62 @@ watch(currentTime, (newTime) => {
   }
 });
 
+// const scrollToCurrentLine = () => {
+//   if (currentLineRef.value) {
+//     currentLineRef.value.scrollIntoView({
+//       block: 'center',
+//       behavior: 'smooth'
+//     });
+//   }
+// };
+
 const scrollToCurrentLine = () => {
   if (currentLineRef.value && lyricsContainer.value) {
-    const containerHeight = lyricsContainer.value.clientHeight;
-    const lineTop = currentLineRef.value.offsetTop;
-    const lineHeight = currentLineRef.value.clientHeight;
+    const offset = 30; 
+    const lineRect = currentLineRef.value.getBoundingClientRect();
+    const containerRect = lyricsContainer.value.getBoundingClientRect();
+    
+    // 计算居中位置，并加上偏移量
+    const targetScroll = lyricsContainer.value.scrollTop + 
+      lineRect.top - 
+      containerRect.top - 
+      (containerRect.height - lineRect.height) / 2 + 
+      offset;
+
     lyricsContainer.value.scrollTo({
-      top: lineTop - containerHeight * 0.6 + lineHeight / 2,
+      top: targetScroll,
       behavior: 'smooth'
     });
   }
 };
 
 const close = () => {
-  emit('close');
+  showLyricView.value = false;
+};
+
+const handleAnimationEnd = (event: AnimationEvent) => {
+  if (!showLyricView.value) {
+    emit('close');
+  }
 };
 </script>
 
 <style scoped>
-.lyric-detail {
-  position: fixed;
-  bottom: -100%;
+.music-detail-container {
+  position: absolute;
+  top: 0;
   left: 0;
   right: 0;
-  height: calc(100vh - 57px - 68px);
-  transition: bottom 0.3s ease-in-out;
-  background: white;
-  z-index: 998;
+  bottom: 0;
+  z-index: 1;
   display: flex;
-  width: 100vw;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
 }
 
-.background-image {
-  background-size: cover;
-  background-position: center;
-}
-
-.lyric-detail.show {
-  bottom: 68px;
-}
-
-.background-overlay {
+.music-detail-background {
   position: absolute;
   top: 0;
   left: 0;
@@ -185,102 +211,107 @@ const close = () => {
   -webkit-mask-image: linear-gradient(to bottom, #fff, transparent);
   z-index: -1;
   transition: background-image ease 300ms;
-
 }
 
-.lyric-container {
-  position: relative;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
+.music-title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-top: 1.5rem;
+  color: var(--textColor);
+}
+
+.music-info {
   display: flex;
-  flex-direction: column;
-  height: 100%;
-  border-radius: 10px;
-  padding: 20px;
-  z-index: 1;
+  width: 70vw;
+  font-size: 1.2rem;
+  justify-content: center;
+  color: var(--textColor);
 }
 
-.song-title {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 5px;
-  text-align: center;
-  color: #333;
+.music-info span {
+  opacity: 0.8;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-right: 1rem;
+  font-weight: 300;
 }
 
-.artists {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.content-wrapper {
+.music-body {
   display: flex;
   gap: 20px;
   flex-grow: 1;
   overflow: hidden;
+  max-width: 60vw;
 }
 
-.album-cover {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.album-cover img {
-  width: 300px;
-  height: 300px;
+.music-album-options {
+  width: 260px;
+  height: 260px;
+  margin-top: 90px;
+  margin-right: 96px;
   object-fit: cover;
-  border-radius: 8px;
+  -webkit-user-drag: none;
 }
 
-.lyrics-content {
-  min-width: 400px;
+.music-album-options .music-album {
+  width: 260px;
+  height: 260px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.lyric-container {
+  width: 400px;
   flex-grow: 1;
   overflow-y: auto;
+  margin-top: 30px;
+  height: 80%;
   display: flex;
+  padding-top: 20%;
   flex-direction: column;
   align-items: center;
   margin-bottom: 20px;
   scrollbar-width: none;
   /* For Firefox */
   -ms-overflow-style: none;
-  /* For Internet Explorer and Edge */
 }
 
-.lyrics-content::-webkit-scrollbar {
+.lyric-container::-webkit-scrollbar {
   display: none;
-  /* For Chrome, Safari, and Opera */
 }
 
-.lyric-line {
+.lyric-item {
   font-size: 16px;
   text-align: center;
   transition: all 0.3s ease;
+  color: var(--textColor);
 }
 
-.lyric-line p {
+.lyric-item p {
   margin: 6px 0;
 }
 
-.lyric-line.active {
+.lyric-item.active {
   font-size: 22px;
   font-weight: bold;
-  color: #f0a050;
+  color: var(--primaryColor);
 }
 
-.lyric-line .translation {
+.lyric-item .translation {
   font-size: 14px;
-  color: #999;
+  color: var(--textColor);
+  opacity: 0.7;
   margin-top: 5px;
 }
 
-.close-button {
+.hide-music-detail {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 70px;
+  right: 30px;
+  cursor: pointer;
   z-index: 2;
+  color: var(--textColor);
 }
 </style>

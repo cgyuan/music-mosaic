@@ -13,11 +13,18 @@
             </div>
         </div>
         <div class="actions">
-            <Button label="播放" icon="pi pi-play" class="p-button-rounded" @click="playAll" />
-            <Button label="添加" icon="pi pi-plus" class="p-button-rounded p-button-outlined" @click="handleAddAll()" />
-            <Button label="收藏" :icon="isStarred ? 'pi pi-heart-fill' : 'pi pi-heart'"
-                class="p-button-rounded p-button-outlined" v-if="musicSheetType === MusicSheetType.Cloud"
-                @click="handleStarMusicSheet" />
+            <div data-type="primaryButton" role="button" @click="playAll" class="option-button">
+                <SvgAsset iconName="play" />
+                <span>播放</span>
+            </div>
+            <div data-type="normalButton" role="button" @click="handleAddAll()" class="option-button">
+                <SvgAsset iconName="plus" />
+                <span>添加</span>
+            </div>
+            <div data-type="normalButton" role="button" @click="handleStarMusicSheet" class="option-button">
+                <SvgAsset :icon-name="isStarred ? 'heart' : 'heart-outline'" :color="isStarred ? 'red' : 'var(--textColor)'" />
+                <span>收藏</span>
+            </div>
         </div>
     </div>
 </template>
@@ -28,6 +35,7 @@ import dayjs from 'dayjs';
 import MusicSheet from '@/music-sheet';
 import { isSameMedia } from '@/common/media-util';
 import { computed } from 'vue';
+import SvgAsset from '@/components/SvgAsset.vue';
 
 const starredMusicSheets = MusicSheet.frontend.useAllStarredSheets();
 
@@ -96,6 +104,7 @@ const handleStarMusicSheet = () => {
     display: flex;
     flex-direction: column;
     min-width: 0;
+    color: var(--textColor);
 }
 
 .info h1 {
@@ -108,8 +117,8 @@ const handleStarMusicSheet = () => {
 
 .info div {
     margin: 5px 0;
-    font-size: 14px;
-    color: #5C5C5C;
+    font-size: 12px;
+    color: var(--textColor);
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -123,5 +132,19 @@ const handleStarMusicSheet = () => {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
+}
+
+.option-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 0.8em;
+    padding-right: 0.8em;
+}
+
+.option-button svg {
+    width: 1.3em;
+    height: 1.3em;
+    margin-right: 2px;
 }
 </style>

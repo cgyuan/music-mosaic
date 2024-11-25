@@ -10,6 +10,7 @@ declare module 'vue' {
     2: typeof import('./src/components/CustomDataTable copy 2.vue')['default']
     AlbumDataView: typeof import('./src/components/AlbumDataView/index.vue')['default']
     AlbumDetails: typeof import('./src/components/AlbumDetails.vue')['default']
+    AnimatedDiv: typeof import('./src/components/AnimatedDiv.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader/index.vue')['default']
     AppSideBar: typeof import('./src/components/AppSideBar/index.vue')['default']
     BottomLoadingState: typeof import('./src/components/BottomLoadingState.vue')['default']
@@ -18,7 +19,7 @@ declare module 'vue' {
     Column: typeof import('primevue/column')['default']
     CommonMusicSheet: typeof import('./src/components/CommonMusicSheet.vue')['default']
     ContextMenu: typeof import('primevue/contextmenu')['default']
-    copy: typeof import('./src/components/CustomDataTable copy.vue')['default']
+    copy: typeof import('./src/components/LyricView copy.vue')['default']
     CreateMusicSheetModal: typeof import('./src/components/AppSideBar/CreateMusicSheetModal.vue')['default']
     CreatePlaylistModal: typeof import('./src/components/AppSideBar/CreatePlaylistModal.vue')['default']
     CustomDataTable: typeof import('./src/components/CustomDataTable.vue')['default']
@@ -58,6 +59,7 @@ declare module 'vue' {
     TabPanel: typeof import('primevue/tabpanel')['default']
     TabPanels: typeof import('primevue/tabpanels')['default']
     Tabs: typeof import('primevue/tabs')['default']
+    Tag: typeof import('./src/components/Tag.vue')['default']
   }
   export interface ComponentCustomProperties {
     Tooltip: typeof import('primevue/tooltip')['default']

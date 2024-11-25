@@ -291,9 +291,7 @@ defineExpose({ scrollToIndex, updateVisibleRange });
 }
 
 .header {
-    background-color: white;
     padding: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .virtual-list {
@@ -313,12 +311,13 @@ table {
     table-layout: fixed;
     border-collapse: separate;
     border-spacing: 0;
+    color: var(--textColor);
 }
 
 thead {
     position: sticky;
     top: 0;
-    background-color: #f4f4f4;
+    /* background-color: #f4f4f4; */
     z-index: 1;
     display: contents;  /* This allows the header to scroll with the content */
 }
@@ -327,15 +326,16 @@ th,
 td {
     padding: 10px 16px;
     text-align: left;
-    border-bottom: 1px solid #eee;
+    /* border-bottom: 1px solid var(--dividerColor); */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 th {
-    border-top: 1px solid #eee;
+    /* border-top: 1px solid var(--dividerColor); */
     font-weight: bold;
+    border-bottom: 1px solid var(--dividerColor);
 }
 
 .data-row {
@@ -343,11 +343,11 @@ th {
 }
 
 tbody tr:hover {
-    background-color: #f8f8f8;
+    background-color: var(--listHoverColor);
 }
 
 .striped {
-    background-color: #f8f8f8;
+    background-color: var(--listHoverColor);
 }
 
 .loading-container,
