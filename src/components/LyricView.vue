@@ -136,6 +136,8 @@ const parseLyrics = (rawLyrics: string) => {
   }).filter((line): line is { time: number; text: string } => line !== null);
 };
 
+const isVisible = computed(() => showLyricView.value);
+
 watch(currentTime, (newTime) => {
   const index = parsedLyrics.value.findIndex((line, i) => {
     const nextLine = parsedLyrics.value[i + 1];
@@ -143,7 +145,20 @@ watch(currentTime, (newTime) => {
   });
   if (index !== -1 && index !== currentLineIndex.value) {
     currentLineIndex.value = index;
-    scrollToCurrentLine();
+    // 只在组件可见时执行滚动
+    if (isVisible.value) {
+      scrollToCurrentLine();
+    }
+  }
+});
+
+// 对可见性变化的监听
+watch(isVisible, (newVisible) => {
+  if (newVisible) {
+    // 当组件变为可见时，立即滚动到当前行
+    nextTick(() => {
+      scrollToCurrentLine();
+    });
   }
 });
 
