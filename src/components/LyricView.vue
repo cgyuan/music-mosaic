@@ -87,7 +87,6 @@ const loadAndRenderLyric = async () => {
           };
         });
       }
-      scrollToCurrentLine();
     } catch (error) {
       console.error("getLyric error", error);
     }
@@ -102,8 +101,15 @@ onMounted(() => {
 
 watch(currentTrack, () => {
   parsedLyrics.value = [];
+  currentLineIndex.value = 0;
   nextTick(() => {
     loadAndRenderLyric();
+    if (lyricsContainer.value) {
+      lyricsContainer.value.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   });
 });
 
