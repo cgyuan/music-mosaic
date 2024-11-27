@@ -1,5 +1,8 @@
 <template>
-    <div class="ranking">
+    <div v-if="tabMenuItems.length === 0" class="ranking">
+        <Empty />
+    </div>
+    <div class="ranking" v-else>
         <Tabs v-model:value="activePluginIndex" scrollable>
             <TabList>
                 <Tab v-for="(tab, index) in tabMenuItems" :key="tab.id!" :value="index">
@@ -24,6 +27,7 @@ import { storeToRefs } from 'pinia';
 import AlbumDataView from '@/components/AlbumDataView/index.vue'
 import Loading from '@/components/Loading.vue';
 import { MusicSheetType } from '@/common/constant';
+import Empty from '@/components/Empty.vue';
 
 
 const pluginStore = usePluginStore();

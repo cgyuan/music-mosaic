@@ -1,5 +1,8 @@
 <template>
-    <div class="popular-music-sheet">
+     <div v-if="tabMenuItems.length === 0" class="popular-music-sheet">
+        <Empty />
+    </div>
+    <div class="popular-music-sheet" v-else>
         <Tabs class="plugin-tabs" v-model:value="activePluginIndex" scrollable>
             <TabList>
                 <Tab v-for="(tab, index) in tabMenuItems" :key="tab.id!" :value="index">

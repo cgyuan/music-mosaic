@@ -48,7 +48,8 @@
                     </div>
                     <div :style="{
                         color: 'var(--infoColor, #0A95C8)',
-                    }" v-if="item.supportedSearchType?.includes('sheet')" role="button" @click="importMusicSheet(item)">
+                    }" v-if="item.supportedSearchType?.includes('sheet')" role="button"
+                        @click="importMusicSheet(item)">
                         <span>导入歌单</span>
                     </div>
                     <div :style="{
@@ -62,6 +63,9 @@
                         <i class="pi pi-arrow-up"></i>
                     </div>
                 </div>
+            </template>
+            <template #empty>
+                <Empty />
             </template>
         </CustomDataTable>
 
@@ -96,10 +100,7 @@
                 </div>
             </div>
         </Dialog>
-        <ImportMusicSheetModal 
-            v-model:visible="importMusicSheetDialogVisible"
-            :plugin="selectedPlugin ?? undefined"
-        />
+        <ImportMusicSheetModal v-model:visible="importMusicSheetDialogVisible" :plugin="selectedPlugin ?? undefined" />
     </div>
 </template>
 
@@ -115,6 +116,7 @@ import { storeToRefs } from 'pinia';
 import Loading from '@/components/Loading.vue';
 import { useToast } from "primevue/usetoast";
 import ImportMusicSheetModal from '../../../components/ImportMusicSheetModal.vue';
+import Empty from '@/components/Empty.vue';
 
 const pluginStore = usePluginStore();
 const { plugins } = storeToRefs(pluginStore);
@@ -352,5 +354,4 @@ h1 {
     font-size: 1rem;
     border-radius: 4px;
 }
-
 </style>
