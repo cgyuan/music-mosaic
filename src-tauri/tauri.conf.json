@@ -60,7 +60,7 @@
         "unminimize": true
       },
       "http": {
-        "all": false,
+        "all": true,
         "request": true,
         "scope": ["https://*", "http://*"]
       }
@@ -75,7 +75,8 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' asset: https://asset.localhost"
+      "csp": null,
+      "dangerousUseHttpScheme": true
     },
     "bundle": {
       "active": true,
@@ -87,7 +88,12 @@
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
-      ]
+      ],
+      "macOS": {
+        "providerShortName": null,
+        "signingIdentity": null,
+        "frameworks": []
+      }
     }
   }
 }
