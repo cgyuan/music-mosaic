@@ -21,7 +21,7 @@
                 <SvgAsset iconName="plus" />
                 <span>添加</span>
             </div>
-            <div data-type="normalButton" role="button" @click="handleStarMusicSheet" class="option-button">
+            <div data-type="normalButton" role="button" @click="handleStarMusicSheet" class="option-button" v-if="musicSheetType !== MusicSheetType.Local">
                 <SvgAsset :icon-name="isStarred ? 'heart' : 'heart-outline'" :color="isStarred ? 'red' : 'var(--textColor)'" />
                 <span>收藏</span>
             </div>
