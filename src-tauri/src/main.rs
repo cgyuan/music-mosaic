@@ -4,6 +4,7 @@
 mod http;
 mod filesystem;
 mod compression;
+mod tray;
 
 use urlencoding::decode;
 use std::borrow::Cow;
@@ -16,6 +17,8 @@ fn plugin_log(message: String, window: tauri::Window) {
 
 fn main() {
     tauri::Builder::default()
+        .system_tray(tray::create_tray())
+        .on_system_tray_event(tray::handle_tray_event)
         .invoke_handler(tauri::generate_handler![
             http::http_request,
             http::download_file,
@@ -27,6 +30,7 @@ fn main() {
             filesystem::read_file,
             compression::unzip_file,
             plugin_log,
+            tray::update_tray_state,
         ])
         .register_uri_scheme_protocol("theme", |_app, request| {
             let path = request.uri().strip_prefix("theme://localhost/").unwrap();
@@ -45,6 +49,12 @@ fn main() {
                         .status(404)
                         .body(Vec::new())
                 }
+            }
+        })
+        .on_window_event(|event| {
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
+                event.window().hide().unwrap();
+                api.prevent_close();
             }
         })
         .run(tauri::generate_context!())

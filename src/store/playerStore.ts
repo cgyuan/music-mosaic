@@ -4,6 +4,7 @@ import { usePluginStore } from './pluginStore';
 import { RepeatMode } from '@/components/NowPlaying/enum';
 import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
 import { isSameMedia } from '@/common/media-util';
+import { invoke } from '@tauri-apps/api/tauri';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -40,11 +41,13 @@ export const usePlayerStore = defineStore('player', () => {
     function init() {
         if (currentTrack.value) {
             setAudioSrc(currentTrack.value);
+            syncTrayState();
         }
     }
 
     function setCurrentTrack(track: IMusic.IMusicItem) {
         currentTrack.value = track;
+        syncTrayState();
     }
 
     function setPlaylist(newPlaylist: IMusic.IMusicItem[]) {
@@ -143,11 +146,13 @@ export const usePlayerStore = defineStore('player', () => {
     function play() {
         audioElement.value?.play();
         isPlaying.value = true;
+        syncTrayState();
     }
 
     function pause() {
         audioElement.value?.pause();
         isPlaying.value = false;
+        syncTrayState();
     }
 
     function toggleMute() {
@@ -248,6 +253,8 @@ export const usePlayerStore = defineStore('player', () => {
         if (mode === RepeatMode.Shuffle) {
             shufflePlaylist();
         }
+        // 同步状态到托盘
+        syncTrayState();
     }
 
     function shufflePlaylist() {
@@ -259,6 +266,29 @@ export const usePlayerStore = defineStore('player', () => {
         if (repeatMode.value === RepeatMode.Shuffle) {
             shufflePlaylist();
         }
+    }
+
+    // 添加同步状态函数
+    async function syncTrayState() {
+        let modeStr = 'list';
+        switch (repeatMode.value) {
+            case RepeatMode.Loop:
+                modeStr = 'single';
+                break;
+            case RepeatMode.Queue:
+                modeStr = 'list';
+                break;
+            case RepeatMode.Shuffle:
+                modeStr = 'random';
+                break;
+        }
+        
+        await invoke('update_tray_state', {
+            playState: isPlaying.value,
+            repeatMode: modeStr,
+            songTitle: currentTrack.value?.title || null,
+            platform: currentTrack.value?.platform || null
+        });
     }
 
     return {
