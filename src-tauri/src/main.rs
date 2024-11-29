@@ -38,10 +38,30 @@ fn main() {
                 .unwrap_or(Cow::Borrowed(path));
             let resource_path = std::path::PathBuf::from(decoded_path.as_ref());
             
+            let content_type = match resource_path.extension()
+                .and_then(|ext| ext.to_str()) {
+                Some("js") => "application/javascript",
+                Some("css") => "text/css",
+                Some("html") => "text/html",
+                Some("png") => "image/png",
+                Some("jpg") | Some("jpeg") => "image/jpeg",
+                Some("gif") => "image/gif",
+                Some("svg") => "image/svg+xml",
+                Some("mp4") => "video/mp4",
+                Some("webm") => "video/webm",
+                Some("mp3") => "audio/mpeg",
+                Some("wav") => "audio/wav",
+                Some("json") => "application/json",
+                Some("woff") => "font/woff",
+                Some("woff2") => "font/woff2",
+                Some("ttf") => "font/ttf",
+                _ => "application/octet-stream",
+            };
+            
             match std::fs::read(&resource_path) {
                 Ok(content) => {
                     tauri::http::ResponseBuilder::new()
-                        .header("Content-Type", "image/*")
+                        .header("Content-Type", content_type)
                         .body(content)
                 },
                 Err(_) => {

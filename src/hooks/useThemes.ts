@@ -12,6 +12,19 @@ import CryptoJS from "crypto-js";
 const themeNodeId = "themepack-node";
 const themePathKey = "themepack-path";
 
+const validIframeMap = new Map<
+  "app" | "header" | "body" | "music-bar" | "side-bar" | "page",
+  HTMLIFrameElement | null
+>([
+  ["app", null],
+  ["header", null],
+  ["body", null],
+  ["music-bar", null],
+  ["side-bar", null],
+  ["page", null],
+]);
+
+
 function raceWithData<T>(promises: Array<Promise<T>>): Promise<T> {
   const promiseCount = promises.length;
   return new Promise((resolve, reject) => {
@@ -209,6 +222,12 @@ export default function useThemes() {
     if (themePack === null) {
       // 移除
       themeNode.innerHTML = "";
+      validIframeMap.forEach((value, key) => {
+        if (value !== null) {
+          value.remove();
+          validIframeMap.set(key, null);
+        }
+      });
       localStorage.removeItem(themePathKey);
     } else {
       const styleFile = await join(themePack.path, "index.css");
@@ -216,6 +235,54 @@ export default function useThemes() {
         filePath: styleFile
       }) as string;
       themeNode.innerHTML = replaceAlias(rawStyle, themePack.path);
+
+      if (themePack.iframe) {
+        validIframeMap.forEach(async (value, key) => {
+          let themePackIframeSource = themePack.iframe![key];
+          if (!themePackIframeSource) {
+            value?.remove();
+            validIframeMap.set(key, null);
+            return;
+          }
+          // 如果有，且当前也有
+          let iframeNode = null;
+          if (value !== null) {
+            // 移除旧的
+            value.remove();
+            validIframeMap.set(key, null);
+          }
+          // 新的iframe
+          iframeNode = document.createElement("iframe");
+          iframeNode.scrolling = "no";
+          document.querySelector(`.${key}-container`)?.prepend?.(iframeNode);
+          validIframeMap.set(key, iframeNode);
+
+          if (themePackIframeSource.startsWith("http")) {
+            iframeNode.src = themePackIframeSource;
+          } else {
+            themePackIframeSource = themePackIframeSource.replace("@/", "");
+            themePackIframeSource = await join(themePack.path, themePackIframeSource);
+            console.log(themePackIframeSource);
+            const rawHtml = await invoke("read_file", {
+              filePath: themePackIframeSource
+            }) as string;
+            console.log(rawHtml);
+            iframeNode!.contentWindow!.document.open();
+            iframeNode!.contentWindow!.document.write(
+              replaceAlias(rawHtml, themePack.path)
+            );
+            iframeNode!.contentWindow!.document.close();
+          }
+        });
+      } else {
+        validIframeMap.forEach((value, key) => {
+          if (value !== null) {
+            value.remove();
+            validIframeMap.set(key, null);
+          }
+        });
+      }
+
       localStorage.setItem(themePathKey, themePack.path);
     }
     currentThemePack.value = themePack;

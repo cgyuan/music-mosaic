@@ -39,6 +39,7 @@ provide('playlistDrawer', playlistDrawer);
   flex-direction: column;
   height: 100vh;
   width: 100vw;
+  position: relative;
 }
 
 .body-container {
