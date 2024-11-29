@@ -87,43 +87,11 @@ app.use(PrimeVue, {
 app.directive('theme-src', {
   mounted(el, binding) {
     const value = binding.value;
-    const loadResource = async () => {
-      try {
-        const response = await fetch(`theme://localhost/${value}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const blob = await response.blob();
-        el.src = URL.createObjectURL(blob);
-      } catch (error) {
-        console.error('Error loading resource:', error);
-        // 如果加载失败，尝试直接设置src
-        el.src = `theme://localhost/${value}`;
-      }
-    };
-    loadResource();
-  },
-  beforeUnmount(el) {
-    if (el.src && el.src.startsWith('blob:')) {
-      URL.revokeObjectURL(el.src);
-    }
+    el.src = `theme://localhost/${value}`;
   },
   updated(el, binding) {
     const value = binding.value;
-    if (el.src && el.src.startsWith('blob:')) {
-      URL.revokeObjectURL(el.src);
-    }
-    const loadResource = async () => {
-      try {
-        const response = await fetch(`theme://localhost/${value}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const blob = await response.blob();
-        el.src = URL.createObjectURL(blob);
-      } catch (error) {
-        console.error('Error loading resource:', error);
-        // 如果加载失败，尝试直接设置src
-        el.src = `theme://localhost/${value}`;
-      }
-    };
-    loadResource();
+    el.src = `theme://localhost/${value}`;
   }
 });
 
