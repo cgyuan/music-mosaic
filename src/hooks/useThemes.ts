@@ -190,7 +190,6 @@ export default function useThemes() {
     const files = await invoke("readdir", {
       path: themePackPath
     }) as string[];
-    console.log(files);
     // make sure config.json and  index.css exist
     if (!files.includes("config.json") || !files.includes("index.css")) {
       throw new Error("theme pack is invalid");
@@ -262,11 +261,9 @@ export default function useThemes() {
           } else {
             themePackIframeSource = themePackIframeSource.replace("@/", "");
             themePackIframeSource = await join(themePack.path, themePackIframeSource);
-            console.log(themePackIframeSource);
             const rawHtml = await invoke("read_file", {
               filePath: themePackIframeSource
             }) as string;
-            console.log(rawHtml);
             iframeNode!.contentWindow!.document.open();
             iframeNode!.contentWindow!.document.write(
               replaceAlias(rawHtml, themePack.path)
