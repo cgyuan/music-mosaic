@@ -1518,22 +1518,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "groove-genie"
-version = "0.1.0"
-dependencies = [
- "reqwest",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tokio",
- "ureq",
- "url",
- "urlencoding",
- "zip",
-]
-
-[[package]]
 name = "gtk"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2253,6 +2237,22 @@ dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "music-mosaic"
+version = "0.1.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tokio",
+ "ureq",
+ "url",
+ "urlencoding",
+ "zip",
 ]
 
 [[package]]

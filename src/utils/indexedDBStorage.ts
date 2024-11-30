@@ -1,7 +1,7 @@
 import localforage from "localforage";
 
 export const localforageInstance = localforage.createInstance({
-  name: "groove-genie",
+  name: "music-mosaic",
   driver: "indexedDB",
 });
 

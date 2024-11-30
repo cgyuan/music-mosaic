@@ -7,7 +7,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "groove-genie",
+    "productName": "music-mosaic",
     "version": "0.1.0"
   },
   "tauri": {
@@ -67,7 +67,7 @@
     },
     "windows": [
       {
-        "title": "groove-genie",
+        "title": "music-mosaic",
         "width": 1200,
         "height": 800,
         "hiddenTitle": true,
@@ -81,7 +81,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.groove-genie.app",
+      "identifier": "com.music-mosaic.app",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
