@@ -8,6 +8,7 @@ mod tray;
 
 use urlencoding::decode;
 use std::borrow::Cow;
+use tauri::Manager;
 
 #[tauri::command]
 fn plugin_log(message: String, window: tauri::Window) {
