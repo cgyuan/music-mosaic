@@ -13,7 +13,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, ubuntu-latest, windows-latest]
+        include:
+          - platform: macos-latest
+            target: x86_64-apple-darwin
+            name: macOS-intel
+          - platform: macos-latest
+            target: aarch64-apple-darwin
+            name: macOS-apple-silicon
+          - platform: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            name: linux-x86_64
+          - platform: windows-latest
+            target: x86_64-pc-windows-msvc
+            name: windows-x64
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Checkout repository
@@ -29,6 +41,8 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -58,9 +72,14 @@ jobs:
             Changes in this Release:
             ${{ github.event.head_commit.message }}
             
-            Download the appropriate installer for your operating system.
+            Download the appropriate installer for your operating system:
+            - macOS Intel (x86_64): For Intel-based Macs
+            - macOS Apple Silicon (arm64): For M1/M2/M3 Macs
+            - Linux: For 64-bit Linux systems
+            - Windows: For 64-bit Windows systems
           releaseDraft: true
           prerelease: false
+          args: --target ${{ matrix.target }}
 
   update-latest-tag:
     needs: release
