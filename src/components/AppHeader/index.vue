@@ -2,14 +2,14 @@
     <div class="header-container" data-tauri-drag-region>
         <div class="center-content">
             <div class="left-controls">
-                <Button severity="secondary" text rounded size="small" @click="goBack"
-                    :disabled="!canGoBack" :class="{ 'disabled-button': !canGoBack }">
+                <Button severity="secondary" text rounded size="small" @click="goBack" :disabled="!canGoBack"
+                    :class="{ 'disabled-button': !canGoBack }">
                     <SvgAsset iconName="chevron-left"></SvgAsset>
                 </Button>
                 <Button :style="{
                     display: 'none',
-                }" severity="secondary" text rounded size="small" @click="goForward"
-                    :disabled="!canGoForward" :class="{ 'disabled-button': !canGoForward }">
+                }" severity="secondary" text rounded size="small" @click="goForward" :disabled="!canGoForward"
+                    :class="{ 'disabled-button': !canGoForward }">
                     <SvgAsset iconName="chevron-right"></SvgAsset>
                 </Button>
             </div>
@@ -31,6 +31,14 @@
             <Button severity="secondary" text rounded>
                 <SvgAsset iconName="picture-in-picture-line"></SvgAsset>
             </Button>
+            <template v-if="is.windows()">
+                <Button severity="secondary" text rounded @click="minimizeWindow">
+                    <SvgAsset iconName="minus"></SvgAsset>
+                </Button>
+                <Button severity="secondary" text rounded @click="closeWindow">
+                    <SvgAsset iconName="x-mark"></SvgAsset>
+                </Button>
+            </template>
         </div>
     </div>
 </template>
@@ -42,6 +50,8 @@ import SvgAsset from '../SvgAsset.vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
 import PlaylistDrawer from '../PlaylistDrawer.vue';
+import { appWindow } from '@tauri-apps/api/window'
+import { is } from '@/common/is';
 
 const { showLyricView } = storeToRefs(useUIStore());
 const router = useRouter();
@@ -100,6 +110,14 @@ onMounted(() => {
 
 watch(route, updateNavigationState);
 
+
+const minimizeWindow = () => {
+    appWindow.minimize();
+};
+
+const closeWindow = () => {
+    appWindow.hide();
+};
 </script>
 
 <style scoped>

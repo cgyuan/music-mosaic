@@ -17,6 +17,16 @@ fn plugin_log(message: String, window: tauri::Window) {
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(target_os = "windows")]
+            {
+                println!("target_os = \"{}\"", std::env::consts::OS);
+                if let Some(window) = app.get_window("main") {
+                    window.set_decorations(false).unwrap();
+                }
+            }
+            Ok(())
+        })
         .system_tray(tray::create_tray())
         .on_system_tray_event(tray::handle_tray_event)
         .invoke_handler(tauri::generate_handler![
