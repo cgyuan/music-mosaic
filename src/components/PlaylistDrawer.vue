@@ -101,7 +101,6 @@ const isCurrentTrack = (track: IMusic.IMusicItem) => {
 const scrollToCurrentTrack = () => {
   if (playerStore.currentTrack && isTransitionComplete.value) {
     const index = playlist.value.findIndex(track => track.id === playerStore.currentTrack?.id);
-    console.log('index', index);
     dataTable.value?.scrollToIndex(index, { smooth: true, position: 'center' });
   }
 };

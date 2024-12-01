@@ -294,6 +294,7 @@ const showPluginList = () => {
 .section-actions {
     display: flex;
     gap: 0.25rem;
+    color: var(--textColor);
 }
 
 :deep(.p-button.p-button-text) {

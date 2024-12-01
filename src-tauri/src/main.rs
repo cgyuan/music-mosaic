@@ -60,7 +60,7 @@ fn main() {
             
             match std::fs::read(&resource_path) {
                 Ok(content) => {
-                    let mut response_builder = tauri::http::ResponseBuilder::new()
+                    let response_builder = tauri::http::ResponseBuilder::new()
                         .header("Content-Type", content_type)
                         .header("Accept-Ranges", "bytes");
 

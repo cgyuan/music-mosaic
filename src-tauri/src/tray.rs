@@ -3,7 +3,6 @@ use tauri::{
     SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
     SystemTraySubmenu,
 };
-use tauri::SystemTrayMenuItemHandle;
 
 #[tauri::command]
 pub fn update_tray_state(app: tauri::AppHandle, play_state: bool, repeat_mode: &str, song_title: Option<String>, platform: Option<String>) {

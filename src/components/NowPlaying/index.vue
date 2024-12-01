@@ -54,7 +54,7 @@
                     <Button text rounded @click="toggleRepeatMode">
                         <SvgAsset :iconName="repeatModeIcon" :size="22" />
                     </Button>
-                    <Button text rounded @click="showPlaylist">
+                    <Button text rounded @click="togglePlaylistDrawer">
                         <SvgAsset iconName="playlist" :size="22" />
                     </Button>
                 </div>
@@ -73,7 +73,6 @@ import { storeToRefs } from 'pinia';
 import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
-import LyricView from '../LyricView.vue';
 import { useUIStore } from '@/store/uiStore';
 
 const playerStore = usePlayerStore();
@@ -122,9 +121,9 @@ const formatTime = (time: number) => {
 
 const playlistDrawer = inject('playlistDrawer') as Ref<InstanceType<typeof PlaylistDrawer>>;
 
-const showPlaylist = () => {
+const togglePlaylistDrawer = () => {
     if (playlistDrawer.value) {
-        playlistDrawer.value.visible = true;
+        playlistDrawer.value.visible = !playlistDrawer.value.visible;
     }
 };
 

@@ -36,12 +36,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, Ref, inject } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import SvgAsset from '../SvgAsset.vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
-
+import PlaylistDrawer from '../PlaylistDrawer.vue';
 
 const { showLyricView } = storeToRefs(useUIStore());
 const router = useRouter();
@@ -50,12 +50,15 @@ const searchQuery = ref('');
 const canGoBack = ref(false);
 const canGoForward = ref(false);
 
+const playlistDrawer = inject('playlistDrawer') as Ref<InstanceType<typeof PlaylistDrawer>>;
+
 const updateNavigationState = () => {
     canGoBack.value = router.options.history.state.back !== null;
     canGoForward.value = router.options.history.state.forward !== null;
 };
 
 const goBack = () => {
+    playlistDrawer.value.visible = false;
     if (showLyricView.value) {
         showLyricView.value = false;
         return;
@@ -66,6 +69,7 @@ const goBack = () => {
 };
 
 const goForward = () => {
+    playlistDrawer.value.visible = false;
     if (showLyricView.value) {
         showLyricView.value = false;
         return;
@@ -77,12 +81,14 @@ const goForward = () => {
 
 const handleSearch = () => {
     if (searchQuery.value.trim()) {
+        playlistDrawer.value.visible = false;
         showLyricView.value = false;
         router.push({ name: 'search', params: { query: searchQuery.value.trim() } });
     }
 };
 
 const handleTheme = () => {
+    playlistDrawer.value.visible = false;
     showLyricView.value = false;
     router.push({ name: 'theme' });
 };

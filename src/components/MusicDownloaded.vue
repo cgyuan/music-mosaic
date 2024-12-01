@@ -35,3 +35,9 @@ const downloadMusic = () => {
     Downloader.startDownload([props.musicItem]);
 };
 </script>
+
+<style scoped>
+:deep(svg) {
+    background: transparent !important;
+}
+</style>
