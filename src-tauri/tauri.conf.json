@@ -76,7 +76,8 @@
     ],
     "security": {
       "csp": null,
-      "dangerousUseHttpScheme": true
+      "dangerousUseHttpScheme": true,
+      "dangerousDisableAssetCspModification": true
     },
     "bundle": {
       "active": true,
