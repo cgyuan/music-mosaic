@@ -15,11 +15,13 @@
       </ul>
     </nav>
 
-    <div class="sections">
-      <section v-for="section in tabSections" :key="section.id" :ref="el => { if (el) sectionRefs[section.id] = el as HTMLElement }">
-        <h3>{{ section.label }}</h3>
-        <component :is="section.component" />
-      </section>
+    <div class="sections-container">
+      <div class="sections">
+        <section v-for="section in tabSections" :key="section.id" :ref="el => { if (el) sectionRefs[section.id] = el as HTMLElement }">
+          <h3>{{ section.label }}</h3>
+          <component :is="section.component" />
+        </section>
+      </div>
     </div>
   </div>
 </template>
@@ -37,7 +39,7 @@ interface TabSection {
 
 const tabSections: TabSection[] = [
   { id: 'general', label: '常规', component: Normal },
-  { id: 'playMusic', label: '播放', component: PlayMusic }
+  { id: 'playMusic', label: '播放', component: PlayMusic },
 ]
 
 const activeTab = ref<string>('account')
@@ -46,15 +48,22 @@ const navRef = ref<HTMLElement | null>(null)
 
 
 const handleScroll = () => {
-  const navHeight = navRef.value?.offsetHeight || 0
+  const sectionsEl = document.querySelector('.sections')
+  if (!sectionsEl) return
 
   let currentSection = tabSections[0].id
+  const containerRect = sectionsEl.getBoundingClientRect()
+  const containerTop = containerRect.top
+  const threshold = 1 // Distance from top where section becomes active
 
+  // Find the last section that has crossed the threshold
   for (const section of tabSections) {
     const element = sectionRefs.value[section.id]
     if (element) {
       const { top } = element.getBoundingClientRect()
-      if (top <= navHeight + 50) {
+      const relativeTop = top - containerTop
+      
+      if (relativeTop <= threshold) {
         currentSection = section.id
       }
     }
@@ -65,35 +74,34 @@ const handleScroll = () => {
 
 const scrollToSection = (sectionId: string) => {
   const element = sectionRefs.value[sectionId]
-  const navHeight = navRef.value?.offsetHeight || 0
-  const container = document.querySelector('.container')
+  const sectionsEl = document.querySelector('.sections')
   
-  if (element && container) {
-    // Get the element's position relative to the container
-    const containerRect = container.getBoundingClientRect()
+  if (element && sectionsEl) {
+    // Get the element's position relative to the sections container
+    const sectionsRect = sectionsEl.getBoundingClientRect()
     const elementRect = element.getBoundingClientRect()
-    const relativeTop = elementRect.top - containerRect.top + container.scrollTop
+    const relativeTop = elementRect.top - sectionsRect.top + sectionsEl.scrollTop
     
-    // Scroll the container, accounting for nav height and adding a small offset
-    container.scrollTo({
-      top: relativeTop - navHeight + 10, // 24px matches your container padding
+    // Scroll the sections container
+    sectionsEl.scrollTo({
+      top: relativeTop,
       behavior: 'smooth'
     })
   }
 }
 
 onMounted(() => {
-  const container = document.querySelector('.container')
-  if (container) {
-    container.addEventListener('scroll', handleScroll)
+  const sectionsEl = document.querySelector('.sections')
+  if (sectionsEl) {
+    sectionsEl.addEventListener('scroll', handleScroll)
   }
   handleScroll() // Initial check
 })
 
 onUnmounted(() => {
-  const container = document.querySelector('.container')
-  if (container) {
-    container.removeEventListener('scroll', handleScroll)
+  const sectionsEl = document.querySelector('.sections')
+  if (sectionsEl) {
+    sectionsEl.removeEventListener('scroll', handleScroll)
   }
 })
 </script>
@@ -104,7 +112,8 @@ onUnmounted(() => {
   padding: 0 24px;
   font-family: Arial, sans-serif;
   height: 100%;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
   color: var(--textColor);
 }
@@ -116,11 +125,6 @@ h1 {
 }
 
 .tabs {
-  position: sticky;
-  top: 0;
-  background-color: var(--backgroundColor);
-  z-index: 10;
-  /* margin-bottom: 24px; */
   border-bottom: 1px solid var(--dividerColor);
 }
 
@@ -159,7 +163,14 @@ h1 {
   background-color: var(--primaryColor);
 }
 
+.sections-container {
+  flex: 1;
+  overflow: hidden;
+}
+
 .sections {
+  height: 100%;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 10px;

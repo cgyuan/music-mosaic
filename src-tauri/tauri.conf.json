@@ -68,8 +68,8 @@
     "windows": [
       {
         "title": "music-mosaic",
-        "width": 1200,
-        "height": 800,
+        "width": 1050,
+        "height": 700,
         "hiddenTitle": true,
         "titleBarStyle": "Overlay"
       }

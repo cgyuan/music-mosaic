@@ -23,10 +23,8 @@
             <Button severity="secondary" text rounded @click="handleTheme">
                 <SvgAsset iconName="t-shirt-line"></SvgAsset>
             </Button>
-            <Button :style="{
-                display: 'none',
-            }" severity="secondary" text rounded @click="router.push({ name: 'settings' })">
-                <SvgAsset iconName="cog-8-tooth"></SvgAsset>
+            <Button severity="secondary" text rounded @click="router.push({ name: 'settings' })">
+                <SvgAsset iconName="cog-8-tooth" :size="24"></SvgAsset>
             </Button>
             <Button severity="secondary" text rounded>
                 <SvgAsset iconName="picture-in-picture-line"></SvgAsset>

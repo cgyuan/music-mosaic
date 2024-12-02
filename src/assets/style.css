@@ -170,6 +170,24 @@ div[role="button"][data-type="dangerButton"][data-fill="true"] {
   background-color: transparent !important;
 }
 
+.p-checkbox-checked .p-checkbox-box {
+  background: var(--primaryColor) !important;
+  border-color: var(--primaryColor) !important;
+}
+
+.p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) .p-checkbox-box {
+  border-color: color-mix(in srgb, var(--primaryColor) 50%, transparent) !important;
+}
+
+.p-radiobutton-checked .p-radiobutton-box {
+  background: var(--primaryColor) !important;
+  border-color: var(--primaryColor) !important;
+}
+
+.p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:hover) .p-radiobutton-box {
+  border-color: color-mix(in srgb, var(--primaryColor) 50%, transparent) !important;
+}
+
 /* 自定义滚动条样式 */
 ::-webkit-scrollbar {
     width: 6px;

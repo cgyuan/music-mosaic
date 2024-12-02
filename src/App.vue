@@ -9,6 +9,9 @@ import { RepeatMode } from '@/components/NowPlaying/enum';
 import { onMounted } from 'vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
+import { useSettingsStore } from '@/store/settingsStore';
+
+const settingsStore = useSettingsStore()
 
 const { loadThemePacks } = useThemes();
 
@@ -16,6 +19,10 @@ const pluginStore = usePluginStore();
 pluginStore.$persistedState.isReady().then(() => {
     pluginStore.loadPlugins();
 });
+
+settingsStore.$persistedState.isReady().then(() => {
+    console.log('settingsStore', settingsStore.settings)
+})
 
 const playerStore = usePlayerStore();
 playerStore.$persistedState.isReady().then(() => {
