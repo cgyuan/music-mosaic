@@ -16,6 +16,7 @@ const defaultAppConfig: IDefaultAppConfig<IAppConfigKeyPath> = {
   "normal.closeBehavior": "minimize",
   "normal.checkUpdate": true,
   "normal.maxHistoryLength": 30,
+  "normal.windowResizable": false,
   "download.defaultQuality": "standard",
   "download.whenQualityMissing": "lower",
   "lyric.enableDesktopLyric": false,

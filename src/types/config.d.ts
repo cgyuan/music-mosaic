@@ -1,6 +1,7 @@
 interface IConfig {
   normal: {
     closeBehavior: "exit" | "minimize";
+    windowResizable: boolean;
     maxHistoryLength: number;
     checkUpdate: boolean;
     taskbarThumb: "window" | "artwork";

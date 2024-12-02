@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import defaultAppConfig from '@/common/default-config'
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from '@/types/config'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { appWindow } from '@tauri-apps/api/window';
 
 function transformFlatToNested() {
   const result: Partial<{
@@ -43,6 +44,16 @@ export const useSettingsStore = defineStore('settings', () => {
       (settings.value[section] as any)[key] = value
     }
   }
+
+  appWindow.setResizable(settings.value.normal?.windowResizable ?? false)
+
+  watch(() => settings.value.normal?.windowResizable, (value) => {
+    if (value) {
+      appWindow.setResizable(true)
+    } else {
+      appWindow.setResizable(false)
+    }
+  })
 
   return { 
     settings,

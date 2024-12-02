@@ -14,6 +14,13 @@
             @update:value="value => updateSetting('normal.closeBehavior', value as 'exit' | 'minimize')" 
         />
         <RadioGroupSettingItem 
+            :value="settings.normal?.windowResizable"
+            keyPath="normal.windowResizable" 
+            label="窗口大小是否可调整"
+            :options="[{ value: true, title: '可调整' }, { value: false, title: '不可调整' }]"
+            @update:value="value => updateSetting('normal.windowResizable', value as boolean)" 
+        />
+        <RadioGroupSettingItem 
             :value="settings.normal?.maxHistoryLength"
             keyPath="normal.maxHistoryLength" 
             label="搜索历史记录最多保存条数"

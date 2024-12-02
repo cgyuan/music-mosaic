@@ -390,7 +390,7 @@ const toggleLyricView = () => {
 
 .volume-popover label {
     font-size: 0.8rem;
-    color: #6c757d;
+    color: var(--textColor);
 }
 
 :deep(.p-slider-vertical) {
