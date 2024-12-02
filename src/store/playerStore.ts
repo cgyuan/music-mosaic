@@ -3,8 +3,9 @@ import { ref, computed } from 'vue';
 import { usePluginStore } from './pluginStore';
 import { RepeatMode } from '@/components/NowPlaying/enum';
 import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
-import { isSameMedia } from '@/common/media-util';
+import { getQualityOrder, isSameMedia } from '@/common/media-util';
 import { invoke } from '@tauri-apps/api/tauri';
+import { useSettingsStore } from './settingsStore';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -60,16 +61,54 @@ export const usePlayerStore = defineStore('player', () => {
         play();
     }
 
+    async function getMediaSourceByQuality(track: IMusic.IMusicItem, quality: IMusic.IQualityKey) {
+        const plugin = pluginStore.getPluginByPlatform(track.platform);
+        if (plugin && plugin.getMediaSource) {
+            try {
+                const mediaSource = await plugin.getMediaSource(track, quality);
+                console.log('mediaSource', mediaSource);
+                if (mediaSource && mediaSource.url) {
+                    return mediaSource;
+                } else {
+                    console.error('No valid media source found');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error fetching media source:', error);
+                return null;
+            }
+        }
+        return null;
+    }
+
     async function getMediaSource(track: IMusic.IMusicItem) {
         if (track.url) {
             return track.url;
         }
-        
+
         const plugin = pluginStore.getPluginByPlatform(track.platform);
         console.log("track", track, plugin);
         if (plugin && plugin.getMediaSource) {
             try {
-                const mediaSource = await plugin.getMediaSource(track, 'standard');
+                const settingsStore = useSettingsStore();
+                const [defaultQuality, whenQualityMissing] = [
+                    "standard" as IMusic.IQualityKey,
+                    settingsStore.settings.playMusic?.whenQualityMissing || 'lower'
+                ];
+                const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
+                let realQuality: IMusic.IQualityKey = qualityOrder[0];
+                let mediaSource: IPlugin.IMediaSourceResult | null = null;
+                for (const quality of qualityOrder) {
+                    try {
+                        mediaSource = await getMediaSourceByQuality(track, quality);
+                        if (!mediaSource?.url) {
+                            continue;
+                        }
+                        realQuality = quality;
+                        break;
+                    } catch { }
+                }
+
                 console.log('mediaSource', mediaSource);
                 if (mediaSource && mediaSource.url) {
                     return mediaSource.url;
@@ -87,7 +126,7 @@ export const usePlayerStore = defineStore('player', () => {
 
     async function setAudioSrc(track: IMusic.IMusicItem) {
         audioElement.value && audioElement.value.pause();
-        
+
         // Add 5-second timeout to getMediaSource
         const src = await Promise.race([
             getMediaSource(track),
@@ -136,10 +175,10 @@ export const usePlayerStore = defineStore('player', () => {
             return;
         }
 
-        if (currentIndex < playlist.value.length - 1) {
-            playlist.value.splice(currentIndex + 1, 0, track);
-        } else {
+        if (currentIndex === -1 || currentIndex === playlist.value.length - 1) {
             playlist.value.push(track);
+        } else {
+            playlist.value.splice(currentIndex + 1, 0, track);
         }
     }
 
@@ -223,7 +262,7 @@ export const usePlayerStore = defineStore('player', () => {
         if (audioElement.value) {
             audioElement.value.pause();
             audioElement.value.src = '';
-            
+
             // Clear media session metadata and state
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = null;
@@ -233,7 +272,7 @@ export const usePlayerStore = defineStore('player', () => {
                     navigator.mediaSession.setActionHandler(action as MediaSessionAction, null);
                 });
             }
-            
+
             audioElement.value = null;
         }
         duration.value = 0;
@@ -262,10 +301,11 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     function addToPlaylist(track: IMusic.IMusicItem) {
-        playlist.value.push(track);
-        if (repeatMode.value === RepeatMode.Shuffle) {
-            shufflePlaylist();
+        // 如果重复，则不添加
+        if (playlist.value.find(t => isSameMedia(t, track))) {
+            return;
         }
+        playlist.value.push(track);
     }
 
     // 添加同步状态函数
@@ -282,7 +322,7 @@ export const usePlayerStore = defineStore('player', () => {
                 modeStr = 'random';
                 break;
         }
-        
+
         await invoke('update_tray_state', {
             playState: isPlaying.value,
             repeatMode: modeStr,

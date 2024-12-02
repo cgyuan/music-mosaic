@@ -10,6 +10,7 @@ import { onMounted } from 'vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
 import { useSettingsStore } from '@/store/settingsStore';
+import { appWindow } from '@tauri-apps/api/window';
 
 const settingsStore = useSettingsStore()
 
@@ -19,10 +20,6 @@ const pluginStore = usePluginStore();
 pluginStore.$persistedState.isReady().then(() => {
     pluginStore.loadPlugins();
 });
-
-settingsStore.$persistedState.isReady().then(() => {
-    console.log('settingsStore', settingsStore.settings)
-})
 
 const playerStore = usePlayerStore();
 playerStore.$persistedState.isReady().then(() => {
@@ -95,6 +92,14 @@ onMounted(async () => {
     // 添加显示歌词视图的事件监听
     await listen('show-lyric-view', () => {
         showLyricView.value = true;
+    });
+
+    await listen('window-close-requested', () => {
+        if (settingsStore.settings.normal?.closeBehavior === 'minimize') {
+            appWindow.hide();
+        } else {
+            appWindow.close();
+        }
     });
 });
 </script>

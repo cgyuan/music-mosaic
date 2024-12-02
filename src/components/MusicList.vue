@@ -1,17 +1,9 @@
 <template>
     <div class="music-list-wrapper">
-        <CustomDataTable 
-            ref="dataTableRef"
-            :loading="isLoading" 
-            :value="musicList || []"
-            :columns="columns" 
-            keyField="id" 
-            :stripedRows="true" 
-            class="music-list" 
-            :bufferSize="10"
-            :show-header="showHeader"
+        <CustomDataTable ref="dataTableRef" :loading="isLoading" :value="musicList || []" :columns="columns"
+            keyField="id" :stripedRows="true" class="music-list" :bufferSize="10" :show-header="showHeader"
             @row-dblclick="onRowDoubleClick" @row-contextmenu="onRowRightClick">
-            <template #header  v-if="$slots.header">
+            <template #header v-if="$slots.header">
                 <slot name="header"></slot>
             </template>
             <template #footer v-if="$slots.footer">
@@ -44,13 +36,15 @@
         </CustomDataTable>
 
         <ContextMenu ref="cm" :model="contextMenuItems" />
-        <Dialog :draggable="false" v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }" @hide="handleDialogHide">
+        <Dialog :draggable="false" v-model:visible="showMusicSheetDialog" header="添加到歌单" :style="{ width: '30vw' }"
+            @hide="handleDialogHide">
             <div class="music-sheett-selection">
                 <div class="new-music-sheet" @click="uiStore.showNewMusicSheetModal()">
                     <i class="pi pi-plus"></i>
                     <span>新建歌单</span>
                 </div>
-                <div v-for="item in musicSheets" :key="item.id" class="music-sheet-item" @click="addToMusicSheet(item.id)">
+                <div v-for="item in musicSheets" :key="item.id" class="music-sheet-item"
+                    @click="addToMusicSheet(item.id)">
                     <img :src="item.artwork || albumCover" :alt="item.title">
                     <span>{{ item.title }}</span>
                 </div>
@@ -76,10 +70,14 @@ import { useRoute } from 'vue-router';
 import { isDownloaded, removeDownloadedMusic } from '@/downloader/downloaded-sheet';
 import { invoke } from '@tauri-apps/api/tauri';
 import { getInternalData } from '@/common/media-util';
+import { useSettingsStore } from '@/store/settingsStore';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const path = route.path;
 
+const settingsStore = useSettingsStore();
+const { settings } = storeToRefs(settingsStore);
 const props = withDefaults(defineProps<{
     platform?: string;
     musicList: IMusic.IMusicItem[],
@@ -89,7 +87,7 @@ const props = withDefaults(defineProps<{
     showHeader: true
 });
 
-const uiStore =  useUIStore();
+const uiStore = useUIStore();
 
 const dataTableRef = ref<InstanceType<typeof CustomDataTable> | null>(null);
 
@@ -169,7 +167,7 @@ const contextMenuItems = computed(() => [
     ])
 ]);
 
-const columns = [
+const defaultColumns = [
     { field: 'actions', header: '', width: '6rem' },
     { field: 'index', header: '#', width: '3.5rem' },
     { field: 'title', header: '标题' },
@@ -178,6 +176,11 @@ const columns = [
     { field: 'duration', header: '时长', width: '5rem' },
     { field: 'platform', header: '来源', width: '10rem' }
 ];
+
+const columns = computed(() => {
+    const columnsShown = settings.value.normal?.musicListColumnsShown || ['duration', 'platform'];
+    return defaultColumns.filter(column => !columnsShown.includes(column.field as 'duration' | 'platform'));
+});
 
 const onRowRightClick = (event: { item: IMusic.IMusicItem, event: MouseEvent }) => {
     selectedTrack.value = event.item;
@@ -194,14 +197,20 @@ const formatDuration = (duration?: number) => {
 
 const onRowDoubleClick = async (event: { item: IMusic.IMusicItem }) => {
     console.log('Double-clicked row data:', event.item);
+    const clickMusicList = settings.value.playMusic?.clickMusicList || 'replace';
 
-    // Add the current music list to the playlist
-    playerStore.setPlaylist([]);
-    await nextTick();
-    // clone the music list to avoid direct mutation  
-    const musicList = JSON.parse(JSON.stringify(props.musicList || []));
-    playerStore.setPlaylist(musicList);
-    playerStore.setCurrentTrackAndPlay(event.item);
+    if (clickMusicList === 'replace') {
+        // Add the current music list to the playlist
+        playerStore.setPlaylist([]);
+        await nextTick();
+        // clone the music list to avoid direct mutation  
+        const musicList = JSON.parse(JSON.stringify(props.musicList || []));
+        playerStore.setPlaylist(musicList);
+        playerStore.setCurrentTrackAndPlay(event.item);
+    } else {
+        playerStore.addToPlaylist(event.item);
+        playerStore.setCurrentTrackAndPlay(event.item);
+    }
 
 };
 
@@ -238,9 +247,9 @@ watch(showMusicSheetDialog, (newValue) => {
 });
 
 const resetScroll = () => {
-  if (dataTableRef.value) {
-    dataTableRef.value.scrollToIndex(0);
-  }
+    if (dataTableRef.value) {
+        dataTableRef.value.scrollToIndex(0);
+    }
 };
 
 defineExpose({

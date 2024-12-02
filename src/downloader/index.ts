@@ -13,6 +13,7 @@ import { invoke } from '@tauri-apps/api/tauri';
 import { addDownloadedMusicToList, isDownloaded, setupDownloadedMusicList, useDownloaded } from "./downloaded-sheet";
 import { ee, DownloadEvts } from "./ee";
 import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useSettingsStore } from "@/store/settingsStore";
 
 export interface IDownloadStatus {
     state: DownloadState;
@@ -30,14 +31,14 @@ async function setupDownloader() {
     await setupDownloadedMusicList();
 }
 
-async function getMediaSource(track: IMusic.IMusicItem) {
+async function getMediaSource(track: IMusic.IMusicItem, quality: IMusic.IQualityKey) {
     const pluginStore = usePluginStore();
 
     const plugin = pluginStore.getPluginByPlatform(track.platform);
     console.log("track", track, plugin);
     if (plugin && plugin.getMediaSource) {
         try {
-            const mediaSource = await plugin.getMediaSource(track, 'standard');
+            const mediaSource = await plugin.getMediaSource(track, quality);
             console.log('mediaSource', mediaSource);
             if (mediaSource && mediaSource.url) {
                 return mediaSource;
@@ -58,9 +59,10 @@ async function downloadMusicImpl(
     fileName: string,
     onStateChange: IOnStateChangeFunc
 ) {
+    const settingsStore = useSettingsStore();
     const [defaultQuality, whenQualityMissing] = [
-        "standard" as IMusic.IQualityKey,
-        "lower" as "higher" | "lower",
+        settingsStore.settings.download?.defaultQuality || "standard",
+        settingsStore.settings.download?.whenQualityMissing || 'lower'
     ];
     const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
     let mediaSource: IPlugin.IMediaSourceResult | null = null;
@@ -68,7 +70,7 @@ async function downloadMusicImpl(
 
     for (const quality of qualityOrder) {
         try {
-            mediaSource = await getMediaSource(musicItem);
+            mediaSource = await getMediaSource(musicItem, quality);
             if (!mediaSource?.url) {
                 continue;
             }

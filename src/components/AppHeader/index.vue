@@ -23,7 +23,7 @@
             <Button severity="secondary" text rounded @click="handleTheme">
                 <SvgAsset iconName="t-shirt-line"></SvgAsset>
             </Button>
-            <Button severity="secondary" text rounded @click="router.push({ name: 'settings' })">
+            <Button severity="secondary" text rounded @click="handleSettings">
                 <SvgAsset iconName="cog-8-tooth" :size="24"></SvgAsset>
             </Button>
             <Button severity="secondary" text rounded>
@@ -50,6 +50,7 @@ import { storeToRefs } from 'pinia';
 import PlaylistDrawer from '../PlaylistDrawer.vue';
 import { appWindow } from '@tauri-apps/api/window'
 import { is } from '@/common/is';
+import { useSettingsStore } from '@/store/settingsStore';
 
 const { showLyricView } = storeToRefs(useUIStore());
 const router = useRouter();
@@ -57,6 +58,8 @@ const route = useRoute();
 const searchQuery = ref('');
 const canGoBack = ref(false);
 const canGoForward = ref(false);
+
+const settingsStore = useSettingsStore();
 
 const playlistDrawer = inject('playlistDrawer') as Ref<InstanceType<typeof PlaylistDrawer>>;
 
@@ -101,6 +104,12 @@ const handleTheme = () => {
     router.push({ name: 'theme' });
 };
 
+const handleSettings = () => {
+    playlistDrawer.value.visible = false;
+    showLyricView.value = false;
+    router.push({ name: 'settings' });
+};
+
 onMounted(() => {
     updateNavigationState();
     window.addEventListener('popstate', updateNavigationState);
@@ -114,7 +123,11 @@ const minimizeWindow = () => {
 };
 
 const closeWindow = () => {
-    appWindow.hide();
+    if (settingsStore.settings.normal?.closeBehavior === 'minimize') {
+        appWindow.hide();
+    } else {
+        appWindow.close();
+    }
 };
 </script>
 

@@ -41,7 +41,7 @@ fn main() {
             filesystem::read_file,
             compression::unzip_file,
             plugin_log,
-            tray::update_tray_state,
+            tray::update_tray_state
         ])
         .register_uri_scheme_protocol("theme", |_app, request| {
             let path = request.uri().strip_prefix("theme://localhost/").unwrap();
@@ -104,7 +104,8 @@ fn main() {
         })
         .on_window_event(|event| {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event.event() {
-                event.window().hide().unwrap();
+                let window = event.window();
+                window.emit("window-close-requested", ()).unwrap();
                 api.prevent_close();
             }
         })
