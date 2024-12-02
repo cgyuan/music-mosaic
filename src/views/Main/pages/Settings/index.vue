@@ -31,6 +31,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import type { Component } from 'vue'
 import PlayMusic from './sections/PlayMusic.vue'
 import Normal from './sections/Normal.vue'
+import Download from './sections/Download.vue'
 interface TabSection {
   id: string;
   label: string;
@@ -40,6 +41,7 @@ interface TabSection {
 const tabSections: TabSection[] = [
   { id: 'general', label: '常规', component: Normal },
   { id: 'playMusic', label: '播放', component: PlayMusic },
+  { id: 'download', label: '下载', component: Download },
 ]
 
 const activeTab = ref<string>('account')
