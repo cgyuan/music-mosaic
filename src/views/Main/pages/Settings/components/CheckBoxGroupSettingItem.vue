@@ -3,9 +3,9 @@
         <label v-if="label" class="check-box-group-label">{{ label }}</label>
         <div :class="['check-box-options', direction === 'vertical' ? 'vertical' : 'horizontal']">
             <div v-for="option in options" :key="option.value as string" class="check-box-option">
-                <CheckBox :inputId="option.value" :modelValue="value" :name="option.title" :value="option.value"
+                <CheckBox :inputId="String(keyPath + option.value)" :modelValue="value" :name="option.title" :value="option.value"
                     @update:modelValue="handleUpdateValue"/>
-                <label>{{ option.title }}</label>
+                <label :for="String(keyPath + option.value)">{{ option.title }}</label>
             </div>
         </div>
     </div>

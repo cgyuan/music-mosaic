@@ -1,11 +1,12 @@
 <template>
     <div class="check-box-setting-item">
         <Checkbox 
+            :inputId="String(keyPath)"
             :modelValue="checked"
             @update:modelValue="$emit('update:checked', $event)"
             binary
         />
-        <label>{{ label }}</label>
+        <label :for="String(keyPath)">{{ label }}</label>
     </div>
 </template>
 

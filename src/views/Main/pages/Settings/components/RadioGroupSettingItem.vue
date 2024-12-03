@@ -3,9 +3,9 @@
         <label v-if="label" class="radio-group-label">{{ label }}</label>
         <div :class="['radio-options', direction === 'vertical' ? 'vertical' : 'horizontal']">
             <div v-for="option in options" :key="option.value as string" class="radio-option">
-                <RadioButton :inputId="String(option.value)" :value="option.value" :modelValue="value"
+                <RadioButton :inputId="String(keyPath + option.value)" :value="option.value" :modelValue="value"
                     @update:modelValue="$emit('update:value', $event)" />
-                <label :for="String(option.value)">{{ option.title || option.value }}</label>
+                <label :for="String(keyPath + option.value)">{{ option.title || option.value }}</label>
             </div>
         </div>
     </div>
