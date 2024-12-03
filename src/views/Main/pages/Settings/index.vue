@@ -17,10 +17,12 @@
 
     <div class="sections-container">
       <div class="sections">
-        <section v-for="section in tabSections" :key="section.id" :ref="el => { if (el) sectionRefs[section.id] = el as HTMLElement }">
-          <h3>{{ section.label }}</h3>
-          <component :is="section.component" />
-        </section>
+        <div class="sections-inner">
+          <section v-for="section in tabSections" :key="section.id" :ref="el => { if (el) sectionRefs[section.id] = el as HTMLElement }">
+            <h3>{{ section.label }}</h3>
+            <component :is="section.component" />
+          </section>
+        </div>
       </div>
     </div>
   </div>
@@ -111,7 +113,6 @@ onUnmounted(() => {
 <style scoped>
 .container {
   margin: 0 auto;
-  padding: 0 24px;
   font-family: Arial, sans-serif;
   height: 100%;
   display: flex;
@@ -124,9 +125,11 @@ h1 {
   font-size: 24px;
   font-weight: 600;
   margin-bottom: 24px;
+  padding: 0 24px;
 }
 
 .tabs {
+  padding: 0 24px;
   border-bottom: 1px solid var(--dividerColor);
 }
 
@@ -175,8 +178,12 @@ h1 {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-bottom: 30px;
 }
 
+.sections-inner {
+  padding: 0 24px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 </style>
