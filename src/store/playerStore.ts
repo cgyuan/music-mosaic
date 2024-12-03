@@ -18,6 +18,7 @@ export const usePlayerStore = defineStore('player', () => {
     const duration = ref(0);
     const audioElement = ref<HTMLAudioElement | null>(null);
     const mute = ref(false);
+    const settingsStore = useSettingsStore();
 
     const progress = computed(() => {
         if (duration.value === 0) return 0;
@@ -101,9 +102,8 @@ export const usePlayerStore = defineStore('player', () => {
         console.log("track", track, plugin);
         if (plugin && plugin.getMediaSource) {
             try {
-                const settingsStore = useSettingsStore();
                 const [defaultQuality, whenQualityMissing] = [
-                    "standard" as IMusic.IQualityKey,
+                    settingsStore.settings.playMusic?.defaultQuality || "standard",
                     settingsStore.settings.playMusic?.whenQualityMissing || 'lower'
                 ];
                 const qualityOrder = getQualityOrder(defaultQuality, whenQualityMissing);
@@ -144,6 +144,9 @@ export const usePlayerStore = defineStore('player', () => {
             new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Timeout getting media source')), 5000))
         ]).catch(error => {
             console.error('Error or timeout getting media source:', error);
+            if (settingsStore.settings.playMusic?.playError === 'skip') {
+                nextTrack();
+            }
             return null;
         });
 
@@ -165,6 +168,12 @@ export const usePlayerStore = defineStore('player', () => {
             });
             audioElement.value.addEventListener('pause', () => {
                 isPlaying.value = false;
+            });
+
+            audioElement.value.addEventListener('error', () => {
+                if (settingsStore.settings.playMusic?.playError === 'skip') {
+                    nextTrack();
+                }
             });
         }
         audioElement.value.addEventListener('play', () => {
