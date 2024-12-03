@@ -3,9 +3,11 @@ import { ref, computed } from 'vue';
 import { usePluginStore } from './pluginStore';
 import { RepeatMode } from '@/components/NowPlaying/enum';
 import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
-import { getQualityOrder, isSameMedia } from '@/common/media-util';
+import { getQualityOrder, isSameMedia, getInternalData } from '@/common/media-util';
 import { invoke } from '@tauri-apps/api/tauri';
 import { useSettingsStore } from './settingsStore';
+import { isDownloaded } from '@/downloader/downloaded-sheet';
+import { addFileScheme } from '@/common/file-util';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -86,6 +88,15 @@ export const usePlayerStore = defineStore('player', () => {
             return track.url;
         }
 
+        // if the track is already downloaded, return the local file path
+        const isDownloadedTrack = isDownloaded(track);
+        if (isDownloadedTrack) {
+            const downloadData = getInternalData<IMusic.IMusicItemInternalData>(track, 'downloadData');
+            if (downloadData?.path) {
+                return downloadData.path;
+            }
+        }
+
         const plugin = pluginStore.getPluginByPlatform(track.platform);
         console.log("track", track, plugin);
         if (plugin && plugin.getMediaSource) {
@@ -128,13 +139,17 @@ export const usePlayerStore = defineStore('player', () => {
         audioElement.value && audioElement.value.pause();
 
         // Add 5-second timeout to getMediaSource
-        const src = await Promise.race([
+        let src = await Promise.race([
             getMediaSource(track),
             new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Timeout getting media source')), 5000))
         ]).catch(error => {
             console.error('Error or timeout getting media source:', error);
             return null;
         });
+
+        if (!src?.startsWith('http')) {
+            src = addFileScheme(src!)
+        }
 
         if (!audioElement.value) {
             audioElement.value = new Audio();
@@ -308,7 +323,7 @@ export const usePlayerStore = defineStore('player', () => {
         playlist.value.push(track);
     }
 
-    // 添加同步状态函数
+    // 添加同步状函数
     async function syncTrayState() {
         let modeStr = 'list';
         switch (repeatMode.value) {
