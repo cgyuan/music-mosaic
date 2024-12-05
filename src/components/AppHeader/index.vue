@@ -26,7 +26,7 @@
             <Button severity="secondary" text rounded @click="handleSettings">
                 <SvgAsset iconName="cog-8-tooth" :size="24"></SvgAsset>
             </Button>
-            <Button severity="secondary" text rounded>
+            <Button severity="secondary" text rounded @click="showMiniPlayer">
                 <SvgAsset iconName="picture-in-picture-line"></SvgAsset>
             </Button>
             <template v-if="is.windows()">
@@ -51,6 +51,7 @@ import PlaylistDrawer from '../PlaylistDrawer.vue';
 import { appWindow } from '@tauri-apps/api/window'
 import { is } from '@/common/is';
 import { useSettingsStore } from '@/store/settingsStore';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 const { showLyricView } = storeToRefs(useUIStore());
 const router = useRouter();
@@ -108,6 +109,14 @@ const handleSettings = () => {
     playlistDrawer.value.visible = false;
     showLyricView.value = false;
     router.push({ name: 'settings' });
+};
+
+const showMiniPlayer = async () => {
+    // Hide the main window
+    await appWindow.hide();
+    // Get and show the mini-player window
+    const miniPlayer = await WebviewWindow.getByLabel('mini-player');
+    await miniPlayer?.show();
 };
 
 onMounted(() => {

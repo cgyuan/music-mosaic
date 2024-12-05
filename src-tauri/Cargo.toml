@@ -20,6 +20,8 @@ ureq = { version = "2.5", features = ["json"] }
 urlencoding = "2.1.0"
 url = "2.2"
 zip = "0.6"
+window-vibrancy = "0.4.3"
+window-shadows = "0.2.2"
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
 custom-protocol = ["tauri/custom-protocol"]

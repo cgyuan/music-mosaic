@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Main from '@/views/Main/index.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -76,11 +76,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Main/pages/Theme/Index.vue')
       }
     ]
+  },
+  {
+    path: '/mini-player',
+    name: 'mini-player',
+    component: () => import('@/views/MiniPlayer/index.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes
 })
 

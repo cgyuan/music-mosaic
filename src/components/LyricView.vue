@@ -43,6 +43,7 @@ import SvgAsset from './SvgAsset.vue';
 import AnimatedDiv from './AnimatedDiv.vue';
 import { useUIStore } from '@/store/uiStore';
 import Tag from './Tag.vue';
+import { emit as emitEvent } from '@tauri-apps/api/event';
 
 const uiStore = useUIStore();
 const { showLyricView } = storeToRefs(uiStore);
@@ -100,6 +101,7 @@ onMounted(() => {
 });
 
 watch(currentTrack, () => {
+  emitEvent('current-lyric-text', currentTrack.value?.title || '');
   parsedLyrics.value = [];
   currentLineIndex.value = 0;
   nextTick(() => {
@@ -145,6 +147,7 @@ watch(currentTime, (newTime) => {
   });
   if (index !== -1 && index !== currentLineIndex.value) {
     currentLineIndex.value = index;
+    emitEvent('current-lyric-text', parsedLyrics.value[index].text);
     // 只在组件可见时执行滚动
     if (isVisible.value) {
       scrollToCurrentLine();

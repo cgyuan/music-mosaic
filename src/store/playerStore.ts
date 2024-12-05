@@ -5,9 +5,11 @@ import { RepeatMode } from '@/components/NowPlaying/enum';
 import { addToRecentlyPlaylist } from '@/hooks/useRecentPlayed'
 import { getQualityOrder, isSameMedia, getInternalData } from '@/common/media-util';
 import { invoke } from '@tauri-apps/api/tauri';
+import { listen, emit } from '@tauri-apps/api/event';
 import { useSettingsStore } from './settingsStore';
 import { isDownloaded } from '@/downloader/downloaded-sheet';
 import { addFileScheme } from '@/common/file-util';
+import { appWindow } from '@tauri-apps/api/window';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -19,6 +21,7 @@ export const usePlayerStore = defineStore('player', () => {
     const audioElement = ref<HTMLAudioElement | null>(null);
     const mute = ref(false);
     const settingsStore = useSettingsStore();
+    const isMainWindow = ref(false);
 
     const progress = computed(() => {
         if (duration.value === 0) return 0;
@@ -42,16 +45,56 @@ export const usePlayerStore = defineStore('player', () => {
         volume.value = value;
     }
 
-    function init() {
-        if (currentTrack.value) {
-            setAudioSrc(currentTrack.value);
-            syncTrayState();
+    async function init() {
+        // 判断当前是否为主窗口
+        isMainWindow.value = appWindow.label === 'main';
+
+        if (isMainWindow.value) {
+            // 主窗口初始化音频播放器
+            if (currentTrack.value) {
+                setAudioSrc(currentTrack.value);
+                syncTrayState();
+                syncMiniPlayerState();
+            }
+
+            // 监听来自迷你播放器的控制命令
+            listen('player-control', (event: { payload: { type: string, data?: any } }) => {
+                switch (event.payload.type) {
+                    case 'play':
+                        play();
+                        break;
+                    case 'pause':
+                        pause();
+                        break;
+                    case 'next':
+                        nextTrack();
+                        break;
+                    case 'previous':
+                        previousTrack();
+                        break;
+                    case 'seek':
+                        seek(event.payload.data);
+                        break;
+                }
+            });
+        } else {
+            // 迷你播放器监听状态更新
+            listen('player-state-update', (event) => {
+                const state = event.payload as { isPlaying: boolean, currentTime: number, duration: number, currentTrack: IMusic.IMusicItem, playlist: IMusic.IMusicItem[] };
+                isPlaying.value = state.isPlaying;
+                currentTime.value = state.currentTime;
+                duration.value = state.duration;
+                currentTrack.value = state.currentTrack;
+                playlist.value = state.playlist;
+            });
         }
+        
     }
 
     function setCurrentTrack(track: IMusic.IMusicItem) {
         currentTrack.value = track;
         syncTrayState();
+        syncMiniPlayerState();
     }
 
     function setPlaylist(newPlaylist: IMusic.IMusicItem[]) {
@@ -61,7 +104,12 @@ export const usePlayerStore = defineStore('player', () => {
     async function setCurrentTrackAndPlay(track: IMusic.IMusicItem) {
         setCurrentTrack(track);
         await setAudioSrc(track);
-        play();
+        await play();
+        // 发送事件到其他窗口
+        await emit('player-state-changed', {
+            isPlaying: true,
+            currentTrack: track
+        });
     }
 
     async function getMediaSourceByQuality(track: IMusic.IMusicItem, quality: IMusic.IQualityKey) {
@@ -136,6 +184,7 @@ export const usePlayerStore = defineStore('player', () => {
     }
 
     async function setAudioSrc(track: IMusic.IMusicItem) {
+        currentTime.value = 0;
         audioElement.value && audioElement.value.pause();
 
         // Add 5-second timeout to getMediaSource
@@ -144,13 +193,17 @@ export const usePlayerStore = defineStore('player', () => {
             new Promise<null>((_, reject) => setTimeout(() => reject(new Error('Timeout getting media source')), 5000))
         ]).catch(error => {
             console.error('Error or timeout getting media source:', error);
-            if (settingsStore.settings.playMusic?.playError === 'skip') {
-                nextTrack();
-            }
             return null;
         });
 
-        if (!src?.startsWith('http')) {
+        if (!src) {
+            if (settingsStore.settings.playMusic?.playError === 'skip') {
+                nextTrack();
+            }
+            return;
+        }
+
+        if (!src.startsWith('http')) {
             src = addFileScheme(src!)
         }
 
@@ -206,16 +259,22 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
-    function play() {
-        audioElement.value?.play();
+    async function play() {
         isPlaying.value = true;
-        syncTrayState();
+        if (isMainWindow.value) {
+            audioElement.value?.play();
+            syncTrayState();
+            syncMiniPlayerState();
+        }
     }
 
-    function pause() {
-        audioElement.value?.pause();
+    async function pause() {
         isPlaying.value = false;
-        syncTrayState();
+        if (isMainWindow.value) {
+            audioElement.value?.pause();
+            syncTrayState();
+            syncMiniPlayerState();
+        }
     }
 
     function toggleMute() {
@@ -225,10 +284,14 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
-    function seek(value: number) {
-        if (audioElement.value) {
-            const seekTime = (value / 100) * duration.value;
-            audioElement.value.currentTime = seekTime;
+    async function seek(value: number) {
+        if (isMainWindow.value) {
+            if (audioElement.value) {
+                const seekTime = (value / 100) * duration.value;
+                audioElement.value.currentTime = seekTime;
+            }
+        } else {
+            await emit('player-control', { type: 'seek', data: value });
         }
     }
 
@@ -258,6 +321,7 @@ export const usePlayerStore = defineStore('player', () => {
             // If there's no next track and we're not repeating, stop playback
             pause();
         }
+        syncMiniPlayerState();
     }
 
     async function previousTrack() {
@@ -280,6 +344,7 @@ export const usePlayerStore = defineStore('player', () => {
                 await play();
             }
         }
+        syncMiniPlayerState();
     }
 
     function clearPlaylist() {
@@ -355,6 +420,18 @@ export const usePlayerStore = defineStore('player', () => {
         });
     }
 
+    async function syncMiniPlayerState() {
+        if (isMainWindow.value) {
+            await emit('player-state-update', {
+                isPlaying: isPlaying.value,
+                currentTime: currentTime.value,
+                duration: duration.value,
+                currentTrack: currentTrack.value,
+                playlist: playlist.value
+            });
+        }
+    }
+
     return {
         init,
         currentTrack,
@@ -381,6 +458,7 @@ export const usePlayerStore = defineStore('player', () => {
         addToPlaylist,
         mute,
         toggleMute,
+        isMainWindow,
     };
 }, {
     persistedState: {

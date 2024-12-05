@@ -71,7 +71,22 @@
         "width": 1050,
         "height": 700,
         "hiddenTitle": true,
+        "label": "main",
         "titleBarStyle": "Overlay"
+      },
+      {
+        "title": "mini-player",
+        "width": 340,
+        "height": 72,
+        "hiddenTitle": true,
+        "decorations": false,
+        "transparent": true,
+        "resizable": false,
+        "visible": false,
+        "titleBarStyle": "Overlay",
+        "url": "#/mini-player",
+        "alwaysOnTop": true,
+        "label": "mini-player"
       }
     ],
     "security": {

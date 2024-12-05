@@ -95,7 +95,7 @@ const close = () => {
 };
 
 const isCurrentTrack = (track: IMusic.IMusicItem) => {
-  return playerStore.currentTrack?.id === track.id;
+  return playerStore.currentTrack?.id === track.id && playerStore.currentTrack.platform === track.platform;
 };
 
 const scrollToCurrentTrack = () => {
