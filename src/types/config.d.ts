@@ -45,19 +45,12 @@ interface IConfig {
   shortCut: {
     enableLocal: boolean;
     enableGlobal: boolean;
-    shortcuts: Record<
-      | "play/pause"
-      | "skip-previous"
-      | "skip-next"
-      | "toggle-desktop-lyric"
-      | "volume-up"
-      | "volume-down"
-      | "like/dislike",
-      {
-        local?: string[] | null;
-        global?: string[] | null;
-      }
-    >;
+    shortcuts: Array<{
+      id: string;
+      name: string;
+      shortcut: string;
+      globalShortcut: string;
+    }>;
   };
   download: {
     /** 下载路径 */

@@ -34,6 +34,7 @@ import type { Component } from 'vue'
 import PlayMusic from './sections/PlayMusic.vue'
 import Normal from './sections/Normal.vue'
 import Download from './sections/Download.vue'
+import Shortcut from './sections/Shortcut.vue'
 interface TabSection {
   id: string;
   label: string;
@@ -44,6 +45,7 @@ const tabSections: TabSection[] = [
   { id: 'general', label: '常规', component: Normal },
   { id: 'playMusic', label: '播放', component: PlayMusic },
   { id: 'download', label: '下载', component: Download },
+  { id: 'shortcut', label: '快捷键', component: Shortcut },
 ]
 
 const activeTab = ref<string>('account')

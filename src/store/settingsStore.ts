@@ -3,6 +3,7 @@ import defaultAppConfig from '@/common/default-config'
 import { IAppConfig, IAppConfigKeyPath, IAppConfigKeyPathValue } from '@/types/config'
 import { ref, watch } from 'vue'
 import { appWindow } from '@tauri-apps/api/window';
+import { defaultShortcuts } from '@/common/default-shortcut';
 
 function transformFlatToNested() {
   const result: Partial<{
@@ -27,6 +28,8 @@ function transformFlatToNested() {
       (result[section as keyof typeof result] as any)[field] = value
     }
   })
+
+  result.shortCut!.shortcuts = defaultShortcuts
 
   return result as IAppConfig;
 }

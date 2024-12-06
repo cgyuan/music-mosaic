@@ -432,6 +432,29 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
+    function handleShortcut(shortcutId: string) {
+        switch (shortcutId) {
+            case 'play/pause':
+                isPlaying.value ? pause() : play()
+                break
+            case 'skip-previous':
+                previousTrack()
+                break
+            case 'skip-next':
+                nextTrack()
+                break
+            case 'volume-up':
+                setVolume(Math.min(volume.value + 0.1, 1))
+                break
+            case 'volume-down':
+                setVolume(Math.max(volume.value - 0.1, 0))
+                break
+            case 'like/dislike':
+                // TODO: Implement like/dislike functionality
+                break
+        }
+    }
+
     return {
         init,
         currentTrack,
@@ -459,6 +482,7 @@ export const usePlayerStore = defineStore('player', () => {
         mute,
         toggleMute,
         isMainWindow,
+        handleShortcut,
     };
 }, {
     persistedState: {

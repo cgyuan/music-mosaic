@@ -6,12 +6,13 @@ import { setupRecentlyPlaylist } from '@/hooks/useRecentPlayed';
 import useThemes from '@/hooks/useThemes';
 import { listen } from '@tauri-apps/api/event';
 import { RepeatMode } from '@/components/NowPlaying/enum';
-import { onMounted } from 'vue';
+import { onMounted, watch, computed, ref, provide } from 'vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
 import { useSettingsStore } from '@/store/settingsStore';
 import { appWindow, WebviewWindow } from '@tauri-apps/api/window';
 import router from './router';
+import { useMagicKeys, whenever } from '@vueuse/core'
 
 const settingsStore = useSettingsStore()
 
@@ -109,6 +110,64 @@ onMounted(async () => {
         }
     });
 });
+
+// Setup keyboard shortcuts
+const keys = useMagicKeys({
+    passive: false,
+    onEventFired(e) {
+        // Prevent navigation keys and space default behavior
+        if (
+            (e.metaKey || e.ctrlKey) && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) ||
+            e.code === 'Space'
+        ) {
+            e.preventDefault()
+            e.stopPropagation()
+        }
+    }
+})
+
+// Track recording state
+const isRecordingShortcut = ref(false)
+
+// Watch for each shortcut
+const shortcuts = computed(() => settingsStore.settings.shortCut?.shortcuts || [])
+
+// Register shortcuts
+const registerShortcuts = () => {
+    shortcuts.value.forEach(shortcut => {
+        const keyCombo = shortcut.shortcut
+            .split('+')
+            .map(key => key === 'CommandOrControl' ? 'meta' : key.toLowerCase())
+            .join('+')
+
+        whenever(keys[keyCombo], () => {
+            // Skip if recording or shortcuts disabled
+            if (isRecordingShortcut.value || !settingsStore.settings.shortCut?.enableLocal) return
+            
+            // Skip if in input element
+            const target = document.activeElement as HTMLElement
+            if (
+                target?.tagName === 'INPUT' || 
+                target?.tagName === 'TEXTAREA' || 
+                target?.isContentEditable ||
+                target?.closest('[role="textbox"]')
+            ) {
+                return
+            }
+
+            playerStore.handleShortcut(shortcut.id)
+        })
+    })
+}
+
+// Watch for shortcut changes
+watch(() => shortcuts.value, registerShortcuts, { deep: true })
+
+// Initial registration
+registerShortcuts()
+
+// Export isRecordingShortcut for use in Shortcut.vue
+provide('isRecordingShortcut', isRecordingShortcut)
 </script>
 
 <template>
