@@ -32,7 +32,7 @@ export const defaultShortcuts = [
     {
         id: 'like/dislike',
         name: '喜欢/取消喜欢',
-        shortcut: 'CommandOrControl+L',
+        shortcut: 'CommandOrControl+Shift+L',
         globalShortcut: 'CommandOrControl+Alt+L'
     }
 ]

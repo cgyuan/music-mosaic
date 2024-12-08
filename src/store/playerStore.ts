@@ -10,6 +10,7 @@ import { useSettingsStore } from './settingsStore';
 import { isDownloaded } from '@/downloader/downloaded-sheet';
 import { addFileScheme } from '@/common/file-util';
 import { appWindow } from '@tauri-apps/api/window';
+import { addMusicToFavorite, isFavoriteMusic, removeMusicFromFavorite } from '@/music-sheet/frontend';
 
 export const usePlayerStore = defineStore('player', () => {
     const pluginStore = usePluginStore();
@@ -450,7 +451,9 @@ export const usePlayerStore = defineStore('player', () => {
                 setVolume(Math.max(volume.value - 0.1, 0))
                 break
             case 'like/dislike':
-                // TODO: Implement like/dislike functionality
+                if (currentTrack.value) {
+                    isFavoriteMusic(currentTrack.value) ? removeMusicFromFavorite(currentTrack.value) : addMusicToFavorite(JSON.parse(JSON.stringify(currentTrack.value)));
+                }
                 break
         }
     }

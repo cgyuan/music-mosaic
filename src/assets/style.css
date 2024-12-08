@@ -162,6 +162,10 @@ div[role="button"][data-type="dangerButton"][data-fill="true"] {
   font-size: 1rem;
 }
 
+.p-dialog .p-button svg {
+  color: var(--textColor) !important;
+}
+
 .p-button-label {
   color: var(--textColor) !important;
 }

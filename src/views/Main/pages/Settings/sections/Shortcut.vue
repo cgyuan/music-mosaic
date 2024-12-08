@@ -87,7 +87,7 @@ const formatShortcut = (shortcut: string) => {
 
 const shortcutTableRef = ref<HTMLElement | null>(null)
 
-const isRecordingShortcut = inject('isRecordingShortcut')
+const isRecordingShortcut = inject('isRecordingShortcut', ref(false))
 
 const readyToRecordShortcut = (id: string, type: string) => {
     if (type === 'globalShortcut' && !isGlobalShortcutEnabled.value) {
@@ -216,7 +216,7 @@ watch(shortcuts, (newShortcuts) => {
 }
 
 .row.row-head {
-    opacity: 0.58;
+    opacity: 0.8;
     font-size: 13px;
     font-weight: 500;
     margin-bottom: 16px;

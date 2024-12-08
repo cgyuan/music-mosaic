@@ -6,13 +6,14 @@ import { setupRecentlyPlaylist } from '@/hooks/useRecentPlayed';
 import useThemes from '@/hooks/useThemes';
 import { listen } from '@tauri-apps/api/event';
 import { RepeatMode } from '@/components/NowPlaying/enum';
-import { onMounted, watch, computed, ref, provide } from 'vue';
+import { onMounted, watch, computed, ref, provide, onUnmounted } from 'vue';
 import { useUIStore } from '@/store/uiStore';
 import { storeToRefs } from 'pinia';
 import { useSettingsStore } from '@/store/settingsStore';
 import { appWindow, WebviewWindow } from '@tauri-apps/api/window';
 import router from './router';
 import { useMagicKeys, whenever } from '@vueuse/core'
+import { register, unregister } from '@tauri-apps/api/globalShortcut'
 
 const settingsStore = useSettingsStore()
 
@@ -168,6 +169,57 @@ registerShortcuts()
 
 // Export isRecordingShortcut for use in Shortcut.vue
 provide('isRecordingShortcut', isRecordingShortcut)
+
+// Track previous shortcuts for cleanup
+const previousShortcuts = ref<typeof shortcuts.value>([])
+
+// Register global shortcuts
+const registerGlobalShortcuts = async () => {
+    // Unregister previous shortcuts
+    for (const shortcut of previousShortcuts.value) {
+        try {
+            await unregister(shortcut.globalShortcut)
+        } catch {}
+    }
+
+    // Only register if global shortcuts are enabled
+    if (!settingsStore.settings.shortCut?.enableGlobal) return
+
+    // Register new shortcuts
+    for (const shortcut of shortcuts.value) {
+        if (!shortcut.globalShortcut) continue
+        
+        try {
+            await register(shortcut.globalShortcut, () => {
+                playerStore.handleShortcut(shortcut.id)
+            })
+        } catch (error) {
+            console.warn(`Failed to register global shortcut: ${shortcut.globalShortcut}`, error)
+        }
+    }
+
+    // Update previous shortcuts
+    previousShortcuts.value = JSON.parse(JSON.stringify(shortcuts.value))
+}
+
+// Watch for global shortcut changes
+watch(
+    [
+        () => settingsStore.settings.shortCut?.enableGlobal,
+        () => shortcuts.value
+    ],
+    () => registerGlobalShortcuts(),
+    { deep: true }
+)
+
+// Clean up on unmount
+onUnmounted(async () => {
+    for (const shortcut of shortcuts.value) {
+        try {
+            await unregister(shortcut.globalShortcut)
+        } catch {}
+    }
+})
 </script>
 
 <template>
