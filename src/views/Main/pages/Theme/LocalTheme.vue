@@ -2,6 +2,13 @@
     <div>
         <div class="local-thme-container">
             <div class="local-thme-grid">
+                <div class="local-thme-item local-theme-upload">
+                    <div class="local-thme-item-preview-container" @click="handleLoadLocalTheme">
+                        <div class="local-thme-item-preview upload-preview">
+                            <SvgAsset iconName="plus" :size="60" color="var(--textColor)" />
+                        </div>
+                    </div>
+                </div>
                 <div class="local-thme-item" :class="{ active: currentThemePack?.id === theme?.id }" v-for="theme in themePacks" :key="theme?.id">
                     <div class="local-thme-item-preview-container">
                         <div v-if="theme === null" class="local-thme-item-preview" :style="{
@@ -31,7 +38,9 @@
 <script lang="ts" setup>
 import useThemes from "@/hooks/useThemes";
 import { computed } from 'vue';
-const { selectTheme, localThemePacks, uninstallThemePack, currentThemePack } = useThemes();
+import { open } from '@tauri-apps/api/dialog';
+import SvgAsset from "@/components/SvgAsset.vue";
+const { selectTheme, localThemePacks, uninstallThemePack, currentThemePack, installLocalTheme } = useThemes();
 
 
 const themePacks = computed(() => {
@@ -39,10 +48,27 @@ const themePacks = computed(() => {
 });
 
 const handleSelectTheme = async (theme: ICommon.IThemePack | null) => {
-
     selectTheme(theme);
 }
 
+const handleLoadLocalTheme = async () => {
+    try {
+        const selected = await open({
+            multiple: false,
+            filters: [{
+                name: '主题包',
+                extensions: ['mftheme']
+            }]
+        });
+        
+        if (selected && typeof selected === 'string') {
+            const themePack = await installLocalTheme(selected);
+            selectTheme(themePack);
+        }
+    } catch (error) {
+        console.error('Failed to load local theme:', error);
+    }
+}
 </script>
 <style scoped>
 .local-thme-container {
@@ -134,5 +160,30 @@ const handleSelectTheme = async (theme: ICommon.IThemePack | null) => {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.local-theme-upload .local-thme-item-preview-container {
+    cursor: pointer;
+    border: 2px dashed var(--dividerColor);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* .local-theme-upload .local-thme-item-preview-container:hover {
+    border-color: var(--primaryColor);
+    background-color: rgba(var(--primaryColorRgb), 0.1);
+} */
+
+.upload-preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent !important;
+}
+
+.local-theme-upload .local-thme-item-preview-container:hover :deep(svg) {
+    color: var(--primaryColor) !important;
 }
 </style>

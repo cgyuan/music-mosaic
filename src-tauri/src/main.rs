@@ -41,6 +41,7 @@ fn main() {
             filesystem::open_folder,
             filesystem::readdir,
             filesystem::read_file,
+            filesystem::copy_file,
             compression::unzip_file,
             plugin_log,
             tray::update_tray_state

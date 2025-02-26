@@ -76,4 +76,11 @@ pub async fn readdir(path: String, folder: Option<bool>) -> Result<Vec<String>, 
 pub async fn read_file(file_path: String) -> Result<String, String> {
     let content = std::fs::read_to_string(file_path).map_err(|e| e.to_string())?;
     Ok(content)
+}
+
+#[command]
+pub async fn copy_file(src: String, dest: String) -> Result<(), String> {
+    std::fs::copy(&src, &dest)
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 } 

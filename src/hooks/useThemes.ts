@@ -176,15 +176,39 @@ export default function useThemes() {
   }
 
   const installTheme = async (themePackPath: string) => {
-    // unzip theme pack
-    const cacheDir = themePackPath.replace(".mftheme", "");
-    await invoke("unzip_file", {
-      filePath: themePackPath,
-      outputDir: cacheDir
-    });
-    const themePack = await parseThemePack(cacheDir);
-    localThemePacks.value.push(themePack);
-    return themePack;
+    try {
+      // unzip theme pack
+      const cacheDir = themePackPath.replace(".mftheme", "");
+      await invoke("unzip_file", {
+        filePath: themePackPath,
+        outputDir: cacheDir
+      });
+      
+      // Parse the theme pack to get its metadata
+      const themePack = await parseThemePack(cacheDir);
+      
+      // Check if we already have this theme installed (by hash)
+      const existingTheme = localThemePacks.value.find(theme => theme.hash === themePack.hash);
+      
+      if (existingTheme) {
+        console.log('Theme already installed, using existing theme');
+        
+        // Clean up temporary files
+        await invoke("delete_file", { path: themePackPath });
+        await invoke("rmdir", { path: cacheDir, recursive: true });
+        
+        return existingTheme;
+      }
+
+      await invoke("delete_file", { path: themePackPath });
+      
+      // Add to local themes if it's new
+      localThemePacks.value.push(themePack);
+      return themePack;
+    } catch (error) {
+      console.error('Failed to install theme:', error);
+      throw error;
+    }
   }
 
   const parseThemePack = async (themePackPath: string) => {
@@ -299,6 +323,30 @@ export default function useThemes() {
     }
   }
 
+  const installLocalTheme = async (sourcePath: string) => {
+    try {
+      // Get home directory and create theme directory path
+      const homePath = await homeDir();
+      const musicThemePackDir = await join(homePath, '.music-theme-pack');
+      await createDir(musicThemePackDir, { recursive: true });
+      
+      // Create a destination path with a unique filename
+      const destPath = await join(musicThemePackDir, `${nanoid()}.mftheme`);
+      
+      // Copy the selected file to our theme directory
+      await invoke("copy_file", {
+        src: sourcePath,
+        dest: destPath
+      });
+      
+      // Install the copied theme file
+      return await installTheme(destPath);
+    } catch (error) {
+      console.error('Failed to install local theme:', error);
+      throw error;
+    }
+  }
+
   return {
     loadThemePacks,
     loadRemoteThemes,
@@ -310,5 +358,7 @@ export default function useThemes() {
     downloadTheme,
     installRemoteThemePack,
     selectTheme,
+    installTheme,
+    installLocalTheme
   }
 }
