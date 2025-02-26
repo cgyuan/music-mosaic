@@ -33,6 +33,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             http::http_request,
             http::download_file,
+            tray::update_tray_lyric_state,
+            tray::update_tray_lyric_lock_state,
             filesystem::check_path_exists,
             filesystem::rmdir,
             filesystem::delete_file,

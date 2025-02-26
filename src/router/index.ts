@@ -81,6 +81,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/mini-player',
     name: 'mini-player',
     component: () => import('@/views/MiniPlayer/index.vue')
+  },
+  {
+    path: '/desktop-lyric',
+    name: 'desktop-lyric',
+    component: () => import('@/views/DesktopLyric/index.vue')
   }
 ]
 

@@ -148,6 +148,10 @@ watch(currentTime, (newTime) => {
   if (index !== -1 && index !== currentLineIndex.value) {
     currentLineIndex.value = index;
     emitEvent('current-lyric-text', parsedLyrics.value[index].text);
+    emitEvent('desktop-lyric-update', {
+      currentLyric: parsedLyrics.value[index].text,
+      nextLyric: parsedLyrics.value[index + 1]?.text || ''
+    });
     // 只在组件可见时执行滚动
     if (isVisible.value) {
       scrollToCurrentLine();

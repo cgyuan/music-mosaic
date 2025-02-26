@@ -41,11 +41,14 @@
 }
 
 body {
+    background-color: transparent;
     margin: 0;
-    overflow: hidden;
-    background-color: var(--backgroundColor);
-    /* background-image: url('theme://localhost//Users/yuan/.music-theme-pack/sDzbUVXnTVsV2g6AKLCNe/imgs/autumn.jpg') !important; */
-    background-size: cover;
+    min-height: 100vh;
+}
+
+/* 为主窗口设置背景色 */
+body.main-window {
+  background-color: var(--backgroundColor);
 }
 
 .text-ellipsis {
@@ -232,4 +235,8 @@ iframe {
   left: 0;
   overflow: hidden;
   pointer-events: none;
+}
+
+.primary-color {
+    color: var(--primaryColor);
 }

@@ -23,6 +23,10 @@ export const usePlayerStore = defineStore('player', () => {
     const mute = ref(false);
     const settingsStore = useSettingsStore();
     const isMainWindow = ref(false);
+    const currentLyric = ref('');
+    const nextLyric = ref('');
+    const lyricList = ref<{ time: number; text: string }[]>([]);
+    const isDesktopLyricShowing = ref(false);
 
     const progress = computed(() => {
         if (duration.value === 0) return 0;
@@ -106,11 +110,6 @@ export const usePlayerStore = defineStore('player', () => {
         setCurrentTrack(track);
         await setAudioSrc(track);
         await play();
-        // 发送事件到其他窗口
-        await emit('player-state-changed', {
-            isPlaying: true,
-            currentTrack: track
-        });
     }
 
     async function getMediaSourceByQuality(track: IMusic.IMusicItem, quality: IMusic.IQualityKey) {
@@ -458,6 +457,20 @@ export const usePlayerStore = defineStore('player', () => {
         }
     }
 
+    function updateLyric(time: number) {
+        // 根据当前播放时间更新歌词
+        const currentIndex = lyricList.value.findIndex(
+            (lyric, index) =>
+                time >= lyric.time &&
+                (!lyricList.value[index + 1] || time < lyricList.value[index + 1].time)
+        );
+
+        if (currentIndex !== -1) {
+            currentLyric.value = lyricList.value[currentIndex].text;
+            nextLyric.value = lyricList.value[currentIndex + 1]?.text || '';
+        }
+    }
+
     return {
         init,
         currentTrack,
@@ -486,6 +499,11 @@ export const usePlayerStore = defineStore('player', () => {
         toggleMute,
         isMainWindow,
         handleShortcut,
+        currentLyric,
+        nextLyric,
+        lyricList,
+        updateLyric,
+        isDesktopLyricShowing,
     };
 }, {
     persistedState: {

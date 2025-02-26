@@ -22,6 +22,7 @@
                         </div>
                         <div class="option-item no-drag" @mousedown.stop @click="togglePlay">
                             <SvgAsset :iconName="isPlaying ? 'pause' : 'play'" :size="28" />
+                   
                         </div>
                         <div class="option-item no-drag" @mousedown.stop @click="nextTrack">
                             <SvgAsset iconName="skip-right" :size="28" />
@@ -35,28 +36,24 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { usePlayerStore } from '@/store/playerStore';
 import SvgAsset from '@/components/SvgAsset.vue';
-import { storeToRefs } from 'pinia';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { appWindow } from '@tauri-apps/api/window';
 import { emit, listen } from '@tauri-apps/api/event';
 import { WebviewWindow } from '@tauri-apps/api/window';
 
 const hover = ref(false);
-const playerStore = usePlayerStore();
-const { isPlaying, currentTrack } = storeToRefs(playerStore);
+const isPlaying = ref(false);
+const currentTrack = ref<IMusic.IMusicItem | null>(null);
 const currentLyricText = ref('');
 appWindow.setResizable(false);
 
 // 初始化时设置事件监听
 onMounted(() => {
     // 确保迷你播放器窗口也能接收到主窗口的状态更新
-    listen<{ isPlaying: boolean, currentTrack: IMusic.IMusicItem }>('player-state-changed', (event) => {
-        playerStore.$patch({
-            isPlaying: event.payload.isPlaying,
-            currentTrack: event.payload.currentTrack
-        });
+    listen<{ isPlaying: boolean, currentTrack: IMusic.IMusicItem }>('player-state-update', (event) => {
+        isPlaying.value = event.payload.isPlaying;
+        currentTrack.value = event.payload.currentTrack;
     });
     listen('current-lyric-text', (event) => {
         currentLyricText.value = event.payload as string;

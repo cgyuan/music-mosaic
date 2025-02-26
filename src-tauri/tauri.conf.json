@@ -90,8 +90,24 @@
         "url": "#/mini-player",
         "alwaysOnTop": true,
         "label": "mini-player"
+      },
+      {
+        "title": "desktop-lyric",
+        "width": 800,
+        "height": 80,
+        "hiddenTitle": true,
+        "decorations": false,
+        "transparent": true,
+        "resizable": true,
+        "visible": false,
+        "titleBarStyle": "Overlay",
+        "url": "#/desktop-lyric",
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "label": "desktop-lyric"
       }
     ],
+    "macOSPrivateApi": true,
     "security": {
       "csp": null,
       "dangerousUseHttpScheme": true,

@@ -48,6 +48,24 @@ pub fn update_tray_state(app: tauri::AppHandle, play_state: bool, repeat_mode: &
     }
 }
 
+#[tauri::command]
+pub fn update_tray_lyric_state(app: tauri::AppHandle, showing: bool) {
+    let tray_handle = app.tray_handle();
+    
+    tray_handle.get_item("desktopLyric")
+        .set_title(if showing { "关闭桌面歌词" } else { "开启桌面歌词" })
+        .unwrap();
+}
+
+#[tauri::command]
+pub fn update_tray_lyric_lock_state(app: tauri::AppHandle, locked: bool) {
+    let tray_handle = app.tray_handle();
+    
+    tray_handle.get_item("lockLyric")
+        .set_title(if locked { "解锁桌面歌词" } else { "锁定桌面歌词" })
+        .unwrap();
+}
+
 pub fn create_tray() -> SystemTray {
     // 创建播放控制菜单项
     let play = CustomMenuItem::new("play".to_string(), "播放");
@@ -88,8 +106,8 @@ pub fn create_tray() -> SystemTray {
         // 添加分隔线
         .add_native_item(SystemTrayMenuItem::Separator)
         // 添加歌词控制
-        .add_item(desktop_lyric.disabled())
-        .add_item(lock_lyric.disabled())
+        .add_item(desktop_lyric)
+        .add_item(lock_lyric)
         // 添加分隔线
         .add_native_item(SystemTrayMenuItem::Separator)
         // 添加设置和退出
@@ -168,8 +186,8 @@ pub fn handle_tray_event(app: &AppHandle, event: SystemTrayEvent) {
                     window.emit("tray-lyric-control", "toggle").unwrap();
                 }
                 "lockLyric" => {
-                    // 发送锁定桌面歌词消息到前端
-                    window.emit("tray-lyric-control", "lock").unwrap();
+                    // Send toggle lock message to desktop lyric window
+                    window.emit("tray-lyric-lock-control", "toggle").unwrap();
                 }
                 _ => {}
             }

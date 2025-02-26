@@ -48,8 +48,12 @@
                             <label for="volume">{{ `${(playerStore.volume * 100).toFixed(0)}%` }}</label>
                         </div>
                     </div>
-                    <Button text rounded>
-                        <SvgAsset iconName="lyric" :size="22" />
+                    <Button text rounded @click="toggleDesktopLyric">
+                        <SvgAsset 
+                            iconName="lyric" 
+                            :size="22" 
+                            :color="isDesktopLyricShowing ? 'var(--primaryColor)' : 'var(--textColor)'"
+                        />
                     </Button>
                     <Button text rounded @click="toggleRepeatMode">
                         <SvgAsset :iconName="repeatModeIcon" :size="22" />
@@ -64,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { inject, Ref, computed, ref } from 'vue';
+import { inject, Ref, computed, ref, onMounted, watch } from 'vue';
 import { usePlayerStore } from '@/store/playerStore';
 import Button from 'primevue/button';
 import Slider from 'primevue/slider';
@@ -74,6 +78,9 @@ import { RepeatMode } from './enum';
 import SvgAsset from '../SvgAsset.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { useUIStore } from '@/store/uiStore';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/tauri';
 
 const playerStore = usePlayerStore();
 const { volume, isPlaying, mute } = storeToRefs(playerStore);
@@ -155,6 +162,50 @@ const toggleRepeatMode = () => {
 const toggleLyricView = () => {
     showLyricView.value = !showLyricView.value;
 };
+
+const toggleDesktopLyric = async () => {
+    const desktopLyricWindow = WebviewWindow.getByLabel('desktop-lyric');
+    
+    if (desktopLyricWindow) {
+        const visible = await desktopLyricWindow.isVisible();
+        if (visible) {
+            await desktopLyricWindow.hide();
+            playerStore.isDesktopLyricShowing = false;
+        } else {
+            await desktopLyricWindow.show();
+            await desktopLyricWindow.setFocus();
+            playerStore.isDesktopLyricShowing = true;
+        }
+    }
+};
+
+const isDesktopLyricShowing = computed(() => playerStore.isDesktopLyricShowing);
+
+watch(() => playerStore.isDesktopLyricShowing, async (showing) => {
+    const trayHandle = await invoke('update_tray_lyric_state', { showing });
+});
+
+onMounted(async () => {
+    await listen('desktop-lyric-state', (event) => {
+        const { visible } = event.payload as { visible: boolean };
+        playerStore.isDesktopLyricShowing = visible;
+    });
+
+    await listen('tray-lyric-control', async (event) => {
+        const command = event.payload as string;
+        if (command === 'toggle') {
+            await toggleDesktopLyric();
+        }
+    });
+
+    const desktopLyricWindow = WebviewWindow.getByLabel('desktop-lyric');
+    if (desktopLyricWindow) {
+        const visible = await desktopLyricWindow.isVisible();
+        if (visible) {
+            await desktopLyricWindow.hide();
+        }
+    }
+});
 
 </script>
 
