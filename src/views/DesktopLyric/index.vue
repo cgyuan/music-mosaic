@@ -78,6 +78,12 @@ onMounted(async () => {
     const { primaryColor: newColor } = event.payload as { primaryColor: string };
     primaryColor.value = newColor;
   });
+
+  // Disable context menu
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    return false;
+  });
 });
 
 onUnmounted(() => {

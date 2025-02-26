@@ -58,6 +58,11 @@ onMounted(() => {
     listen('current-lyric-text', (event) => {
         currentLyricText.value = event.payload as string;
     });
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        return false;
+    });
 });
 
 const startDragging = () => {
