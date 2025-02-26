@@ -8,6 +8,8 @@ import { homeDir, join } from "@tauri-apps/api/path";
 import { createDir } from "@tauri-apps/api/fs";
 import { nanoid } from "nanoid";
 import CryptoJS from "crypto-js";
+import { WebviewWindow } from "@tauri-apps/api/window";
+import { emit } from "@tauri-apps/api/event";
 
 const themeNodeId = "themepack-node";
 const themePathKey = "themepack-path";
@@ -283,6 +285,18 @@ export default function useThemes() {
       localStorage.setItem(themePathKey, themePack.path);
     }
     currentThemePack.value = themePack;
+
+    // If desktop lyric window is open, update its color
+    const desktopLyricWindow = WebviewWindow.getByLabel('desktop-lyric');
+    if (desktopLyricWindow) {
+      desktopLyricWindow.isVisible().then(visible => {
+        if (visible) {
+          const primaryColor = getComputedStyle(document.documentElement)
+            .getPropertyValue('--primaryColor').trim();
+          emit('desktop-lyric-color-update', { primaryColor });
+        }
+      });
+    }
   }
 
   return {

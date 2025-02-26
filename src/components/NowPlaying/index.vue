@@ -79,7 +79,7 @@ import SvgAsset from '../SvgAsset.vue';
 import albumCover from '@/assets/imgs/album-cover.jpg';
 import { useUIStore } from '@/store/uiStore';
 import { WebviewWindow } from '@tauri-apps/api/window';
-import { listen } from '@tauri-apps/api/event';
+import { listen, emit } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 
 const playerStore = usePlayerStore();
@@ -172,6 +172,11 @@ const toggleDesktopLyric = async () => {
             await desktopLyricWindow.hide();
             playerStore.isDesktopLyricShowing = false;
         } else {
+            const primaryColor = getComputedStyle(document.documentElement)
+                .getPropertyValue('--primaryColor').trim();
+                
+            await emit('desktop-lyric-color-update', { primaryColor });
+            
             await desktopLyricWindow.show();
             await desktopLyricWindow.setFocus();
             playerStore.isDesktopLyricShowing = true;

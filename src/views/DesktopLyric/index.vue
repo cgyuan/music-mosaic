@@ -1,7 +1,7 @@
 <template>
   <div class="desktop-lyric" ref="lyricWindow" @mousedown="startDragging">
     <div class="lyric-content">
-      <div class="current-lyric">{{ currentLyric }}</div>
+      <div class="current-lyric" :style="{ color: primaryColor }">{{ currentLyric }}</div>
       <div class="next-lyric">{{ nextLyric }}</div>
     </div>
     <div class="control-buttons">
@@ -36,6 +36,8 @@ const isTransparent = ref(false);
 const currentLyric = ref('暂无歌词');
 const nextLyric = ref('');
 
+const primaryColor = ref('var(--primaryColor)');
+
 // 监听歌词更新事件
 let unlisten: (() => void) | null = null;
 
@@ -69,6 +71,12 @@ onMounted(async () => {
     if (command === 'toggle') {
       await toggleLock();
     }
+  });
+
+  // Listen for color updates
+  await listen('desktop-lyric-color-update', (event) => {
+    const { primaryColor: newColor } = event.payload as { primaryColor: string };
+    primaryColor.value = newColor;
   });
 });
 
@@ -133,7 +141,6 @@ const closeDesktopLyric = async () => {
 .current-lyric {
   font-size: 30px;
   font-weight: bold;
-  color: var(--primaryColor);
   margin-bottom: 4px;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
