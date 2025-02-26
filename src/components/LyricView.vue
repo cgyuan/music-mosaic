@@ -213,7 +213,7 @@ const handleAnimationEnd = (event: AnimationEvent) => {
 .music-detail-container {
   position: absolute;
   top: 0;
-  left: 0;
+  left: 0 !important;
   right: 0;
   bottom: 0;
   z-index: 1;
@@ -230,6 +230,7 @@ const handleAnimationEnd = (event: AnimationEvent) => {
   left: 0;
   right: 0;
   bottom: 0;
+  width: 100vw;
   background-size: cover;
   background-repeat: no-repeat;
   position: absolute;
