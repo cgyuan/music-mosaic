@@ -198,7 +198,9 @@ export const usePlayerStore = defineStore('player', () => {
 
         if (!src) {
             if (settingsStore.settings.playMusic?.playError === 'skip') {
-                nextTrack();
+                setTimeout(() => {
+                    nextTrack();
+                }, 5000);
             }
             return;
         }
